@@ -1,12 +1,3 @@
-#!/usr/bin/env python3
-# -*- coding: utf-8 -*-
-"""
-modules/scraper.py
-------------------
-Raspagem dos detalhes de uma publicação jurídica no Legal One.
-Extrai: número do processo, conteúdo, tribunal, diário, data, advogados.
-"""
-
 import re
 import time
 import logging
@@ -16,17 +7,18 @@ from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 
 from datetime import datetime
-from modules.utils import normalizar_key, salvar_screenshot
+
+from adapters.infra.logging_utils import salvar_screenshot
+
+
+def _normalizar_key(label: str) -> str:
+    import unicodedata
+    nkfd = unicodedata.normalize("NFKD", label)
+    sem_acentos = "".join(c for c in nkfd if not unicodedata.combining(c))
+    return re.sub(r"[^a-z0-9]+", "_", sem_acentos.lower().strip())
 
 
 def parse_conteudo_dinamico(texto: str) -> dict:
-    """
-    Parser genérico que detecta campos 'Label: valor' no texto da publicação.
-    Também extrai advogados no formato 'Nome - OAB: NUMERO'.
-
-    Returns:
-        dict com: campos, advogados, flags, texto_bruto
-    """
     linhas = texto.strip().split("\n")
     campos = {}
     advogados = []
@@ -44,18 +36,16 @@ def parse_conteudo_dinamico(texto: str) -> dict:
         if not linha:
             continue
 
-        # Caso 1: advogado com OAB
         adv_match = adv_regex.match(linha)
         if adv_match:
             nome, oab = adv_match.groups()
             advogados.append({"nome": nome.strip(), "oab": oab.strip()})
             continue
 
-        # Caso 2: campo "Label: valor"
         campo_match = campo_regex.match(linha)
         if campo_match:
             if ultimo_label:
-                campos[normalizar_key(ultimo_label)] = " | ".join(valor_atual).strip()
+                campos[_normalizar_key(ultimo_label)] = " | ".join(valor_atual).strip()
             ultimo_label, valor = campo_match.groups()
             valor_atual = [valor.strip()]
             lbl_lower = ultimo_label.lower()
@@ -66,16 +56,15 @@ def parse_conteudo_dinamico(texto: str) -> dict:
             if "consulta aos autos" in lbl_lower:
                 consulta_autos_digitais = True
         elif linha.startswith("    ") or linha.startswith("   "):
-            # linha de continuação (indentada)
             valor_atual.append(linha.strip())
         else:
             if ultimo_label:
-                campos[normalizar_key(ultimo_label)] = " | ".join(valor_atual).strip()
+                campos[_normalizar_key(ultimo_label)] = " | ".join(valor_atual).strip()
             ultimo_label = None
             valor_atual = []
 
     if ultimo_label:
-        campos[normalizar_key(ultimo_label)] = " | ".join(valor_atual).strip()
+        campos[_normalizar_key(ultimo_label)] = " | ".join(valor_atual).strip()
 
     return {
         "campos": campos,
@@ -90,36 +79,27 @@ def parse_conteudo_dinamico(texto: str) -> dict:
 
 
 def _extrair_numero_cnj(texto: str, driver=None) -> str:
-    """
-    Tenta extrair o número CNJ do processo usando 3 estratégias:
-      1. Padrão CNJ com traços no conteúdo
-      2. Campo 'Número único' (20 dígitos sem traços)
-      3. Link/href do processo no DOM
-    """
     cnj_patterns = [
         r"\d{7}-\d{2}\.\d{4}\.\d\.\d{2}\.\d{4}",
         r"\d{7}-\d{2}\.\d{4}\.\d\.\d{4}",
         r"\d{7}-\d{2}\.\d{4}\.\d{2}\.\d{4}",
     ]
 
-    # Estratégia 1: padrão CNJ no texto
     for pattern in cnj_patterns:
         match = re.search(pattern, texto)
         if match:
             return match.group(0)
 
-    # Estratégia 2: número único (20 dígitos) convertido para CNJ
     num_match = re.search(r"[Nn][uú]mero\s+[uú]nico[:\s]+([\d]{20})", texto)
     if num_match:
         raw = num_match.group(1)
         try:
             cnj = f"{raw[0:7]}-{raw[7:9]}.{raw[9:13]}.{raw[13]}.{raw[14:16]}.{raw[16:20]}"
-            logging.info(f"[SCRAPER] Número único convertido para CNJ: {cnj}")
+            logging.info(f"[SCRAPER] Numero unico convertido para CNJ: {cnj}")
             return cnj
         except Exception:
             return raw
 
-    # Estratégia 3: DOM (link do processo)
     if driver:
         try:
             link = driver.find_element(
@@ -130,7 +110,7 @@ def _extrair_numero_cnj(texto: str, driver=None) -> str:
                 for pattern in cnj_patterns:
                     m = re.search(pattern, src)
                     if m:
-                        logging.info(f"[SCRAPER] Processo extraído do DOM: {m.group(0)}")
+                        logging.info(f"[SCRAPER] Processo extraido do DOM: {m.group(0)}")
                         return m.group(0)
         except Exception:
             pass
@@ -139,9 +119,6 @@ def _extrair_numero_cnj(texto: str, driver=None) -> str:
 
 
 def _extrair_advogados(conteudo: str) -> list:
-    """
-    Extrai lista de advogados no formato 'Nome - OAB/UF' do conteúdo.
-    """
     advogados = []
     bloco_matches = re.findall(
         r"Advogado:\s*(.*?)(?:\. Relator:|\. Agravado:|\. Agravante:|$)",
@@ -161,14 +138,6 @@ def _extrair_advogados(conteudo: str) -> list:
 
 
 def raspar_detalhes_publicacao(driver) -> dict:
-    """
-    Raspa todos os detalhes da publicação atualmente aberta no painel de detalhes.
-
-    Returns:
-        dict com: url_pagina, data_raspagem, processo_numero, processo_href,
-                  tipo, badge, data_disponibilizacao, fonte_tribunal, fonte_diario,
-                  conteudo, conteudo_parsed, advogados
-    """
     wait = WebDriverWait(driver, 20)
 
     dados = {
@@ -186,7 +155,6 @@ def raspar_detalhes_publicacao(driver) -> dict:
         "advogados": [],
     }
 
-    # Aguarda o painel de detalhes ou conteúdo estar presente
     wait.until(
         EC.presence_of_element_located(
             (By.CSS_SELECTOR, "div[role='tabpanel'].collapse.show, div.formatted-text")
@@ -194,7 +162,6 @@ def raspar_detalhes_publicacao(driver) -> dict:
     )
     time.sleep(1)
 
-    # ── Extração do conteúdo principal ──────────────────────────────────────
     conteudo = ""
     seletores_conteudo = [
         "div[role='tabpanel'].collapse.show div.formatted-text",
@@ -218,11 +185,8 @@ def raspar_detalhes_publicacao(driver) -> dict:
             continue
 
     dados["conteudo"] = conteudo
-
-    # ── Número do processo ───────────────────────────────────────────────────
     dados["processo_numero"] = _extrair_numero_cnj(conteudo, driver)
 
-    # ── Fonte do rodapé ──────────────────────────────────────────────────────
     try:
         dados["fonte_tribunal"] = driver.find_element(
             By.ID, "publication-detail-footer-sourceCourt"
@@ -237,7 +201,6 @@ def raspar_detalhes_publicacao(driver) -> dict:
     except Exception:
         pass
 
-    # ── Data de disponibilização (extraída do conteúdo) ──────────────────────
     data_match = re.search(
         r"dia\s+(\d{2}/\d{2}/\d{4})|em\s+(\d{2}/\d{2}/\d{4})",
         conteudo, re.IGNORECASE
@@ -245,7 +208,6 @@ def raspar_detalhes_publicacao(driver) -> dict:
     if data_match:
         dados["data_disponibilizacao"] = data_match.group(1) or data_match.group(2)
 
-    # ── Badge e tipo ─────────────────────────────────────────────────────────
     try:
         dados["badge"] = driver.find_element(
             By.CSS_SELECTOR, "span.badge.badge-light"
@@ -260,15 +222,12 @@ def raspar_detalhes_publicacao(driver) -> dict:
     except Exception:
         pass
 
-    # ── Advogados ────────────────────────────────────────────────────────────
     dados["advogados"] = _extrair_advogados(conteudo)
-
-    # ── Parser dinâmico do conteúdo ──────────────────────────────────────────
     dados["conteudo_parsed"] = parse_conteudo_dinamico(conteudo)
 
     logging.info(
         f"[SCRAPER] Processo: {dados['processo_numero']} | "
-        f"Conteúdo: {len(conteudo)} chars | "
+        f"Conteudo: {len(conteudo)} chars | "
         f"Advogados: {len(dados['advogados'])}"
     )
 

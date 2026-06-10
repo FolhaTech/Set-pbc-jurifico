@@ -11,7 +11,7 @@ import os
 from dotenv import load_dotenv
 
 # Carrega variáveis do .env automaticamente (se houver)
-load_dotenv(dotenv_path=os.path.join(os.path.dirname(__file__), "..", ".env"))
+load_dotenv(os.path.join(os.path.dirname(__file__), "..", ".env"))
 
 # ─── URLs e Credenciais ──────────────────────────────────────────────────────
 URL_LOGIN = (
@@ -19,8 +19,8 @@ URL_LOGIN = (
     "&returnto=https%3a%2f%2flogin.novajus.com.br%2fOnePass%2fLoginOnePass%2f"
     "&bhcp=1"
 )
-USERNAME         = "fernando_andrade"
-PASSWORD         = "Tech@#$2026"
+USERNAME         = os.getenv("THOMSON_USERNAME","")
+PASSWORD         = os.getenv("THOMSON_PASSWORD","")
 RESPONSAVEL_ALVO = "Aline Frutuoso"
 DOMINIOS_VALIDOS = ["legalone.com.br", "novajus.com.br"]
 

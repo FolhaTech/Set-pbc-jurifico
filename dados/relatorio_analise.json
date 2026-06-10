@@ -1,7 +1,7 @@
 {
-  "timestamp": "2026-06-09T13:32:49.095837",
-  "total": 2,
-  "com_analise": 2,
+  "timestamp": "2026-06-10T14:56:11.834952",
+  "total": 3,
+  "com_analise": 3,
   "sem_analise": 0,
   "nosso_tratado": [],
   "pendentes_acao": [
@@ -9,11 +9,21 @@
       "processo": "1013756-37.2025.8.26.0405",
       "decisao_agente": "Tratar",
       "lado_processo": "nosso_cliente",
-      "status_acao": "⏳ Aguardando ação manual do responsável",
+      "status_acao": "Aguardando acao manual do responsavel",
       "urgencia": "MEDIA",
       "resumo": "A instrução processual foi encerrada, com prazo de 5 dias para apresentação das alegações finais pela nossa cliente. A equipe deve elaborar e protocolar a peça de alegações finais até a data limite. O despacho também deu ciência à autora sobre os documentos de fls. 678/701.\n\n***\n\n**RESUMO DE AGENDAM...",
       "acao_recomendada": "Revisar análise processual.",
       "data_raspagem": "2026-06-09T13:31:09.850246"
+    },
+    {
+      "processo": "1122458-90.2023.8.26.0100",
+      "decisao_agente": "Tratar",
+      "lado_processo": "nosso_cliente",
+      "status_acao": "Aguardando acao manual do responsavel",
+      "urgencia": "MEDIA",
+      "resumo": "**RESUMO DE AGENDAMENTO:**\n- **Decisão:** AGENDAR\n- **Data do Agendamento:** 26/06/2026",
+      "acao_recomendada": "Revisar análise processual.",
+      "data_raspagem": "2026-06-10T14:55:06.271859"
     }
   ],
   "operadora_sem_providencia": [
