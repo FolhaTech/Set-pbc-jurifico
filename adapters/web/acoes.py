@@ -1,5 +1,6 @@
 import time
 import logging
+import uuid
 
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
@@ -187,38 +188,26 @@ def obter_classificacao_ia(dados: dict, opcoes: list, adapta_info: dict | None) 
         return "N/A"
 
     prompt = (
-        f"Com base na publicacao juridica abaixo, identifique qual das seguintes opcoes de descricao de compromisso "
-        f"do escritorio e a mais adequada.\n\n"
-        f"**PUBLICACAO:**\n{dados.get('conteudo', '')}\n\n"
-        f"**OPCOES DISPONIVEIS:**\n" + "\n".join(f"- {op}" for op in opcoes) + "\n\n"
-        f"Responda APENAS com o texto exato da opcao selecionada (copie exatamente como esta na lista acima). "
-        f"Nao adicione introducao, pontuacao, explicacao ou qualquer texto extra. "
-        f"Se nenhuma opcao se aplicar, responda exatamente: N/A"
+            f"Com base na publicacao juridica abaixo, identifique qual das seguintes opcoes de descricao de compromisso "
+            f"do escritorio e a mais adequada.\n\n"
+            f"**PUBLICACAO:**\n{dados.get('conteudo', '')}\n\n"
+            f"**OPCOES DISPONIVEIS:**\n" + "\n".join(f"- {op}" for op in opcoes) + "\n\n"
+                                                                                   f"Responda APENAS com o texto exato da opcao selecionada (copie exatamente como esta na lista acima). "
+                                                                                   f"Nao adicione introducao, pontuacao, explicacao ou qualquer texto extra. "
+                                                                                   f"Se nenhuma opcao se aplicar, responda exatamente: N/A"
     )
 
     try:
         client = adapta_info["client"]
-        chat_id = adapta_info["chat_id"]
-        expert_id = adapta_info["expert_id"]
 
         logging.info(
             "[ACAO] Enviando lista de descricoes ao expert do Adapta ONE para classificacao..."
         )
-        stream = client.send_message_stream(
-            chat_id=chat_id, text=prompt, model_ai="ONE", expert_id=expert_id
-        )
 
-        full_text = []
-        for chunk in stream:
-            if isinstance(chunk, dict):
-                delta = chunk.get("delta", "") or chunk.get("text", "")
-                if delta:
-                    full_text.append(delta)
-
-        escolha_raw = "".join(full_text).strip()
+        escolha_raw = client._enviar_prompt(prompt).strip()
         logging.info(f"[ACAO] Expert Adapta ONE respondeu: '{escolha_raw[:200]}...'")
 
-        linhas = [l.strip() for l in escolha_raw.splitlines() if l.strip()]
+        linas = [l.strip() for l in escolha_raw.splitlines() if l.strip()]
 
         for linha in reversed(linhas):
             if linha in opcoes:
@@ -235,10 +224,8 @@ def obter_classificacao_ia(dados: dict, opcoes: list, adapta_info: dict | None) 
             if op.lower() in escolha_raw.lower():
                 logging.info(f"[ACAO] Correspondencia no texto completo: '{op}'")
                 return op
-
     except Exception as e:
-        logging.error(f"[ACAO] Erro ao classificar descricao no Adapta ONE: {e}")
-
+        logging.warning(f"[ACAO] Falha ao obter classificacao via IA: {e}")
     return "N/A"
 
 
@@ -500,8 +487,8 @@ def clicar_link_processo(driver, dados: dict = None, adapta_info: dict = None) -
                                 )
                                 texto_td = td.text.strip()
                                 if (
-                                    escolha.lower() in texto_td.lower()
-                                    or texto_td.lower() in escolha.lower()
+                                        escolha.lower() in texto_td.lower()
+                                        or texto_td.lower() in escolha.lower()
                                 ):
                                     driver.execute_script(
                                         "arguments[0].scrollIntoView({block:'center'});",

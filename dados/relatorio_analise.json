@@ -1,5 +1,5 @@
 {
-  "timestamp": "2026-06-10T14:56:11.834952",
+  "timestamp": "2026-06-10T16:21:29.547470",
   "total": 3,
   "com_analise": 3,
   "sem_analise": 0,
@@ -23,7 +23,7 @@
       "urgencia": "MEDIA",
       "resumo": "**RESUMO DE AGENDAMENTO:**\n- **Decisão:** AGENDAR\n- **Data do Agendamento:** 26/06/2026",
       "acao_recomendada": "Revisar análise processual.",
-      "data_raspagem": "2026-06-10T14:55:06.271859"
+      "data_raspagem": "2026-06-10T16:20:25.886241"
     }
   ],
   "operadora_sem_providencia": [

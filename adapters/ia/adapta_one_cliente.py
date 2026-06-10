@@ -43,6 +43,16 @@ class AdaptaOneCliente(ClienteIA):
         processo = publicacao.processo_numero
         conteudo = publicacao.conteudo
 
+        logger.info(
+            f"[ADAPTA_CLIENT] Dados da publicação:\n"
+            f"  Processo: {processo}\n"
+            f"  Polo A (Ativo): {autor}\n"
+            f"  Polo P (Passivo): {reu}\n"
+            f"  Data Disponibilização: {data_disp}\n"
+            f"  Lado: {lado.value}\n"
+            f"  Conteúdo (200 chars): {conteudo[:200]}..."
+        )
+
         classificacao_label = (
             "✅ Nosso Cliente"
             if lado == LadoProcesso.NOSSO_CLIENTE
@@ -64,7 +74,7 @@ class AdaptaOneCliente(ClienteIA):
             "Analise o que foi determinado e indique a ação que nossa equipe deve tomar."
             if lado == LadoProcesso.NOSSO_CLIENTE
             else "Esta publicação é relativa à **parte contrária (operadora)**. "
-            "Indique que nenhuma ação ativa é necessária da nossa parte."
+                 "Indique que nenhuma ação ativa é necessária da nossa parte."
         )
 
         prompt = (
@@ -88,6 +98,8 @@ class AdaptaOneCliente(ClienteIA):
             f"- **Decisão:** {decisao_str}\n"
             f"- **Data do Agendamento:** {data_agend_sugerida}\n"
         )
+
+        logger.info(f"[ADAPTA_CLIENT] Prompt enviado: {prompt}")
 
         try:
             if not self._expert_id:
@@ -157,11 +169,11 @@ class AdaptaOneCliente(ClienteIA):
             )
 
     def _analise_fallback(
-        self,
-        pub: Publicacao,
-        lado: LadoProcesso,
-        agendamento: Agendamento,
-        decisao: str,
+            self,
+            pub: Publicacao,
+            lado: LadoProcesso,
+            agendamento: Agendamento,
+            decisao: str,
     ) -> Analise:
         return Analise(
             lado=lado,
@@ -195,6 +207,9 @@ class AdaptaOneCliente(ClienteIA):
             "messageId": str(uuid.uuid4()),
             "isTemporaryChat": False,
         }
+
+        logger.info(f"[ADAPTA_CLIENT] === PAYLOAD ENVIADO ===\n{json.dumps(payload, indent=2, ensure_ascii=False)}")
+
         if self._expert_id:
             payload["expertId"] = self._expert_id
 
@@ -219,11 +234,15 @@ class AdaptaOneCliente(ClienteIA):
                         if chunk.get("type") == "reasoning-delta":
                             continue
                         delta = chunk.get("delta", "") or chunk.get("text", "")
+
                         if delta:
                             full_text.append(delta)
                     except json.JSONDecodeError:
                         pass
-        return "".join(full_text)
+
+        resposta_final = "".join(full_text).strip()
+        logger.info(f"[ADAPTA_CLIENT] Resposta do Expert: '{resposta_final[:200]}...'")
+        return resposta_final
 
     def _localizar_expert(self, nome: str = "o processualista v2") -> Optional[str]:
         for fn in [self._list_personal_experts, self._list_all_experts]:
@@ -251,10 +270,14 @@ class AdaptaOneCliente(ClienteIA):
             data = r.json()
             chats = data.get("data", []) if isinstance(data, dict) else data
             if chats:
-                return chats[0].get("id", str(uuid.uuid4()))
+                chat_id = chats[0].get("id", str(uuid.uuid4()))
+                logger.info(f"[ADAPTA_CLIENT] Chat ID obtido: {chat_id}")
+                return chat_id
         except Exception:
             pass
-        return str(uuid.uuid4())
+        fallback = str(uuid.uuid4())
+        logger.warning(f"[ADAPTA_CLIENT] Fallback Chat ID: {fallback}")
+        return fallback
 
     def _list_all_experts(self, limit: int = 6000):
         r = requests.get(
@@ -279,3 +302,10 @@ class AdaptaOneCliente(ClienteIA):
         r = requests.get(url, headers=self.headers)
         r.raise_for_status()
         return r.json()
+
+    def enviar_mensagem(self, text: str) -> str:
+        if not self._expert_id:
+            self._expert_id = self._localizar_expert()
+        if not self._chat_id:
+            self._chat_id = self._obter_chat_id()
+        return self._enviar_mensagem(text)
