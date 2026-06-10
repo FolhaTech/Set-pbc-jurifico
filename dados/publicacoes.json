@@ -1,0 +1,140 @@
+[
+  {
+    "url_pagina": "https://firm.legalone.com.br/publications",
+    "data_raspagem": "2026-06-09T11:56:27.872269",
+    "processo_numero": "1042298-94.2023.8.26.0224",
+    "processo_href": null,
+    "tipo": "Publicação",
+    "badge": "Recorte",
+    "data_disponibilizacao": "N/A",
+    "fonte_tribunal": "Texto capturado de Diário da Justiça do Estado de São Paulo",
+    "fonte_diario": "Fonte: Diário Eletrônico de Justiça Nacional",
+    "conteudo": "DESPACHO\n\nNº 1042298-94.2023.8.26.0224 - Processo Digital. Petições para juntada devem ser apresentadas exclusivamente por meio eletrônico, nos termos do artigo 7º da Res. 551/2011 - Apelação Cível - Guarulhos - Apelante: Notre Dame Intermédica Saúde S/A - Apelado: Victor Nascimento Castro (Menor) - Apelado: Léo Rodrigues Castro (Representando Menor(es)) - II. Assim, torno sem efeito a decisão a fls. 605 e passo à nova análise do reclamo, em separado. - Magistrado(a) Roberto Mac Cracken (Pres. Seção de D. Privado) - Advs: Fabiana de Souza Fernandes (OAB: 185470/SP) - Paulo Roberto Vigna (OAB: 173477/SP) - Raphaella Arantes Arimura (OAB: 361873/SP) - 4º andar\nNúmero único: 10422989420238260224\nPartes:\nPolo A: NOTRE DAME INTERMéDICA SAúDE S/A\nPolo P: LéO RODRIGUES CASTRO\nPolo P: VICTOR NASCIMENTO CASTRO\nAdvogados:\nRAPHAELLA ARANTES ARIMURA - OAB: 361873-361873\nRAPHAELLA ARANTES ARIMURA - OAB: 361873-361873\nPAULO ROBERTO VIGNA - OAB: 173477-173477\nFABIANA DE SOUZA FERNANDES - OAB: 185470-185470",
+    "conteudo_parsed": {
+      "campos": {
+        "numero_unico": "10422989420238260224",
+        "polo_a": "NOTRE DAME INTERMéDICA SAúDE S/A",
+        "polo_p": "VICTOR NASCIMENTO CASTRO"
+      },
+      "advogados": [
+        {
+          "nome": "RAPHAELLA ARANTES ARIMURA",
+          "oab": "361873-361873"
+        },
+        {
+          "nome": "RAPHAELLA ARANTES ARIMURA",
+          "oab": "361873-361873"
+        },
+        {
+          "nome": "PAULO ROBERTO VIGNA",
+          "oab": "173477-173477"
+        },
+        {
+          "nome": "FABIANA DE SOUZA FERNANDES",
+          "oab": "185470-185470"
+        }
+      ],
+      "flags": {
+        "eh_sigiloso": false,
+        "processo_sigiloso": false,
+        "consulta_autos_digitais": false
+      },
+      "texto_bruto": "DESPACHO\n\nNº 1042298-94.2023.8.26.0224 - Processo Digital. Petições para juntada devem ser apresentadas exclusivamente por meio eletrônico, nos termos do artigo 7º da Res. 551/2011 - Apelação Cível - Guarulhos - Apelante: Notre Dame Intermédica Saúde S/A - Apelado: Victor Nascimento Castro (Menor) - Apelado: Léo Rodrigues Castro (Representando Menor(es)) - II. Assim, torno sem efeito a decisão a fls. 605 e passo à nova análise do reclamo, em separado. - Magistrado(a) Roberto Mac Cracken (Pres. Seção de D. Privado) - Advs: Fabiana de Souza Fernandes (OAB: 185470/SP) - Paulo Roberto Vigna (OAB: 173477/SP) - Raphaella Arantes Arimura (OAB: 361873/SP) - 4º andar\nNúmero único: 10422989420238260224\nPartes:\nPolo A: NOTRE DAME INTERMéDICA SAúDE S/A\nPolo P: LéO RODRIGUES CASTRO\nPolo P: VICTOR NASCIMENTO CASTRO\nAdvogados:\nRAPHAELLA ARANTES ARIMURA - OAB: 361873-361873\nRAPHAELLA ARANTES ARIMURA - OAB: 361873-361873\nPAULO ROBERTO VIGNA - OAB: 173477-173477\nFABIANA DE SOUZA FERNANDES - OAB: 185470-185470"
+    },
+    "advogados": [],
+    "lado_processo": "operadora",
+    "sem_providencia": true,
+    "analise_processualista": "| Campo | Valor |\n| --- | --- |\n| **Processo nº** | 1042298-94.2023.8.26.0224 |\n| **Classificação** | ⚪ Sem Providência (Operadora) |\n| **Data de Disponibilização** | 09/06/2026 |\n| **Polo Ativo** | NOTRE DAME INTERMéDICA SAúDE S/A |\n| **Polo Passivo** | VICTOR NASCIMENTO CASTRO |\n| **Prazo Identificado (juiz)** | 15 dias |\n| **📅 Data Limite (Prazo Final)** | 30/06/2026 |\n| **📅 Data de Agendamento (-5 dias)** | 25/06/2026 |\n| **Ação Necessária** | ⚪ NÃO — publicação da operadora |\n\n**RESUMO DE AGENDAMENTO:**\n- **Decisão:** SEM PROVIDÊNCIA\n- **Data do Agendamento:** 25/06/2026\n\nO despacho torna sem efeito a decisão anterior (fls. 605) e informa que o magistrado realizará nova análise do recurso de apelação. Nenhuma providência é necessária por nossa parte neste momento, sendo recomendado apenas o acompanhamento processual. A publicação é referente à parte contrária.",
+    "agendamento": {
+      "data_limite": "30/06/2026",
+      "data_agendamento": "25/06/2026",
+      "status_temporal": "OK",
+      "dias_restantes": 15
+    },
+    "data_agendada": "25/06/2026",
+    "decisao_agendamento": "SEM PROVIDÊNCIA",
+    "analise_gemini": {
+      "resumo": "| Campo | Valor |\n| --- | --- |\n| **Processo nº** | 1042298-94.2023.8.26.0224 |\n| **Classificação** | ⚪ Sem Providência (Operadora) |\n| **Data de Disponibilização** | 09/06/2026 |\n| **Polo Ativo** | NOTRE DAME INTERMéDICA SAúDE S/A |\n| **Polo Passivo** | VICTOR NASCIMENTO CASTRO |\n| **Prazo Identifi...",
+      "lado_processo": "operadora",
+      "urgencia": "MEDIA",
+      "prazo_recomendado_dias_uteis": 15,
+      "acao_recomendada": "Sem providências necessárias.",
+      "requer_acao": false,
+      "polo_a": "NOTRE DAME INTERMéDICA SAúDE S/A",
+      "polo_p": "VICTOR NASCIMENTO CASTRO"
+    },
+    "acao_executada": "Sem providencia",
+    "status_decidido": "Sem providencia"
+  },
+  {
+    "url_pagina": "https://firm.legalone.com.br/publications",
+    "data_raspagem": "2026-06-09T13:31:09.850246",
+    "processo_numero": "1013756-37.2025.8.26.0405",
+    "processo_href": null,
+    "tipo": "Publicação",
+    "badge": "Recorte",
+    "data_disponibilizacao": "N/A",
+    "fonte_tribunal": "Texto capturado de Diário da Justiça do Estado de São Paulo",
+    "fonte_diario": "Fonte: Diário Eletrônico de Justiça Nacional",
+    "conteudo": "Processo 1013756-37.2025.8.26.0405 - Procedimento Comum Cível - Indenização por Dano Moral - Patricia de Castro Fernandes - Michel Ribeiro Fernandes - Vistos. Cumpra a Serventia a decisão de fls. 671, expedindo-se o mandado de levantamento em favor da perita judicial. Fls. 678/701: ciência à autora. Não havendo mais provas a serem produzidas, dou por encerrada a instrução do processo. Defiro o prazo de 05 dias para que as partes apresentem as alegações finais. Oportunamente, tornem conclusos para sentença. Intime-se. - ADV: MONIQUE NUNES MARTINS (OAB 161242/RJ), LUCIANA VIEIRA DA ROSA SIQUEIRA (OAB 120372/RJ), LYMARK KAMAROFF (OAB 109192/RJ), HELLEN AGUIAR DE MENDONCA (OAB 198997/RJ), RAPHAELLA ARANTES ARIMURA (OAB 361873/SP)\nNúmero único: 10137563720258260405\nPartes:\nPolo A: PATRICIA DE CASTRO FERNANDES\nPolo P: MICHEL RIBEIRO FERNANDES\nAdvogados:\nRAPHAELLA ARANTES ARIMURA - OAB: 361873-361873\nMONIQUE NUNES MARTINS - OAB: 161242-161242\nLYMARK KAMAROFF - OAB: 109192-109192\nLUCIANA VIEIRA DA ROSA SIQUEIRA - OAB: 120372-120372\nHELLEN AGUIAR DE MENDONCA - OAB: 198997-198997",
+    "conteudo_parsed": {
+      "campos": {
+        "numero_unico": "10137563720258260405",
+        "polo_a": "PATRICIA DE CASTRO FERNANDES",
+        "polo_p": "MICHEL RIBEIRO FERNANDES"
+      },
+      "advogados": [
+        {
+          "nome": "RAPHAELLA ARANTES ARIMURA",
+          "oab": "361873-361873"
+        },
+        {
+          "nome": "MONIQUE NUNES MARTINS",
+          "oab": "161242-161242"
+        },
+        {
+          "nome": "LYMARK KAMAROFF",
+          "oab": "109192-109192"
+        },
+        {
+          "nome": "LUCIANA VIEIRA DA ROSA SIQUEIRA",
+          "oab": "120372-120372"
+        },
+        {
+          "nome": "HELLEN AGUIAR DE MENDONCA",
+          "oab": "198997-198997"
+        }
+      ],
+      "flags": {
+        "eh_sigiloso": false,
+        "processo_sigiloso": false,
+        "consulta_autos_digitais": false
+      },
+      "texto_bruto": "Processo 1013756-37.2025.8.26.0405 - Procedimento Comum Cível - Indenização por Dano Moral - Patricia de Castro Fernandes - Michel Ribeiro Fernandes - Vistos. Cumpra a Serventia a decisão de fls. 671, expedindo-se o mandado de levantamento em favor da perita judicial. Fls. 678/701: ciência à autora. Não havendo mais provas a serem produzidas, dou por encerrada a instrução do processo. Defiro o prazo de 05 dias para que as partes apresentem as alegações finais. Oportunamente, tornem conclusos para sentença. Intime-se. - ADV: MONIQUE NUNES MARTINS (OAB 161242/RJ), LUCIANA VIEIRA DA ROSA SIQUEIRA (OAB 120372/RJ), LYMARK KAMAROFF (OAB 109192/RJ), HELLEN AGUIAR DE MENDONCA (OAB 198997/RJ), RAPHAELLA ARANTES ARIMURA (OAB 361873/SP)\nNúmero único: 10137563720258260405\nPartes:\nPolo A: PATRICIA DE CASTRO FERNANDES\nPolo P: MICHEL RIBEIRO FERNANDES\nAdvogados:\nRAPHAELLA ARANTES ARIMURA - OAB: 361873-361873\nMONIQUE NUNES MARTINS - OAB: 161242-161242\nLYMARK KAMAROFF - OAB: 109192-109192\nLUCIANA VIEIRA DA ROSA SIQUEIRA - OAB: 120372-120372\nHELLEN AGUIAR DE MENDONCA - OAB: 198997-198997"
+    },
+    "advogados": [],
+    "lado_processo": "nosso_cliente",
+    "sem_providencia": false,
+    "analise_processualista": "A instrução processual foi encerrada, com prazo de 5 dias para apresentação das alegações finais pela nossa cliente. A equipe deve elaborar e protocolar a peça de alegações finais até a data limite. O despacho também deu ciência à autora sobre os documentos de fls. 678/701.\n\n***\n\n**RESUMO DE AGENDAMENTO:**\n- **Decisão:** AGENDAR\n- **Data do Agendamento:** 12/06/2026",
+    "agendamento": {
+      "data_limite": "30/06/2026",
+      "data_agendamento": "12/06/2026",
+      "status_temporal": "OK",
+      "dias_restantes": 15
+    },
+    "data_agendada": "12/06/2026",
+    "decisao_agendamento": "AGENDAR",
+    "analise_gemini": {
+      "resumo": "A instrução processual foi encerrada, com prazo de 5 dias para apresentação das alegações finais pela nossa cliente. A equipe deve elaborar e protocolar a peça de alegações finais até a data limite. O despacho também deu ciência à autora sobre os documentos de fls. 678/701.\n\n***\n\n**RESUMO DE AGENDAM...",
+      "lado_processo": "nosso_cliente",
+      "urgencia": "MEDIA",
+      "prazo_recomendado_dias_uteis": 15,
+      "acao_recomendada": "Revisar análise processual.",
+      "requer_acao": true,
+      "polo_a": "PATRICIA DE CASTRO FERNANDES",
+      "polo_p": "MICHEL RIBEIRO FERNANDES"
+    },
+    "acao_executada": "Pendente revisao manual",
+    "status_decidido": "Pendente"
+  }
+]

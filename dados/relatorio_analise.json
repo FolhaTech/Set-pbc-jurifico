@@ -1,0 +1,32 @@
+{
+  "timestamp": "2026-06-09T13:32:49.095837",
+  "total": 2,
+  "com_analise": 2,
+  "sem_analise": 0,
+  "nosso_tratado": [],
+  "pendentes_acao": [
+    {
+      "processo": "1013756-37.2025.8.26.0405",
+      "decisao_agente": "Tratar",
+      "lado_processo": "nosso_cliente",
+      "status_acao": "⏳ Aguardando ação manual do responsável",
+      "urgencia": "MEDIA",
+      "resumo": "A instrução processual foi encerrada, com prazo de 5 dias para apresentação das alegações finais pela nossa cliente. A equipe deve elaborar e protocolar a peça de alegações finais até a data limite. O despacho também deu ciência à autora sobre os documentos de fls. 678/701.\n\n***\n\n**RESUMO DE AGENDAM...",
+      "acao_recomendada": "Revisar análise processual.",
+      "data_raspagem": "2026-06-09T13:31:09.850246"
+    }
+  ],
+  "operadora_sem_providencia": [
+    {
+      "processo": "1042298-94.2023.8.26.0224",
+      "decisao_agente": "Sem providência",
+      "lado_processo": "operadora",
+      "status_acao": "✅ Marcado como Sem providência",
+      "urgencia": "MEDIA",
+      "resumo": "| Campo | Valor |\n| --- | --- |\n| **Processo nº** | 1042298-94.2023.8.26.0224 |\n| **Classificação** | ⚪ Sem Providência (Operadora) |\n| **Data de Disponibilização** | 09/06/2026 |\n| **Polo Ativo** | NOTRE DAME INTERMÉDICA SAÚDE S/A |\n| **Polo Passivo** | VICTOR NASCIMENTO CASTRO |\n| **Prazo Identifi...",
+      "acao_recomendada": "Sem providências necessárias.",
+      "data_raspagem": "2026-06-09T11:52:58.885422"
+    }
+  ],
+  "urgencias_nossas": []
+}
