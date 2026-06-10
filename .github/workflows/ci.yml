@@ -44,7 +44,7 @@ jobs:
 
       - name: .gitignore Check
         run: |
-          if ! grep -q "^\.env$" Set-pbc-jurifico/.gitignore; then
+          if ! grep -q "^\.env$" .gitignore; then
           echo "::error::.env não está no .gitignore"
           exit 1
           fi
