@@ -1,0 +1,58 @@
+name: ci.yml
+on:
+  push:
+    branches:
+      - main
+      - dev
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v4
+
+      - name: Python Config
+        run: uv python  install 3.12
+
+      - name: Install dependencies
+        working-directory: Set-pbc-jurifico
+        run: pip install -r requirements.txt
+
+      - name: Sintax Check
+        working-directory: Set-pbc-jurifico
+        run: |
+          uv run python -m py_compile run_v2.py
+          find . -name "*.py" -not -path "./__pycache__/*" -exec uv run python -m py_compile {} +
+
+      - name: Imports Check
+        working-directory: Set-pbc-jurifico
+        run: |
+          uv run python -c "from core.entities import Publicacao, Analise"
+          uv run python -c "from core.enums import LadoProcesso, Urgencia, StatusAcao"
+          uv run python -c "from core.services.calcular_prazo import CalcularPrazo"
+          uv run python -c "from config.settings import MAX_PUBLICACOES"
+
+security:
+  runs-on: ubuntu-latest
+  steps:
+    - uses: actions/checkout@v4
+
+    - name: Check .env is not staged
+      run: |
+        if git diff --cached --name-only | grep -q '\.env$'; then
+          echo "::error::Arquivo .env está staged! Execute: git rm --cached .env"
+          exit 1
+        fi
+
+    - name: .gitignore Check
+      run: |
+        if ! grep -q "^\.env$" Set-pbc-jurifico/.gitignore; then
+          echo "::error::.env não está no .gitignore"
+          exit 1
+        fi

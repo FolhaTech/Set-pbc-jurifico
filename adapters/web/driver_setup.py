@@ -6,6 +6,7 @@ from selenium.webdriver.chrome.options import Options
 UC_DISPONIVEL = False
 try:
     import undetected_chromedriver as uc
+
     UC_DISPONIVEL = True
     uc.Chrome.__del__ = lambda self: None
 except ImportError:
@@ -15,9 +16,9 @@ except ImportError:
 def _detectar_versao_chrome() -> int | None:
     try:
         import winreg
+
         key = winreg.OpenKey(
-            winreg.HKEY_CURRENT_USER,
-            r"Software\Google\Chrome\BLBeacon"
+            winreg.HKEY_CURRENT_USER, r"Software\Google\Chrome\BLBeacon"
         )
         version, _ = winreg.QueryValueEx(key, "version")
         version_main = int(version.split(".")[0])
@@ -28,9 +29,10 @@ def _detectar_versao_chrome() -> int | None:
 
     try:
         import winreg
+
         key = winreg.OpenKey(
             winreg.HKEY_LOCAL_MACHINE,
-            r"SOFTWARE\Wow6432Node\Microsoft\Windows\CurrentVersion\Uninstall\Google Chrome"
+            r"SOFTWARE\Wow6432Node\Microsoft\Windows\CurrentVersion\Uninstall\Google Chrome",
         )
         version, _ = winreg.QueryValueEx(key, "DisplayVersion")
         version_main = int(version.split(".")[0])
@@ -77,7 +79,9 @@ def configurar_driver(usar_undetected: bool = True):
 
         try:
             driver = uc.Chrome(options=options, version_main=version_main)
-            logging.info("[DRIVER] undetected_chromedriver iniciado com versao detectada.")
+            logging.info(
+                "[DRIVER] undetected_chromedriver iniciado com versao detectada."
+            )
         except Exception as e:
             logging.warning(f"[DRIVER] Falha com versao {version_main}: {e}")
             try:

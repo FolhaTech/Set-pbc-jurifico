@@ -13,6 +13,7 @@ from adapters.infra.logging_utils import salvar_screenshot
 
 def _normalizar_key(label: str) -> str:
     import unicodedata
+
     nkfd = unicodedata.normalize("NFKD", label)
     sem_acentos = "".join(c for c in nkfd if not unicodedata.combining(c))
     return re.sub(r"[^a-z0-9]+", "_", sem_acentos.lower().strip())
@@ -94,7 +95,9 @@ def _extrair_numero_cnj(texto: str, driver=None) -> str:
     if num_match:
         raw = num_match.group(1)
         try:
-            cnj = f"{raw[0:7]}-{raw[7:9]}.{raw[9:13]}.{raw[13]}.{raw[14:16]}.{raw[16:20]}"
+            cnj = (
+                f"{raw[0:7]}-{raw[7:9]}.{raw[9:13]}.{raw[13]}.{raw[14:16]}.{raw[16:20]}"
+            )
             logging.info(f"[SCRAPER] Numero unico convertido para CNJ: {cnj}")
             return cnj
         except Exception:
@@ -104,13 +107,15 @@ def _extrair_numero_cnj(texto: str, driver=None) -> str:
         try:
             link = driver.find_element(
                 By.CSS_SELECTOR,
-                "a[href*='processo'], a[id*='processo'], .publication-detail a[href*='/processo/']"
+                "a[href*='processo'], a[id*='processo'], .publication-detail a[href*='/processo/']",
             )
             for src in [link.get_attribute("href") or "", link.text or ""]:
                 for pattern in cnj_patterns:
                     m = re.search(pattern, src)
                     if m:
-                        logging.info(f"[SCRAPER] Processo extraido do DOM: {m.group(0)}")
+                        logging.info(
+                            f"[SCRAPER] Processo extraido do DOM: {m.group(0)}"
+                        )
                         return m.group(0)
         except Exception:
             pass
@@ -130,10 +135,12 @@ def _extrair_advogados(conteudo: str) -> list:
             item = item.strip().strip(".")
             match = re.search(r"(.+?)\s*-\s*([\dA-Z]+N?-[A-Z]{2})", item)
             if match:
-                advogados.append({
-                    "nome": match.group(1).strip(),
-                    "oab": match.group(2).strip(),
-                })
+                advogados.append(
+                    {
+                        "nome": match.group(1).strip(),
+                        "oab": match.group(2).strip(),
+                    }
+                )
     return advogados
 
 
@@ -202,8 +209,7 @@ def raspar_detalhes_publicacao(driver) -> dict:
         pass
 
     data_match = re.search(
-        r"dia\s+(\d{2}/\d{2}/\d{4})|em\s+(\d{2}/\d{2}/\d{4})",
-        conteudo, re.IGNORECASE
+        r"dia\s+(\d{2}/\d{2}/\d{4})|em\s+(\d{2}/\d{2}/\d{4})", conteudo, re.IGNORECASE
     )
     if data_match:
         dados["data_disponibilizacao"] = data_match.group(1) or data_match.group(2)

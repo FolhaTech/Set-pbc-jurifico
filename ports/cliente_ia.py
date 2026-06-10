@@ -6,5 +6,4 @@ from core.enums import LadoProcesso
 
 class ClienteIA(ABC):
     @abstractmethod
-    def analisar(self, publicacao: Publicacao, lado: LadoProcesso) -> Analise:
-        ...
+    def analisar(self, publicacao: Publicacao, lado: LadoProcesso) -> Analise: ...

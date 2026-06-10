@@ -36,16 +36,12 @@ class AnalisarPublicacao:
         self._repo.salvar(publicacao)
         return publicacao
 
-    def _obter_analise(
-        self, pub: Publicacao, lado: LadoProcesso
-    ) -> Analise:
+    def _obter_analise(self, pub: Publicacao, lado: LadoProcesso) -> Analise:
         if self._ia:
             return self._ia.analisar(pub, lado)
         return self._analise_offline(pub, lado)
 
-    def _analise_offline(
-        self, pub: Publicacao, lado: LadoProcesso
-    ) -> Analise:
+    def _analise_offline(self, pub: Publicacao, lado: LadoProcesso) -> Analise:
         return Analise(
             lado=lado,
             resumo="Análise offline baseada na planilha.",

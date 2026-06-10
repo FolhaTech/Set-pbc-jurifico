@@ -6,13 +6,16 @@ from datetime import datetime, date
 from typing import Optional, List
 
 from core.entities import (
-    Publicacao, Analise, Agendamento, ConteudoParsed,
-    FlagsPublicacao, Advogado,
+    Publicacao,
+    Analise,
+    Agendamento,
+    ConteudoParsed,
+    FlagsPublicacao,
+    Advogado,
 )
 from core.enums import LadoProcesso, StatusTemporal, Urgencia, StatusAcao
 from ports.repositorio import Repositorio
 from config.settings import ARQUIVO_JSON
-
 
 logger = logging.getLogger(__name__)
 
@@ -32,12 +35,17 @@ class JsonRepositorio(Repositorio):
         if not processo or processo == "N/A":
             conteudo = dados.get("conteudo", "")
             if conteudo:
-                hash_id = "TMP-" + hashlib.md5(conteudo.encode("utf-8")).hexdigest()[:12].upper()
+                hash_id = (
+                    "TMP-"
+                    + hashlib.md5(conteudo.encode("utf-8")).hexdigest()[:12].upper()
+                )
                 dados["processo_numero"] = hash_id
                 processo = hash_id
                 logger.warning(f"[JSON_REPO] Processo N/A — ID temporário: {hash_id}")
             else:
-                logger.warning("[JSON_REPO] Processo N/A e sem conteúdo. Registro descartado.")
+                logger.warning(
+                    "[JSON_REPO] Processo N/A e sem conteúdo. Registro descartado."
+                )
                 return
 
         for i, pub in enumerate(publicacoes):
@@ -65,21 +73,27 @@ class JsonRepositorio(Repositorio):
     def _para_dict(self, pub: Publicacao) -> dict:
         d = {
             "url_pagina": pub.url_pagina,
-            "data_raspagem": pub.data_raspagem.isoformat() if pub.data_raspagem else None,
+            "data_raspagem": (
+                pub.data_raspagem.isoformat() if pub.data_raspagem else None
+            ),
             "processo_numero": pub.processo_numero,
             "processo_href": pub.processo_href,
             "tipo": pub.tipo,
             "badge": pub.badge,
             "data_disponibilizacao": (
                 pub.data_disponibilizacao.isoformat()
-                if pub.data_disponibilizacao else "N/A"
+                if pub.data_disponibilizacao
+                else "N/A"
             ),
             "fonte_tribunal": pub.fonte_tribunal,
             "fonte_diario": pub.fonte_diario,
             "conteudo": pub.conteudo,
             "conteudo_parsed": {
                 "campos": pub.conteudo_parsed.campos,
-                "advogados": [{"nome": a.nome, "oab": a.oab} for a in pub.conteudo_parsed.advogados],
+                "advogados": [
+                    {"nome": a.nome, "oab": a.oab}
+                    for a in pub.conteudo_parsed.advogados
+                ],
                 "flags": {
                     "eh_sigiloso": pub.conteudo_parsed.flags.eh_sigiloso,
                     "processo_sigiloso": pub.conteudo_parsed.flags.processo_sigiloso,
@@ -90,21 +104,33 @@ class JsonRepositorio(Repositorio):
         }
         if pub.analise:
             d["lado_processo"] = pub.analise.lado.value
-            d["sem_providencia"] = (pub.analise.lado == LadoProcesso.OPERADORA)
+            d["sem_providencia"] = pub.analise.lado == LadoProcesso.OPERADORA
             d["analise_processualista"] = pub.analise.analise_completa
             if pub.analise.agendamento:
                 d["agendamento"] = {
-                    "data_limite": pub.analise.agendamento.data_limite.strftime("%d/%m/%Y"),
-                    "data_agendamento": pub.analise.agendamento.data_agendamento.strftime("%d/%m/%Y"),
+                    "data_limite": pub.analise.agendamento.data_limite.strftime(
+                        "%d/%m/%Y"
+                    ),
+                    "data_agendamento": pub.analise.agendamento.data_agendamento.strftime(
+                        "%d/%m/%Y"
+                    ),
                     "status_temporal": pub.analise.agendamento.status_temporal.value,
                     "dias_restantes": pub.analise.agendamento.dias_restantes,
                 }
-                d["data_agendada"] = pub.analise.agendamento.data_agendamento.strftime("%d/%m/%Y")
+                d["data_agendada"] = pub.analise.agendamento.data_agendamento.strftime(
+                    "%d/%m/%Y"
+                )
             d["decisao_agendamento"] = pub.analise.decisao_agendamento or (
-                "SEM PROVIDÊNCIA" if pub.analise.lado == LadoProcesso.OPERADORA else "AGENDAR"
+                "SEM PROVIDÊNCIA"
+                if pub.analise.lado == LadoProcesso.OPERADORA
+                else "AGENDAR"
             )
             d["analise_gemini"] = {
-                "resumo": pub.analise.resumo[:300] + "..." if len(pub.analise.resumo) > 300 else pub.analise.resumo,
+                "resumo": (
+                    pub.analise.resumo[:300] + "..."
+                    if len(pub.analise.resumo) > 300
+                    else pub.analise.resumo
+                ),
                 "lado_processo": pub.analise.lado.value,
                 "urgencia": pub.analise.urgencia.value,
                 "prazo_recomendado_dias_uteis": pub.analise.prazo_dias,
@@ -119,9 +145,15 @@ class JsonRepositorio(Repositorio):
 
     def _de_dict(self, d: dict) -> Publicacao:
         flags = FlagsPublicacao(
-            eh_sigiloso=d.get("conteudo_parsed", {}).get("flags", {}).get("eh_sigiloso", False),
-            processo_sigiloso=d.get("conteudo_parsed", {}).get("flags", {}).get("processo_sigiloso", False),
-            consulta_autos_digitais=d.get("conteudo_parsed", {}).get("flags", {}).get("consulta_autos_digitais", False),
+            eh_sigiloso=d.get("conteudo_parsed", {})
+            .get("flags", {})
+            .get("eh_sigiloso", False),
+            processo_sigiloso=d.get("conteudo_parsed", {})
+            .get("flags", {})
+            .get("processo_sigiloso", False),
+            consulta_autos_digitais=d.get("conteudo_parsed", {})
+            .get("flags", {})
+            .get("consulta_autos_digitais", False),
         )
         advogados = [
             Advogado(nome=a.get("nome", ""), oab=a.get("oab", ""))
@@ -149,22 +181,34 @@ class JsonRepositorio(Repositorio):
                 lado=LadoProcesso(lado),
                 resumo=d.get("analise_gemini", {}).get("resumo", ""),
                 urgencia=Urgencia(d.get("analise_gemini", {}).get("urgencia", "MEDIA")),
-                prazo_dias=d.get("analise_gemini", {}).get("prazo_recomendado_dias_uteis", 15),
-                acao_recomendada=d.get("analise_gemini", {}).get("acao_recomendada", ""),
+                prazo_dias=d.get("analise_gemini", {}).get(
+                    "prazo_recomendado_dias_uteis", 15
+                ),
+                acao_recomendada=d.get("analise_gemini", {}).get(
+                    "acao_recomendada", ""
+                ),
                 requer_acao=d.get("analise_gemini", {}).get("requer_acao", False),
                 fonte_ia=d.get("analise_gemini", {}).get("fonte_ia", "desconhecida"),
                 analise_completa=d.get("analise_processualista"),
                 agendamento=None,
                 decisao_agendamento=d.get("decisao_agendamento"),
-                status_acao=StatusAcao(d.get("acao_executada", "Pendente revisao manual")),
+                status_acao=StatusAcao(
+                    d.get("acao_executada", "Pendente revisao manual")
+                ),
             )
             agend = d.get("agendamento")
             if agend:
                 try:
                     analise.agendamento = Agendamento(
-                        data_limite=datetime.strptime(agend["data_limite"], "%d/%m/%Y").date(),
-                        data_agendamento=datetime.strptime(agend["data_agendamento"], "%d/%m/%Y").date(),
-                        status_temporal=StatusTemporal(agend.get("status_temporal", "OK")),
+                        data_limite=datetime.strptime(
+                            agend["data_limite"], "%d/%m/%Y"
+                        ).date(),
+                        data_agendamento=datetime.strptime(
+                            agend["data_agendamento"], "%d/%m/%Y"
+                        ).date(),
+                        status_temporal=StatusTemporal(
+                            agend.get("status_temporal", "OK")
+                        ),
                         dias_restantes=agend.get("dias_restantes", 0),
                     )
                 except (ValueError, KeyError):
@@ -172,7 +216,11 @@ class JsonRepositorio(Repositorio):
 
         data_raspagem = d.get("data_raspagem", "")
         try:
-            dt_raspagem = datetime.fromisoformat(data_raspagem) if data_raspagem else datetime.now()
+            dt_raspagem = (
+                datetime.fromisoformat(data_raspagem)
+                if data_raspagem
+                else datetime.now()
+            )
         except ValueError:
             dt_raspagem = datetime.now()
 
@@ -208,11 +256,13 @@ class JsonRepositorio(Repositorio):
             with open(ARQUIVO_RELATORIO, "r", encoding="utf-8") as f:
                 relatorio_anterior = json.load(f)
             processos_tratados_ant = {
-                e.get("processo") for e in relatorio_anterior.get("nosso_tratado", [])
+                e.get("processo")
+                for e in relatorio_anterior.get("nosso_tratado", [])
                 if isinstance(e, dict)
             }
             processos_sem_prov_ant = {
-                e.get("processo") for e in relatorio_anterior.get("operadora_sem_providencia", [])
+                e.get("processo")
+                for e in relatorio_anterior.get("operadora_sem_providencia", [])
                 if isinstance(e, dict)
             }
         except (FileNotFoundError, json.JSONDecodeError):
@@ -220,16 +270,18 @@ class JsonRepositorio(Repositorio):
 
         def _status_label(acao: str) -> str:
             mapa = {
-                "Tratado":                  "Marcado como Tratado",
-                "Sem providencia":          "Marcado como Sem providencia",
-                "Pendente revisao manual":  "Aguardando acao manual do responsavel",
-                "Falha ao marcar":          "Acao necessaria (falha ao marcar no sistema)",
-                "Pulado (sem analise)":     "Sem analise do agente",
+                "Tratado": "Marcado como Tratado",
+                "Sem providencia": "Marcado como Sem providencia",
+                "Pendente revisao manual": "Aguardando acao manual do responsavel",
+                "Falha ao marcar": "Acao necessaria (falha ao marcar no sistema)",
+                "Pulado (sem analise)": "Sem analise do agente",
             }
             return mapa.get(acao, acao or "Pendente")
 
         nosso_tratado = list(relatorio_anterior.get("nosso_tratado", []))
-        operadora_sem_prov = list(relatorio_anterior.get("operadora_sem_providencia", []))
+        operadora_sem_prov = list(
+            relatorio_anterior.get("operadora_sem_providencia", [])
+        )
         pendentes_acao = []
         urgencias_nossas = []
 
@@ -243,18 +295,18 @@ class JsonRepositorio(Repositorio):
 
             decisao_agente = {
                 "nosso_cliente": "Tratar",
-                "operadora":     "Sem providencia",
+                "operadora": "Sem providencia",
             }.get(lado, "Indeterminado")
 
             entry = {
-                "processo":         processo,
-                "decisao_agente":   decisao_agente,
-                "lado_processo":    lado,
-                "status_acao":      _status_label(acao),
-                "urgencia":         analise.get("urgencia", ""),
-                "resumo":           analise.get("resumo", ""),
+                "processo": processo,
+                "decisao_agente": decisao_agente,
+                "lado_processo": lado,
+                "status_acao": _status_label(acao),
+                "urgencia": analise.get("urgencia", ""),
+                "resumo": analise.get("resumo", ""),
                 "acao_recomendada": analise.get("acao_recomendada", ""),
-                "data_raspagem":    pub.get("data_raspagem", ""),
+                "data_raspagem": pub.get("data_raspagem", ""),
             }
 
             if lado == "nosso_cliente":
@@ -270,25 +322,27 @@ class JsonRepositorio(Repositorio):
 
             agend = pub.get("agendamento")
             if agend and agend.get("status_temporal") in ("URGENTE", "ATRASADO"):
-                urgencias_nossas.append({
-                    "processo":        processo,
-                    "decisao_agente":  decisao_agente,
-                    "dias_restantes":  agend.get("dias_restantes"),
-                    "status_temporal": agend.get("status_temporal"),
-                    "data_limite":     agend.get("data_limite"),
-                })
+                urgencias_nossas.append(
+                    {
+                        "processo": processo,
+                        "decisao_agente": decisao_agente,
+                        "dias_restantes": agend.get("dias_restantes"),
+                        "status_temporal": agend.get("status_temporal"),
+                        "data_limite": agend.get("data_limite"),
+                    }
+                )
 
         urgencias_nossas.sort(key=lambda x: x.get("dias_restantes", 999))
 
         relatorio = {
-            "timestamp":                 dt_import.now().isoformat(),
-            "total":                     total,
-            "com_analise":               com_analise,
-            "sem_analise":               sem_analise,
-            "nosso_tratado":             nosso_tratado,
-            "pendentes_acao":            pendentes_acao,
+            "timestamp": dt_import.now().isoformat(),
+            "total": total,
+            "com_analise": com_analise,
+            "sem_analise": sem_analise,
+            "nosso_tratado": nosso_tratado,
+            "pendentes_acao": pendentes_acao,
             "operadora_sem_providencia": operadora_sem_prov,
-            "urgencias_nossas":         urgencias_nossas,
+            "urgencias_nossas": urgencias_nossas,
         }
 
         os.makedirs(os.path.dirname(ARQUIVO_RELATORIO), exist_ok=True)

@@ -8,7 +8,6 @@ from core.use_cases.analisar_publicacao import AnalisarPublicacao
 from core.services.calcular_prazo import CalcularPrazo
 from core.services.classificador_polo import ClassificadorPolo
 
-
 logger = logging.getLogger(__name__)
 
 

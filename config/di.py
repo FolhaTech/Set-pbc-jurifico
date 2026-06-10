@@ -6,7 +6,6 @@ config/di.py
 Injeção de dependências — monta todos os objetos e retorna os casos de uso prontos.
 """
 
-
 import sys
 import uuid
 import logging
@@ -28,24 +27,26 @@ from adapters.web.selenium_navegador import SeleniumNavegador
 
 from config.settings import ARQUIVO_JSON
 
-
 logger = logging.getLogger(__name__)
 
 
 # ─── Token Adapta ONE ──────────────────────────────────────────────────────
+
 
 def obter_token_adapta() -> str:
     """Extrai o token JWT do Adapta ONE via script Node.js."""
     try:
         script_path = os.path.join(
             os.path.dirname(os.path.dirname(os.path.abspath(__file__))),
-            "extract_token.js"
+            "extract_token.js",
         )
         if not os.path.exists(script_path):
             script_path = os.path.join(
-                os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))),
+                os.path.dirname(
+                    os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+                ),
                 "Automação publicação Juridico",
-                "extract_token.js"
+                "extract_token.js",
             )
         if os.path.exists(script_path):
             result = subprocess.run(
@@ -62,6 +63,7 @@ def obter_token_adapta() -> str:
 def verificar_token_expirado(token: str) -> bool:
     """Verifica se o token JWT está expirado (< 60s)."""
     import base64
+
     try:
         parts = token.split(".")
         if len(parts) != 3:
@@ -97,6 +99,7 @@ def renovar_token() -> str:
 
 
 # ─── Verificador de cliente (planilha) ──────────────────────────────────────
+
 
 def verificar_cliente_planilha(polo_a: str, numero_processo: str = None) -> dict:
     """
@@ -139,10 +142,22 @@ def verificar_cliente_planilha(polo_a: str, numero_processo: str = None) -> dict
 
             if proc_norm and num_proc_cel == proc_norm:
                 e_nosso = polo_a_norm in cliente_norm or cliente_norm in polo_a_norm
-                return {"e_nosso": e_nosso, "cliente_planilha": cliente_cel, "contrario": contrario_cel}
+                return {
+                    "e_nosso": e_nosso,
+                    "cliente_planilha": cliente_cel,
+                    "contrario": contrario_cel,
+                }
 
-            if cliente_norm and polo_a_norm and (polo_a_norm in cliente_norm or cliente_norm in polo_a_norm):
-                return {"e_nosso": True, "cliente_planilha": cliente_cel, "contrario": contrario_cel}
+            if (
+                cliente_norm
+                and polo_a_norm
+                and (polo_a_norm in cliente_norm or cliente_norm in polo_a_norm)
+            ):
+                return {
+                    "e_nosso": True,
+                    "cliente_planilha": cliente_cel,
+                    "contrario": contrario_cel,
+                }
 
         wb.close()
         return {"e_nosso": False, "cliente_planilha": None, "contrario": None}

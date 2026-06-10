@@ -21,7 +21,11 @@ if hasattr(sys.stderr, "reconfigure"):
 
 from config.settings import MAX_PUBLICACOES
 from config.di import Container, verificar_cliente_planilha
-from adapters.infra.logging_utils import configurar_logging, salvar_screenshot, diagnosticar_pagina
+from adapters.infra.logging_utils import (
+    configurar_logging,
+    salvar_screenshot,
+    diagnosticar_pagina,
+)
 
 
 def main() -> None:
@@ -29,15 +33,19 @@ def main() -> None:
         description="Automacao de Publicacoes Juridicas — Legal One (v2 Hexagonal)"
     )
     parser.add_argument(
-        "--todas", action="store_true",
+        "--todas",
+        action="store_true",
         help="Processa todas as publicacoes (padrao: apenas a primeira)",
     )
     parser.add_argument(
-        "--sem-adapta", action="store_true",
+        "--sem-adapta",
+        action="store_true",
         help="Desativa o envio ao Adapta ONE (ativo por padrao)",
     )
     parser.add_argument(
-        "--max", type=int, default=MAX_PUBLICACOES,
+        "--max",
+        type=int,
+        default=MAX_PUBLICACOES,
         help=f"Numero maximo de publicacoes (padrao: {MAX_PUBLICACOES})",
     )
     args = parser.parse_args()

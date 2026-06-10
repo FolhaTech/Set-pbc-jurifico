@@ -6,7 +6,9 @@ from selenium.webdriver.common.action_chains import ActionChains
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.common.exceptions import (
-    TimeoutException, NoSuchElementException, ElementClickInterceptedException,
+    TimeoutException,
+    NoSuchElementException,
+    ElementClickInterceptedException,
 )
 
 from config.settings import TIMEOUT, DOMINIOS_VALIDOS, RESPONSAVEL_ALVO
@@ -24,11 +26,17 @@ def acessar_publicacoes(driver):
     wait.until(EC.presence_of_element_located((By.TAG_NAME, "body")))
 
     try:
-        menu = wait.until(EC.element_to_be_clickable((By.ID, "menuPublicationManagement")))
+        menu = wait.until(
+            EC.element_to_be_clickable((By.ID, "menuPublicationManagement"))
+        )
         href = menu.get_attribute("href")
         if href and any(dom in href for dom in DOMINIOS_VALIDOS):
             driver.get(href)
-            wait.until(EC.presence_of_element_located((By.CSS_SELECTOR, "div.publication-items")))
+            wait.until(
+                EC.presence_of_element_located(
+                    (By.CSS_SELECTOR, "div.publication-items")
+                )
+            )
             logging.info("[NAV] Publicacoes via href do menu.")
             return
     except Exception:
@@ -37,7 +45,9 @@ def acessar_publicacoes(driver):
     try:
         menu = driver.find_element(By.ID, "menuPublicationManagement")
         driver.execute_script("arguments[0].click();", menu)
-        wait.until(EC.presence_of_element_located((By.CSS_SELECTOR, "div.publication-items")))
+        wait.until(
+            EC.presence_of_element_located((By.CSS_SELECTOR, "div.publication-items"))
+        )
         logging.info("[NAV] Publicacoes via clique no menu.")
         return
     except Exception:
@@ -57,14 +67,18 @@ def acessar_publicacoes(driver):
             except ElementClickInterceptedException:
                 driver.execute_script("arguments[0].click();", el)
             time.sleep(3)
-            if any(w in driver.current_url.lower() for w in ["publicacoes", "publications"]):
+            if any(
+                w in driver.current_url.lower() for w in ["publicacoes", "publications"]
+            ):
                 logging.info(f"[NAV] Publicacoes via seletor: {sel}")
                 return
         except (TimeoutException, NoSuchElementException):
             continue
 
     driver.get("https://firm.legalone.com.br/publications")
-    wait.until(EC.presence_of_element_located((By.CSS_SELECTOR, "div.publication-items")))
+    wait.until(
+        EC.presence_of_element_located((By.CSS_SELECTOR, "div.publication-items"))
+    )
     logging.info("[NAV] Publicacoes via URL hardcoded.")
 
 
@@ -74,7 +88,9 @@ def selecionar_periodo_60_dias(driver):
 
     try:
         btn_date = wait.until(EC.element_to_be_clickable((By.ID, "btnDateFilterSplit")))
-        driver.execute_script("arguments[0].scrollIntoView({block:'center'});", btn_date)
+        driver.execute_script(
+            "arguments[0].scrollIntoView({block:'center'});", btn_date
+        )
         time.sleep(0.5)
         try:
             btn_date.click()
@@ -83,7 +99,9 @@ def selecionar_periodo_60_dias(driver):
 
         time.sleep(1)
 
-        btn_60 = wait.until(EC.element_to_be_clickable((By.ID, "btnChangeReceivedOn-60")))
+        btn_60 = wait.until(
+            EC.element_to_be_clickable((By.ID, "btnChangeReceivedOn-60"))
+        )
         driver.execute_script("arguments[0].scrollIntoView({block:'center'});", btn_60)
         try:
             btn_60.click()
@@ -123,19 +141,21 @@ def abrir_mais_filtros(driver):
 def selecionar_responsavel(driver, nome: str = RESPONSAVEL_ALVO):
     wait = WebDriverWait(driver, TIMEOUT)
 
-    campo_id = "publication-multiselect-filter-with-search-select-responsible-user-filter"
+    campo_id = (
+        "publication-multiselect-filter-with-search-select-responsible-user-filter"
+    )
     try:
         campo = wait.until(EC.presence_of_element_located((By.ID, campo_id)))
     except TimeoutException:
         logging.warning("[FILTRO] Campo 'Responsavel' nao encontrado pelo ID.")
         return
 
-    driver.execute_script("arguments[0].scrollIntoView(true); arguments[0].click();", campo)
+    driver.execute_script(
+        "arguments[0].scrollIntoView(true); arguments[0].click();", campo
+    )
     time.sleep(2)
 
-    option_xpath = (
-        f"//label[contains(@class,'lookup-option-label') and normalize-space(text())='{nome}']"
-    )
+    option_xpath = f"//label[contains(@class,'lookup-option-label') and normalize-space(text())='{nome}']"
     try:
         option = wait.until(EC.element_to_be_clickable((By.XPATH, option_xpath)))
         driver.execute_script("arguments[0].click();", option)
@@ -161,7 +181,11 @@ def aplicar_filtros(driver):
             except ElementClickInterceptedException:
                 driver.execute_script("arguments[0].click();", btn)
 
-            wait.until(EC.presence_of_element_located((By.CSS_SELECTOR, "div.publication-items")))
+            wait.until(
+                EC.presence_of_element_located(
+                    (By.CSS_SELECTOR, "div.publication-items")
+                )
+            )
             logging.info("[FILTRO] Filtros aplicados.")
             return
         except Exception:

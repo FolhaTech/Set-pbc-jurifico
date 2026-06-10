@@ -5,7 +5,14 @@ from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.common.exceptions import ElementClickInterceptedException
 
-from config.settings import URL_LOGIN, USERNAME, PASSWORD, TIMEOUT, TIMEOUT_POS_LOGIN, DOMINIOS_VALIDOS
+from config.settings import (
+    URL_LOGIN,
+    USERNAME,
+    PASSWORD,
+    TIMEOUT,
+    TIMEOUT_POS_LOGIN,
+    DOMINIOS_VALIDOS,
+)
 
 
 def login_thomson_reuters(driver, user: str = USERNAME, password: str = PASSWORD):
@@ -30,8 +37,6 @@ def login_thomson_reuters(driver, user: str = USERNAME, password: str = PASSWORD
         driver.execute_script("arguments[0].click();", btn_signin)
 
     wait_pos = WebDriverWait(driver, TIMEOUT_POS_LOGIN)
-    wait_pos.until(
-        lambda d: any(dom in d.current_url for dom in DOMINIOS_VALIDOS)
-    )
+    wait_pos.until(lambda d: any(dom in d.current_url for dom in DOMINIOS_VALIDOS))
 
     logging.info(f"[LOGIN] Login bem-sucedido! URL: {driver.current_url}")

@@ -4,7 +4,11 @@ from datetime import datetime
 from typing import Optional
 
 from core.entities import (
-    Publicacao, Analise, ConteudoParsed, FlagsPublicacao, Advogado,
+    Publicacao,
+    Analise,
+    ConteudoParsed,
+    FlagsPublicacao,
+    Advogado,
 )
 from ports.navegador_web import NavegadorWeb
 from ports.cliente_ia import ClienteIA
@@ -26,14 +30,15 @@ from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.common.by import By
 
-
 logger = logging.getLogger(__name__)
 
 
 class SeleniumNavegador(NavegadorWeb):
     """Implementacao de NavegadorWeb usando Selenium + modulos existentes."""
 
-    def __init__(self, usar_undetected: bool = True, cliente_ia: ClienteIA | None = None):
+    def __init__(
+        self, usar_undetected: bool = True, cliente_ia: ClienteIA | None = None
+    ):
         self._driver = None
         self._usar_undetected = usar_undetected
         self._cliente_ia = cliente_ia
@@ -100,6 +105,7 @@ class SeleniumNavegador(NavegadorWeb):
         adapta_info = None
         if self._cliente_ia is not None:
             from adapters.ia.adapta_one_cliente import AdaptaOneCliente
+
             if isinstance(self._cliente_ia, AdaptaOneCliente):
                 adapta_info = {
                     "client": self._cliente_ia,
@@ -121,9 +127,15 @@ class SeleniumNavegador(NavegadorWeb):
     def _dict_para_publicacao(self, d: dict) -> Publicacao:
         """Converte o dict do scraper para entidade Publicacao."""
         flags = FlagsPublicacao(
-            eh_sigiloso=d.get("conteudo_parsed", {}).get("flags", {}).get("eh_sigiloso", False),
-            processo_sigiloso=d.get("conteudo_parsed", {}).get("flags", {}).get("processo_sigiloso", False),
-            consulta_autos_digitais=d.get("conteudo_parsed", {}).get("flags", {}).get("consulta_autos_digitais", False),
+            eh_sigiloso=d.get("conteudo_parsed", {})
+            .get("flags", {})
+            .get("eh_sigiloso", False),
+            processo_sigiloso=d.get("conteudo_parsed", {})
+            .get("flags", {})
+            .get("processo_sigiloso", False),
+            consulta_autos_digitais=d.get("conteudo_parsed", {})
+            .get("flags", {})
+            .get("consulta_autos_digitais", False),
         )
         advogados = [
             Advogado(nome=a.get("nome", ""), oab=a.get("oab", ""))
@@ -146,7 +158,11 @@ class SeleniumNavegador(NavegadorWeb):
 
         return Publicacao(
             url_pagina=d.get("url_pagina", ""),
-            data_raspagem=datetime.fromisoformat(d["data_raspagem"]) if d.get("data_raspagem") else datetime.now(),
+            data_raspagem=(
+                datetime.fromisoformat(d["data_raspagem"])
+                if d.get("data_raspagem")
+                else datetime.now()
+            ),
             processo_numero=d.get("processo_numero", "N/A"),
             processo_href=d.get("processo_href"),
             tipo=d.get("tipo", "N/A"),
@@ -169,13 +185,20 @@ class SeleniumNavegador(NavegadorWeb):
             "processo_href": pub.processo_href,
             "tipo": pub.tipo,
             "badge": pub.badge,
-            "data_disponibilizacao": pub.data_disponibilizacao.strftime("%d/%m/%Y") if pub.data_disponibilizacao else "N/A",
+            "data_disponibilizacao": (
+                pub.data_disponibilizacao.strftime("%d/%m/%Y")
+                if pub.data_disponibilizacao
+                else "N/A"
+            ),
             "fonte_tribunal": pub.fonte_tribunal,
             "fonte_diario": pub.fonte_diario,
             "conteudo": pub.conteudo,
             "conteudo_parsed": {
                 "campos": pub.conteudo_parsed.campos,
-                "advogados": [{"nome": a.nome, "oab": a.oab} for a in pub.conteudo_parsed.advogados],
+                "advogados": [
+                    {"nome": a.nome, "oab": a.oab}
+                    for a in pub.conteudo_parsed.advogados
+                ],
                 "flags": {
                     "eh_sigiloso": pub.conteudo_parsed.flags.eh_sigiloso,
                     "processo_sigiloso": pub.conteudo_parsed.flags.processo_sigiloso,
@@ -183,5 +206,7 @@ class SeleniumNavegador(NavegadorWeb):
                 },
                 "texto_bruto": pub.conteudo_parsed.texto_bruto,
             },
-            "advogados": [{"nome": a.nome, "oab": a.oab} for a in pub.conteudo_parsed.advogados],
+            "advogados": [
+                {"nome": a.nome, "oab": a.oab} for a in pub.conteudo_parsed.advogados
+            ],
         }

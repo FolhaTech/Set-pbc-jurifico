@@ -10,7 +10,9 @@ from adapters.infra.logging_utils import salvar_screenshot
 
 def clicar_elemento_seguro(driver, elemento) -> bool:
     try:
-        driver.execute_script("arguments[0].scrollIntoView({block:'center'});", elemento)
+        driver.execute_script(
+            "arguments[0].scrollIntoView({block:'center'});", elemento
+        )
         time.sleep(0.5)
         try:
             elemento.click()
@@ -113,7 +115,9 @@ def _clicar_opcao_menu(driver, texto_alvo: str, nome_acao: str) -> bool:
     except Exception as e:
         logging.warning(f"[ACAO] Falha JS para '{texto_alvo}': {e}")
 
-    salvar_screenshot(driver, f"debug_{nome_acao.lower().replace(' ', '_')}_nao_encontrado")
+    salvar_screenshot(
+        driver, f"debug_{nome_acao.lower().replace(' ', '_')}_nao_encontrado"
+    )
     logging.warning(f"[ACAO] Opcao '{texto_alvo}' nao encontrada no menu.")
     return False
 
@@ -121,7 +125,9 @@ def _clicar_opcao_menu(driver, texto_alvo: str, nome_acao: str) -> bool:
 def marcar_tratado(driver) -> bool:
     try:
         if not abrir_dropdown_status(driver):
-            logging.warning("[ACAO] Dropdown nao aberto. Nao foi possivel marcar 'Tratado'.")
+            logging.warning(
+                "[ACAO] Dropdown nao aberto. Nao foi possivel marcar 'Tratado'."
+            )
             return False
 
         for texto in ["Tratado", "tratado", "TRATADO"]:
@@ -138,7 +144,9 @@ def marcar_tratado(driver) -> bool:
 def marcar_sem_providencia(driver) -> bool:
     try:
         if not abrir_dropdown_status(driver):
-            logging.warning("[ACAO] Dropdown nao aberto. Nao foi possivel marcar 'Sem providencias'.")
+            logging.warning(
+                "[ACAO] Dropdown nao aberto. Nao foi possivel marcar 'Sem providencias'."
+            )
             return False
 
         time.sleep(1)
@@ -173,15 +181,16 @@ def marcar_sem_providencia(driver) -> bool:
 
 def obter_classificacao_ia(dados: dict, opcoes: list, adapta_info: dict | None) -> str:
     if not adapta_info:
-        logging.warning("[ACAO] Adapta ONE nao disponivel para classificacao de descricao. Pulando.")
+        logging.warning(
+            "[ACAO] Adapta ONE nao disponivel para classificacao de descricao. Pulando."
+        )
         return "N/A"
 
     prompt = (
         f"Com base na publicacao juridica abaixo, identifique qual das seguintes opcoes de descricao de compromisso "
         f"do escritorio e a mais adequada.\n\n"
         f"**PUBLICACAO:**\n{dados.get('conteudo', '')}\n\n"
-        f"**OPCOES DISPONIVEIS:**\n"
-        + "\n".join(f"- {op}" for op in opcoes) + "\n\n"
+        f"**OPCOES DISPONIVEIS:**\n" + "\n".join(f"- {op}" for op in opcoes) + "\n\n"
         f"Responda APENAS com o texto exato da opcao selecionada (copie exatamente como esta na lista acima). "
         f"Nao adicione introducao, pontuacao, explicacao ou qualquer texto extra. "
         f"Se nenhuma opcao se aplicar, responda exatamente: N/A"
@@ -192,12 +201,11 @@ def obter_classificacao_ia(dados: dict, opcoes: list, adapta_info: dict | None) 
         chat_id = adapta_info["chat_id"]
         expert_id = adapta_info["expert_id"]
 
-        logging.info("[ACAO] Enviando lista de descricoes ao expert do Adapta ONE para classificacao...")
+        logging.info(
+            "[ACAO] Enviando lista de descricoes ao expert do Adapta ONE para classificacao..."
+        )
         stream = client.send_message_stream(
-            chat_id=chat_id,
-            text=prompt,
-            model_ai="ONE",
-            expert_id=expert_id
+            chat_id=chat_id, text=prompt, model_ai="ONE", expert_id=expert_id
         )
 
         full_text = []
@@ -253,7 +261,9 @@ def clicar_link_processo(driver, dados: dict = None, adapta_info: dict = None) -
             elementos = driver.find_elements(by, sel)
             for el in elementos:
                 if el.is_displayed():
-                    driver.execute_script("arguments[0].scrollIntoView({block:'center'});", el)
+                    driver.execute_script(
+                        "arguments[0].scrollIntoView({block:'center'});", el
+                    )
                     time.sleep(0.5)
                     try:
                         el.click()
@@ -269,11 +279,15 @@ def clicar_link_processo(driver, dados: dict = None, adapta_info: dict = None) -
             continue
 
     if not link_clicado:
-        logging.warning("[ACAO] Nao foi possivel encontrar ou clicar no link do processo.")
+        logging.warning(
+            "[ACAO] Nao foi possivel encontrar ou clicar no link do processo."
+        )
         return False
 
     try:
-        WebDriverWait(driver, 10).until(lambda d: len(d.window_handles) > total_abas_antes)
+        WebDriverWait(driver, 10).until(
+            lambda d: len(d.window_handles) > total_abas_antes
+        )
         novas_abas = [h for h in driver.window_handles if h != original_handle]
         if novas_abas:
             new_handle = novas_abas[-1]
@@ -283,8 +297,12 @@ def clicar_link_processo(driver, dados: dict = None, adapta_info: dict = None) -
 
             wait = WebDriverWait(driver, 15)
 
-            tab_comp = wait.until(EC.element_to_be_clickable((By.ID, "aTab-appointments-and-tasks")))
-            driver.execute_script("arguments[0].scrollIntoView({block:'center'});", tab_comp)
+            tab_comp = wait.until(
+                EC.element_to_be_clickable((By.ID, "aTab-appointments-and-tasks"))
+            )
+            driver.execute_script(
+                "arguments[0].scrollIntoView({block:'center'});", tab_comp
+            )
             time.sleep(0.5)
             try:
                 tab_comp.click()
@@ -293,10 +311,17 @@ def clicar_link_processo(driver, dados: dict = None, adapta_info: dict = None) -
             logging.info("[ACAO] Aba 'Compromissos e tarefas' selecionada.")
             time.sleep(3)
 
-            btn_adicionar = wait.until(EC.presence_of_element_located(
-                (By.XPATH, "//span[contains(@class, 'add-popover-menu') and (contains(text(), 'Adicionar') or contains(text(), 'Add'))]")
-            ))
-            driver.execute_script("arguments[0].scrollIntoView({block:'center'});", btn_adicionar)
+            btn_adicionar = wait.until(
+                EC.presence_of_element_located(
+                    (
+                        By.XPATH,
+                        "//span[contains(@class, 'add-popover-menu') and (contains(text(), 'Adicionar') or contains(text(), 'Add'))]",
+                    )
+                )
+            )
+            driver.execute_script(
+                "arguments[0].scrollIntoView({block:'center'});", btn_adicionar
+            )
             time.sleep(0.5)
 
             driver.execute_script(
@@ -304,11 +329,12 @@ def clicar_link_processo(driver, dados: dict = None, adapta_info: dict = None) -
                 "var ev2 = new MouseEvent('mouseenter', { bubbles: true, cancelable: true, view: window });"
                 "arguments[0].dispatchEvent(ev1);"
                 "arguments[0].dispatchEvent(ev2);",
-                btn_adicionar
+                btn_adicionar,
             )
 
             try:
                 from selenium.webdriver.common.action_chains import ActionChains
+
                 actions = ActionChains(driver)
                 actions.move_to_element(btn_adicionar).perform()
             except Exception:
@@ -319,15 +345,24 @@ def clicar_link_processo(driver, dados: dict = None, adapta_info: dict = None) -
 
             link_clicado_comp = False
             try:
-                link_novo = WebDriverWait(driver, 4).until(EC.element_to_be_clickable(
-                    (By.XPATH, "//a[contains(text(), 'Novo compromisso') or contains(@href, '/processos/compromissos/CreateFromProcesso/')]")
-                ))
-                driver.execute_script("arguments[0].scrollIntoView({block:'center'});", link_novo)
+                link_novo = WebDriverWait(driver, 4).until(
+                    EC.element_to_be_clickable(
+                        (
+                            By.XPATH,
+                            "//a[contains(text(), 'Novo compromisso') or contains(@href, '/processos/compromissos/CreateFromProcesso/')]",
+                        )
+                    )
+                )
+                driver.execute_script(
+                    "arguments[0].scrollIntoView({block:'center'});", link_novo
+                )
                 time.sleep(0.5)
                 link_novo.click()
                 link_clicado_comp = True
             except Exception:
-                logging.info("[ACAO] Click convencional nao funcionou, tentando click direto via JavaScript...")
+                logging.info(
+                    "[ACAO] Click convencional nao funcionou, tentando click direto via JavaScript..."
+                )
 
             if not link_clicado_comp:
                 resultado_js = driver.execute_script("""
@@ -351,18 +386,28 @@ def clicar_link_processo(driver, dados: dict = None, adapta_info: dict = None) -
                     link_clicado_comp = True
 
             if link_clicado_comp:
-                logging.info("[ACAO] Link 'Novo compromisso' clicado. Aguardando tela de criacao...")
+                logging.info(
+                    "[ACAO] Link 'Novo compromisso' clicado. Aguardando tela de criacao..."
+                )
                 time.sleep(3)
             else:
-                raise Exception("Nao foi possivel encontrar ou clicar no link 'Novo compromisso'.")
+                raise Exception(
+                    "Nao foi possivel encontrar ou clicar no link 'Novo compromisso'."
+                )
 
             logging.info("[ACAO] Aguardando campo 'Descricao' carregar na tela...")
-            input_descricao = wait.until(EC.presence_of_element_located((By.ID, "Descricao")))
+            input_descricao = wait.until(
+                EC.presence_of_element_located((By.ID, "Descricao"))
+            )
             time.sleep(2)
 
-            logging.info("[ACAO] Localizando e clicando no botao de lookup para 'Descricao'...")
+            logging.info(
+                "[ACAO] Localizando e clicando no botao de lookup para 'Descricao'..."
+            )
             xpath_lookup_btn = "//div[contains(@class, 'lookup') and .//input[@id='Descricao']]//div[contains(@class, 'lookup-modal-button')]"
-            btn_lookup = wait.until(EC.element_to_be_clickable((By.XPATH, xpath_lookup_btn)))
+            btn_lookup = wait.until(
+                EC.element_to_be_clickable((By.XPATH, xpath_lookup_btn))
+            )
             try:
                 btn_lookup.click()
             except Exception:
@@ -371,16 +416,24 @@ def clicar_link_processo(driver, dados: dict = None, adapta_info: dict = None) -
             time.sleep(2.5)
 
             logging.info("[ACAO] Aguardando dropdown/modal de lookup de Descricao...")
-            xpath_dropdown = "//div[contains(@id, 'lookup_') and contains(@id, '_dropdown')]"
-            dropdown = wait.until(EC.presence_of_element_located((By.XPATH, xpath_dropdown)))
+            xpath_dropdown = (
+                "//div[contains(@id, 'lookup_') and contains(@id, '_dropdown')]"
+            )
+            dropdown = wait.until(
+                EC.presence_of_element_located((By.XPATH, xpath_dropdown))
+            )
 
             opcoes = []
             paginas_visitadas = 0
             while paginas_visitadas < 5:
-                rows = dropdown.find_elements(By.XPATH, ".//div[@class='lookup-wrapper']//tr[@data-val-id]")
+                rows = dropdown.find_elements(
+                    By.XPATH, ".//div[@class='lookup-wrapper']//tr[@data-val-id]"
+                )
                 for row in rows:
                     try:
-                        td = row.find_element(By.XPATH, ".//td[@data-val-field='Value']")
+                        td = row.find_element(
+                            By.XPATH, ".//td[@data-val-field='Value']"
+                        )
                         texto = td.text.strip()
                         if texto and texto not in opcoes:
                             opcoes.append(texto)
@@ -388,7 +441,9 @@ def clicar_link_processo(driver, dados: dict = None, adapta_info: dict = None) -
                         continue
 
                 try:
-                    btn_next = dropdown.find_element(By.XPATH, ".//a[contains(@class, 'paginator-next')]")
+                    btn_next = dropdown.find_element(
+                        By.XPATH, ".//a[contains(@class, 'paginator-next')]"
+                    )
                     if not btn_next.is_displayed():
                         break
                     try:
@@ -400,7 +455,9 @@ def clicar_link_processo(driver, dados: dict = None, adapta_info: dict = None) -
                 except Exception:
                     break
 
-            logging.info(f"[ACAO] Coletadas {len(opcoes)} opcoes de descricao para classificacao.")
+            logging.info(
+                f"[ACAO] Coletadas {len(opcoes)} opcoes de descricao para classificacao."
+            )
 
             escolha = "N/A"
             if dados and opcoes:
@@ -410,40 +467,63 @@ def clicar_link_processo(driver, dados: dict = None, adapta_info: dict = None) -
 
             if escolha and escolha != "N/A" and escolha in opcoes:
                 try:
+
                     def _tentar_clicar_linhas(linhas):
                         for row in linhas:
                             try:
-                                td = row.find_element(By.XPATH, ".//td[@data-val-field='Value']")
+                                td = row.find_element(
+                                    By.XPATH, ".//td[@data-val-field='Value']"
+                                )
                                 texto_td = td.text.strip()
                                 if texto_td.lower() == escolha.lower():
-                                    driver.execute_script("arguments[0].scrollIntoView({block:'center'});", row)
+                                    driver.execute_script(
+                                        "arguments[0].scrollIntoView({block:'center'});",
+                                        row,
+                                    )
                                     time.sleep(0.4)
                                     try:
                                         row.click()
                                     except Exception:
-                                        driver.execute_script("arguments[0].click();", row)
-                                    logging.info(f"[ACAO] Opcao selecionada e clicada no lookup: '{escolha}'")
+                                        driver.execute_script(
+                                            "arguments[0].click();", row
+                                        )
+                                    logging.info(
+                                        f"[ACAO] Opcao selecionada e clicada no lookup: '{escolha}'"
+                                    )
                                     return True
                             except Exception:
                                 continue
                         for row in linhas:
                             try:
-                                td = row.find_element(By.XPATH, ".//td[@data-val-field='Value']")
+                                td = row.find_element(
+                                    By.XPATH, ".//td[@data-val-field='Value']"
+                                )
                                 texto_td = td.text.strip()
-                                if escolha.lower() in texto_td.lower() or texto_td.lower() in escolha.lower():
-                                    driver.execute_script("arguments[0].scrollIntoView({block:'center'});", row)
+                                if (
+                                    escolha.lower() in texto_td.lower()
+                                    or texto_td.lower() in escolha.lower()
+                                ):
+                                    driver.execute_script(
+                                        "arguments[0].scrollIntoView({block:'center'});",
+                                        row,
+                                    )
                                     time.sleep(0.4)
                                     try:
                                         row.click()
                                     except Exception:
-                                        driver.execute_script("arguments[0].click();", row)
-                                    logging.info(f"[ACAO] Opcao parcial clicada no lookup: '{texto_td}'")
+                                        driver.execute_script(
+                                            "arguments[0].click();", row
+                                        )
+                                    logging.info(
+                                        f"[ACAO] Opcao parcial clicada no lookup: '{texto_td}'"
+                                    )
                                     return True
                             except Exception:
                                 continue
                         return False
 
                     from selenium.webdriver.common.keys import Keys
+
                     try:
                         driver.find_element(By.TAG_NAME, "body").send_keys(Keys.ESCAPE)
                         time.sleep(1.0)
@@ -461,7 +541,9 @@ def clicar_link_processo(driver, dados: dict = None, adapta_info: dict = None) -
                     logging.info("[ACAO] Lookup reaberto. Aguardando dropdown...")
                     time.sleep(2.5)
 
-                    xpath_dropdown2 = "//div[contains(@id, 'lookup_') and contains(@id, '_dropdown')]"
+                    xpath_dropdown2 = (
+                        "//div[contains(@id, 'lookup_') and contains(@id, '_dropdown')]"
+                    )
                     dropdown2 = WebDriverWait(driver, 10).until(
                         EC.presence_of_element_located((By.XPATH, xpath_dropdown2))
                     )
@@ -470,7 +552,8 @@ def clicar_link_processo(driver, dados: dict = None, adapta_info: dict = None) -
                     for pagina in range(6):
                         time.sleep(1.0)
                         linhas_pg = dropdown2.find_elements(
-                            By.XPATH, ".//div[@class='lookup-wrapper']//tr[@data-val-id]"
+                            By.XPATH,
+                            ".//div[@class='lookup-wrapper']//tr[@data-val-id]",
                         )
                         clicou_opcao = _tentar_clicar_linhas(linhas_pg)
                         if clicou_opcao:
@@ -480,18 +563,26 @@ def clicar_link_processo(driver, dados: dict = None, adapta_info: dict = None) -
                                 By.XPATH, ".//a[contains(@class, 'paginator-next')]"
                             )
                             if not btn_next2.is_displayed():
-                                logging.info(f"[ACAO] Fim da paginacao na pagina {pagina + 1}.")
+                                logging.info(
+                                    f"[ACAO] Fim da paginacao na pagina {pagina + 1}."
+                                )
                                 break
                             driver.execute_script("arguments[0].click();", btn_next2)
                         except Exception:
                             break
 
                     if not clicou_opcao:
-                        logging.warning(f"[ACAO] Opcao '{escolha}' nao encontrada em nenhuma pagina do lookup.")
+                        logging.warning(
+                            f"[ACAO] Opcao '{escolha}' nao encontrada em nenhuma pagina do lookup."
+                        )
                 except Exception as e:
-                    logging.error(f"[ACAO] Erro ao navegar/clicar na descricao no lookup: {e}")
+                    logging.error(
+                        f"[ACAO] Erro ao navegar/clicar na descricao no lookup: {e}"
+                    )
             else:
-                logging.warning("[ACAO] Nenhuma opcao valida foi classificada pela IA. O campo ficara em branco para preenchimento manual.")
+                logging.warning(
+                    "[ACAO] Nenhuma opcao valida foi classificada pela IA. O campo ficara em branco para preenchimento manual."
+                )
 
     except Exception as e:
         logging.error(f"[ACAO] Falha ao navegar na aba do processo: {e}")

@@ -13,7 +13,6 @@ from core.services.calcular_prazo import CalcularPrazo
 from ports.cliente_ia import ClienteIA
 from config.settings import ARQUIVO_JSON
 
-
 logger = logging.getLogger(__name__)
 
 
@@ -38,16 +37,20 @@ class AdaptaOneCliente(ClienteIA):
         reu = campos.get("polo_p", "") or "N/A"
         data_disp = (
             publicacao.data_disponibilizacao.strftime("%d/%m/%Y")
-            if publicacao.data_disponibilizacao else "N/A"
+            if publicacao.data_disponibilizacao
+            else "N/A"
         )
         processo = publicacao.processo_numero
         conteudo = publicacao.conteudo
 
         classificacao_label = (
-            "✅ Nosso Cliente" if lado == LadoProcesso.NOSSO_CLIENTE
+            "✅ Nosso Cliente"
+            if lado == LadoProcesso.NOSSO_CLIENTE
             else "⚪ Sem Providência (Operadora)"
         )
-        decisao_str = "AGENDAR" if lado == LadoProcesso.NOSSO_CLIENTE else "SEM PROVIDÊNCIA"
+        decisao_str = (
+            "AGENDAR" if lado == LadoProcesso.NOSSO_CLIENTE else "SEM PROVIDÊNCIA"
+        )
 
         calc = CalcularPrazo()
         prazo_dias = 5 if "despacho" in (publicacao.tipo or "").lower() else 15
@@ -61,7 +64,7 @@ class AdaptaOneCliente(ClienteIA):
             "Analise o que foi determinado e indique a ação que nossa equipe deve tomar."
             if lado == LadoProcesso.NOSSO_CLIENTE
             else "Esta publicação é relativa à **parte contrária (operadora)**. "
-                 "Indique que nenhuma ação ativa é necessária da nossa parte."
+            "Indique que nenhuma ação ativa é necessária da nossa parte."
         )
 
         prompt = (
@@ -94,27 +97,41 @@ class AdaptaOneCliente(ClienteIA):
 
             resposta_texto = self._enviar_mensagem(prompt)
             if not resposta_texto:
-                return self._analise_fallback(publicacao, lado, agendamento_fallback, decisao_str)
+                return self._analise_fallback(
+                    publicacao, lado, agendamento_fallback, decisao_str
+                )
 
             data_ia = re.search(
-                r'Data d[oe] Agendamento[^\d]*(\d{2}/\d{2}/\d{4})',
-                resposta_texto, re.IGNORECASE
+                r"Data d[oe] Agendamento[^\d]*(\d{2}/\d{2}/\d{4})",
+                resposta_texto,
+                re.IGNORECASE,
             )
             data_agendada_final = data_ia.group(1) if data_ia else data_agend_sugerida
 
-            prazo_ia = re.search(r'Prazo Identificado[^\d]*(\d+)', resposta_texto, re.IGNORECASE)
+            prazo_ia = re.search(
+                r"Prazo Identificado[^\d]*(\d+)", resposta_texto, re.IGNORECASE
+            )
             if prazo_ia:
                 prazo_dias = int(prazo_ia.group(1))
 
             from datetime import date as date_type
+
             agend = calc.calcular_prazo(
                 prazo_dias, publicacao.data_disponibilizacao or datetime.now().date()
             )
 
             return Analise(
                 lado=lado,
-                resumo=resposta_texto[:300] + "..." if len(resposta_texto) > 300 else resposta_texto,
-                urgencia=Urgencia.ALTA if agend.status_temporal.value in ("URGENTE", "ATRASADO") else Urgencia.MEDIA,
+                resumo=(
+                    resposta_texto[:300] + "..."
+                    if len(resposta_texto) > 300
+                    else resposta_texto
+                ),
+                urgencia=(
+                    Urgencia.ALTA
+                    if agend.status_temporal.value in ("URGENTE", "ATRASADO")
+                    else Urgencia.MEDIA
+                ),
                 prazo_dias=prazo_dias,
                 acao_recomendada=(
                     "Revisar análise processual."
@@ -135,10 +152,16 @@ class AdaptaOneCliente(ClienteIA):
 
         except Exception as e:
             logger.error(f"[ADAPTA_CLIENT] Falha ao analisar: {e}")
-            return self._analise_fallback(publicacao, lado, agendamento_fallback, decisao_str)
+            return self._analise_fallback(
+                publicacao, lado, agendamento_fallback, decisao_str
+            )
 
     def _analise_fallback(
-        self, pub: Publicacao, lado: LadoProcesso, agendamento: Agendamento, decisao: str
+        self,
+        pub: Publicacao,
+        lado: LadoProcesso,
+        agendamento: Agendamento,
+        decisao: str,
     ) -> Analise:
         return Analise(
             lado=lado,
@@ -213,7 +236,9 @@ class AdaptaOneCliente(ClienteIA):
                     if isinstance(exp, dict):
                         n = exp.get("name", "").strip().lower()
                         if n == nome or "processualista" in n:
-                            logger.info(f"[ADAPTA_CLIENT] Expert encontrado: '{exp.get('name')}' (ID: {exp['id']})")
+                            logger.info(
+                                f"[ADAPTA_CLIENT] Expert encontrado: '{exp.get('name')}' (ID: {exp['id']})"
+                            )
                             return exp["id"]
             except Exception:
                 pass
@@ -241,6 +266,7 @@ class AdaptaOneCliente(ClienteIA):
 
     def _list_personal_experts(self):
         import base64
+
         parts = self.clerk_token.split(".")
         if len(parts) != 3:
             return {"data": []}
