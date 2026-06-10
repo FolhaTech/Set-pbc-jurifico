@@ -21,17 +21,14 @@ jobs:
         run: uv python  install 3.12
 
       - name: Install dependencies
-        working-directory: Set-pbc-jurifico
         run: pip install -r requirements.txt
 
-      - name: Sintax Check
-        working-directory: Set-pbc-jurifico
+      - name: Syntax Check
         run: |
           uv run python -m py_compile run_v2.py
           find . -name "*.py" -not -path "./__pycache__/*" -exec uv run python -m py_compile {} +
 
       - name: Imports Check
-        working-directory: Set-pbc-jurifico
         run: |
           uv run python -c "from core.entities import Publicacao, Analise"
           uv run python -c "from core.enums import LadoProcesso, Urgencia, StatusAcao"
