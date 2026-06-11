@@ -228,6 +228,54 @@ def obter_classificacao_ia(dados: dict, opcoes: list, adapta_info: dict | None) 
     return "N/A"
 
 
+def obter_classificacao_tipo_ia(
+        dados: dict, opcoes: list, adapta_info: dict | None, descricao_escolhida: str
+) -> str:
+    if not adapta_info:
+        logging.warning(
+            "[ACAO] Adapta ONE nao disponivel para classificacao de descricao. Pulando."
+        )
+        return "N/A"
+
+    prompt = (
+            f"Com base na publicacao juridica abaixo e na descricao de compromisso ja selecionada, "
+            f"identifique qual dos seguintes TIPOS de compromisso e o mais adequado.\n\n"
+            f"**DESCRICAO SELECIONADA:** {descricao_escolhida}\n\n"
+            f"**PUBLICACAO:**\n{dados.get('conteudo', '')[:1000]}\n\n"
+            f"**OPCOES DE TIPO DISPONIVEIS:**\n" + "\n".join(f"- {op}" for op in opcoes) + "\n\n"
+                                                                                           f"Responda APENAS com o texto exato da opcao selecionada "
+                                                                                           f"(copie exatamente como esta na lista acima). "
+                                                                                           f"Nao adicione introducao, pontuacao, explicacao ou qualquer texto extra. "
+                                                                                           f"Se nenhuma opcao se aplicar, responda exatamente: N/A"
+    )
+
+    try:
+        client = adapta_info["client"]
+        logging.info(
+            "[ACAO] Enviando lista de tipos ao expert do Adapta ONE para classificacao..."
+        )
+        escolha_raw = client.enviar_mensagem(prompt).strip()
+        logging.info(f"[ACAO] Expert Adapta ONE respondeu: '{escolha_raw[:200]}...'")
+
+        linhas = [l.strip() for l in escolha_raw.splitlines() if l.strip()]
+        for linha in reversed(linhas):
+            if linha in opcoes:
+                logging.info(f"[ACAO] Correspondencia exata (ultima linha): '{linha}'")
+                return linha
+        for linha in reversed(linhas):
+            for op in opcoes:
+                if op.lower() in linha.lower():
+                    logging.info(f"[ACAO] Correspondencia parcial encontrada: '{op}'")
+                    return op
+        for op in opcoes:
+            if op.lower() in escolha_raw.lower():
+                logging.info(f"[ACAO] Correspondencia no texto completo: '{op}'")
+                return op
+    except Exception as e:
+        logging.warning(f"[ACAO] Falha ao obter classificacao via IA: {e}")
+    return "N/A"
+
+
 def clicar_link_processo(driver, dados: dict = None, adapta_info: dict = None) -> bool:
     logging.info("[ACAO] Tentando clicar no link do processo para abrir em nova aba...")
 
@@ -554,6 +602,164 @@ def clicar_link_processo(driver, dados: dict = None, adapta_info: dict = None) -
                 )
         else:
             logging.info("[ACAO] Nao foi possivel classificar a descricao.")
+
+        if escolha and escolha != "N/A":
+            logging.info("[ACAO] ETAPA 1: Abrindo lookup do Tipo...")
+            time.sleep(1.5)
+
+            driver.execute_script("""
+                // 1. limpa TipoText e TipoId
+                var tt = document.getElementById('TipoText');
+                var ti = document.getElementById('TipoId');
+                if (tt) { tt.value = ''; tt.dispatchEvent(new Event('input',{bubbles:true})); }
+                if (ti) { ti.value = ''; }
+                // 2. clica .lookup-show (mostra TODAS opcoes, como o lookup-modal da Descricao)
+                var container = document.getElementById('lookup_tipo');
+                if (!container) return 'nao_achou';
+                var btn = container.querySelector('.lookup-button.lookup-show');
+                if (!btn) btn = container.querySelector('.lookup-button');
+                if (btn) {
+                    btn.scrollIntoView({block:'center'});
+                    btn.click();
+                    return 'clicado';
+                }
+                return 'botao_nao';
+            """)
+            logging.info("[ACAO] Lookup do Tipo aberto.")
+            time.sleep(2.5)
+
+            logging.info("[ACAO] ETAPA 2: Aguardando popup do Tipo...")
+            dropdown_tipo = None
+            for sel in [
+                "div.lookup-tree-container:not([style*='display: none'])",
+                "div[class*='lookup-wrapper']:not([style*='display: none'])",
+                "div[id*='lookup_tipo_']:not([style*='display: none'])",
+            ]:
+                try:
+                    dropdown_tipo = WebDriverWait(driver, 3).until(
+                        EC.presence_of_element_located((By.CSS_SELECTOR, sel))
+                    )
+                    if dropdown_tipo.is_displayed():
+                        logging.info(f"[ACAO] Popup do Tipo: {sel}")
+                        break
+                except Exception:
+                    continue
+            if not dropdown_tipo:
+                raise Exception("Popup do Tipo nao encontrado.")
+
+            logging.info("[ACAO] ETAPA 3: Coletando opcoes do Tipo...")
+            opcoes_tipo = []
+            rows_tipo = []
+            for sel in [
+                "tr[data-val-id]", "li[data-val-id]", ".tree-node", "li.tree-item",
+                "div[data-val-id]",
+            ]:
+                rows_tipo = dropdown_tipo.find_elements(By.CSS_SELECTOR, sel)
+                if rows_tipo:
+                    logging.info(f"[ACAO] {len(rows_tipo)} itens via '{sel}'")
+                    break
+            if not rows_tipo:
+                # fallback: extrai texto bruto do popup
+                texto_bruto = dropdown_tipo.text or ""
+                logging.info(f"[ACAO] Fallback: texto bruto com {len(texto_bruto)} chars")
+                rows_tipo = [dropdown_tipo]  # para loop abaixo
+
+            for row in rows_tipo:
+                # Tenta achar td com data-val-field=Value (padrao grid)
+                try:
+                    td = row.find_element(By.XPATH, ".//td[@data-val-field='Value']")
+                    texto = td.text.strip()
+                except Exception:
+                    texto = (row.text or row.get_attribute("innerText") or "").strip()
+                    # Se texto muito longo, divide por linhas
+                    if len(texto) > 500:
+                        for line in texto.split("\n"):
+                            line = line.strip()
+                            if line and line not in opcoes_tipo:
+                                opcoes_tipo.append(line)
+                        continue
+                if texto and texto not in opcoes_tipo:
+                    opcoes_tipo.append(texto)
+            logging.info(f"[ACAO] {len(opcoes_tipo)} opcoes de Tipo coletadas.")
+
+            escolha_tipo = "N/A"
+            if dados and opcoes_tipo:
+                escolha_tipo = obter_classificacao_tipo_ia(
+                    dados, opcoes_tipo, adapta_info, escolha
+                )
+            logging.info(f"[ACAO] IA escolheu Tipo: '{escolha_tipo}'")
+
+            # ETAPA 4 — Clicar na opcao (igual padrao da Descricao!)
+            if escolha_tipo and escolha_tipo != "N/A" and escolha_tipo in opcoes_tipo:
+                logging.info("[ACAO] ETAPA 4: Clicando na opcao escolhida...")
+
+                # Seletores para itens clicaveis
+                item_seletores = [
+                    "tr[data-val-id]", "li[data-val-id]", ".tree-node",
+                    "li.tree-item", "div[data-val-id]",
+                ]
+                # Encontra o seletor correto
+                itens = []
+                for isel in item_seletores:
+                    itens = dropdown_tipo.find_elements(By.CSS_SELECTOR, isel)
+                    if itens:
+                        break
+
+                if itens:
+                    clicou_tipo = False
+                    for item in itens:
+                        try:
+                            td = item.find_element(By.XPATH, ".//td[@data-val-field='Value']")
+                            texto = td.text.strip()
+                        except Exception:
+                            texto = (item.text or item.get_attribute("innerText") or "").strip()
+                        if texto.lower() == escolha_tipo.lower():
+                            driver.execute_script("arguments[0].scrollIntoView({block:'center'});", item)
+                            time.sleep(0.3)
+                            try:
+                                item.click()
+                            except:
+                                driver.execute_script("arguments[0].click();", item)
+                            logging.info(f"[ACAO] Opcao '{escolha_tipo}' clicada!")
+                            clicou_tipo = True
+                            break
+                    if not clicou_tipo:
+                        for item in itens:
+                            try:
+                                td = item.find_element(By.XPATH, ".//td[@data-val-field='Value']")
+                                texto = td.text.strip()
+                            except Exception:
+                                texto = (item.text or item.get_attribute("innerText") or "").strip()
+                            if escolha_tipo.lower() in texto.lower() or texto.lower() in escolha_tipo.lower():
+                                driver.execute_script("arguments[0].scrollIntoView({block:'center'});", item)
+                                time.sleep(0.3)
+                                try:
+                                    item.click()
+                                except:
+                                    driver.execute_script("arguments[0].click();", item)
+                                logging.info(f"[ACAO] Opcao parcial '{escolha_tipo}' clicada.")
+                                clicou_tipo = True
+                                break
+                    if not clicou_tipo:
+                        logging.warning(f"[ACAO] Opcao '{escolha_tipo}' nao encontrada.")
+                else:
+                    logging.warning("[ACAO] Nenhum item clicavel encontrado no popup.")
+            elif escolha_tipo == "N/A":
+                logging.info("[ACAO] Tipo nao classificado. Mantendo selecao atual.")
+
+            # ETAPA 5 — Confirmar
+            time.sleep(2)
+            try:
+                input_tipo = driver.find_element(By.ID, "TipoText")
+                valor = input_tipo.get_attribute("value") or ""
+                if valor.strip():
+                    logging.info(f"[ACAO] CONFIRMADO! Campo Tipo: '{valor}'")
+                else:
+                    logging.warning("[ACAO] Campo Tipo continua vazio.")
+            except Exception as e:
+                logging.warning(f"[ACAO] Erro ao confirmar Tipo: {e}")
+        else:
+            logging.info("[ACAO] Pulando Tipo - descricao nao classificada.")
 
     except Exception as e:
         logging.error(f"[ACAO] Falha ao navegar na aba do processo: {e}")

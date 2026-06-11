@@ -10,9 +10,9 @@ Uso:
   python run_v2.py --max 10             -> Limite de publicacoes
 """
 
-import sys
-import logging
 import argparse
+import logging
+import sys
 
 if hasattr(sys.stdout, "reconfigure"):
     sys.stdout.reconfigure(encoding="utf-8")
