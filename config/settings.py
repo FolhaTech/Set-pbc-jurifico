@@ -8,6 +8,7 @@ Para alterar credenciais, URLs ou parâmetros operacionais, edite SOMENTE este a
 """
 
 import os
+
 from dotenv import load_dotenv
 
 # Carrega variáveis do .env automaticamente (se houver)
@@ -45,8 +46,11 @@ ANTECEDENCIA_DIAS = 5  # dias antes do prazo para agendar
 
 # ─── Planilha base ───────────────────────────────────────────────────────────
 # Referência à planilha na pasta original (não movida)
-PLANILHA_BASE = os.path.join(
-    os.path.dirname(BASE_DIR),
-    "Automação publicação Juridico",
-    "3. Relatório Base x Advogado.xlsx",
+PLANILHA_BASE = os.getenv(
+    "PLANILHA_BASE",
+    os.path.join(
+        os.path.dirname(os.path.dirname(BASE_DIR)),
+        "Automação publicação Juridico",
+        "3. Relatório Base x Advogado.xlsx",
+    ),
 )

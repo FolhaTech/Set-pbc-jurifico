@@ -6,26 +6,19 @@ config/di.py
 Injeção de dependências — monta todos os objetos e retorna os casos de uso prontos.
 """
 
-import sys
-import uuid
+import json
 import logging
 import os
 import subprocess
-import json
 import time
 
+from adapters.ia.adapta_one_cliente import AdaptaOneCliente
+from adapters.persistencia.json_repositorio import JsonRepositorio
+from adapters.web.selenium_navegador import SeleniumNavegador
 from core.services.calcular_prazo import CalcularPrazo
 from core.services.classificador_polo import ClassificadorPolo
 from core.use_cases.analisar_publicacao import AnalisarPublicacao
 from core.use_cases.processar_lista import ProcessarLista
-from ports.navegador_web import NavegadorWeb
-from ports.cliente_ia import ClienteIA
-from ports.repositorio import Repositorio
-from adapters.persistencia.json_repositorio import JsonRepositorio
-from adapters.ia.adapta_one_cliente import AdaptaOneCliente
-from adapters.web.selenium_navegador import SeleniumNavegador
-
-from config.settings import ARQUIVO_JSON
 
 logger = logging.getLogger(__name__)
 
@@ -114,11 +107,18 @@ def verificar_cliente_planilha(polo_a: str, numero_processo: str = None) -> dict
     from config.settings import PLANILHA_BASE
 
     if not openpyxl:
-        return {"e_nosso": True, "cliente_planilha": None, "contrario": None}
+        raise ImportError("openpyxl não está instalado. Execute: pip install openpyxl")
 
     if not os.path.exists(PLANILHA_BASE):
-        logger.warning(f"[DI] Planilha não encontrada: {PLANILHA_BASE}")
-        return {"e_nosso": True, "cliente_planilha": None, "contrario": None}
+        logger.error(
+            f"[DI] ❌ Planilha NÃO encontrada em: {PLANILHA_BASE}\n"
+            f"    Configure PLANILHA_BASE no arquivo .env"
+        )
+
+        raise FileNotFoundError(
+            f"Planilha base não encontrada: {PLANILHA_BASE}\n"
+            f"Adicione PLANILHA_BASE=<caminho> no arquivo .env"
+        )
 
     import unicodedata
 
