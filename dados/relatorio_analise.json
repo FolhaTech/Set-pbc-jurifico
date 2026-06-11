@@ -1,5 +1,5 @@
 {
-  "timestamp": "2026-06-10T16:21:29.547470",
+  "timestamp": "2026-06-11T12:59:40.058311",
   "total": 3,
   "com_analise": 3,
   "sem_analise": 0,
@@ -21,9 +21,9 @@
       "lado_processo": "nosso_cliente",
       "status_acao": "Aguardando acao manual do responsavel",
       "urgencia": "MEDIA",
-      "resumo": "**RESUMO DE AGENDAMENTO:**\n- **Decisão:** AGENDAR\n- **Data do Agendamento:** 26/06/2026",
+      "resumo": "**RESUMO DE AGENDAMENTO:**\n- **Decisão:** AGENDAR\n- **Data do Agendamento:** 27/06/2026",
       "acao_recomendada": "Revisar análise processual.",
-      "data_raspagem": "2026-06-10T16:20:25.886241"
+      "data_raspagem": "2026-06-11T12:58:08.833149"
     }
   ],
   "operadora_sem_providencia": [

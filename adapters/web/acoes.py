@@ -1,10 +1,9 @@
-import time
 import logging
-import uuid
+import time
 
 from selenium.webdriver.common.by import By
-from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
+from selenium.webdriver.support.ui import WebDriverWait
 
 from adapters.infra.logging_utils import salvar_screenshot
 
@@ -204,10 +203,10 @@ def obter_classificacao_ia(dados: dict, opcoes: list, adapta_info: dict | None) 
             "[ACAO] Enviando lista de descricoes ao expert do Adapta ONE para classificacao..."
         )
 
-        escolha_raw = client._enviar_prompt(prompt).strip()
+        escolha_raw = client.enviar_mensagem(prompt).strip()
         logging.info(f"[ACAO] Expert Adapta ONE respondeu: '{escolha_raw[:200]}...'")
 
-        linas = [l.strip() for l in escolha_raw.splitlines() if l.strip()]
+        linhas = [l.strip() for l in escolha_raw.splitlines() if l.strip()]
 
         for linha in reversed(linhas):
             if linha in opcoes:
@@ -446,130 +445,115 @@ def clicar_link_processo(driver, dados: dict = None, adapta_info: dict = None) -
                 f"[ACAO] Coletadas {len(opcoes)} opcoes de descricao para classificacao."
             )
 
-            escolha = "N/A"
-            if dados and opcoes:
-                escolha = obter_classificacao_ia(dados, opcoes, adapta_info)
+        escolha = "N/A"
+        if dados and opcoes:
+            escolha = obter_classificacao_ia(dados, opcoes, adapta_info)
 
-            logging.info(f"[ACAO] Descricao selecionada pela IA: '{escolha}'")
+        logging.info(f"[ACAO] Escolha de descricao: '{escolha}'")
 
-            if escolha and escolha != "N/A" and escolha in opcoes:
-                try:
-
-                    def _tentar_clicar_linhas(linhas):
-                        for row in linhas:
-                            try:
-                                td = row.find_element(
-                                    By.XPATH, ".//td[@data-val-field='Value']"
-                                )
-                                texto_td = td.text.strip()
-                                if texto_td.lower() == escolha.lower():
-                                    driver.execute_script(
-                                        "arguments[0].scrollIntoView({block:'center'});",
-                                        row,
-                                    )
-                                    time.sleep(0.4)
-                                    try:
-                                        row.click()
-                                    except Exception:
-                                        driver.execute_script(
-                                            "arguments[0].click();", row
-                                        )
-                                    logging.info(
-                                        f"[ACAO] Opcao selecionada e clicada no lookup: '{escolha}'"
-                                    )
-                                    return True
-                            except Exception:
-                                continue
-                        for row in linhas:
-                            try:
-                                td = row.find_element(
-                                    By.XPATH, ".//td[@data-val-field='Value']"
-                                )
-                                texto_td = td.text.strip()
-                                if (
-                                        escolha.lower() in texto_td.lower()
-                                        or texto_td.lower() in escolha.lower()
-                                ):
-                                    driver.execute_script(
-                                        "arguments[0].scrollIntoView({block:'center'});",
-                                        row,
-                                    )
-                                    time.sleep(0.4)
-                                    try:
-                                        row.click()
-                                    except Exception:
-                                        driver.execute_script(
-                                            "arguments[0].click();", row
-                                        )
-                                    logging.info(
-                                        f"[ACAO] Opcao parcial clicada no lookup: '{texto_td}'"
-                                    )
-                                    return True
-                            except Exception:
-                                continue
-                        return False
-
-                    from selenium.webdriver.common.keys import Keys
-
-                    try:
-                        driver.find_element(By.TAG_NAME, "body").send_keys(Keys.ESCAPE)
-                        time.sleep(1.0)
-                    except Exception:
-                        pass
-
-                    xpath_lookup_btn2 = "//div[contains(@class, 'lookup') and .//input[@id='Descricao']]//div[contains(@class, 'lookup-modal-button')]"
-                    btn_lookup2 = WebDriverWait(driver, 10).until(
-                        EC.element_to_be_clickable((By.XPATH, xpath_lookup_btn2))
-                    )
-                    try:
-                        btn_lookup2.click()
-                    except Exception:
-                        driver.execute_script("arguments[0].click();", btn_lookup2)
-                    logging.info("[ACAO] Lookup reaberto. Aguardando dropdown...")
-                    time.sleep(2.5)
-
-                    xpath_dropdown2 = (
-                        "//div[contains(@id, 'lookup_') and contains(@id, '_dropdown')]"
-                    )
-                    dropdown2 = WebDriverWait(driver, 10).until(
-                        EC.presence_of_element_located((By.XPATH, xpath_dropdown2))
-                    )
-
-                    clicou_opcao = False
-                    for pagina in range(6):
-                        time.sleep(1.0)
-                        linhas_pg = dropdown2.find_elements(
-                            By.XPATH,
-                            ".//div[@class='lookup-wrapper']//tr[@data-val-id]",
-                        )
-                        clicou_opcao = _tentar_clicar_linhas(linhas_pg)
-                        if clicou_opcao:
-                            break
-                        try:
-                            btn_next2 = dropdown2.find_element(
-                                By.XPATH, ".//a[contains(@class, 'paginator-next')]"
-                            )
-                            if not btn_next2.is_displayed():
-                                logging.info(
-                                    f"[ACAO] Fim da paginacao na pagina {pagina + 1}."
-                                )
-                                break
-                            driver.execute_script("arguments[0].click();", btn_next2)
-                        except Exception:
-                            break
-
-                    if not clicou_opcao:
-                        logging.warning(
-                            f"[ACAO] Opcao '{escolha}' nao encontrada em nenhuma pagina do lookup."
-                        )
-                except Exception as e:
-                    logging.error(
-                        f"[ACAO] Erro ao navegar/clicar na descricao no lookup: {e}"
-                    )
-            else:
-                logging.warning(
-                    "[ACAO] Nenhuma opcao valida foi classificada pela IA. O campo ficara em branco para preenchimento manual."
+        if escolha and escolha != "N/A":
+            try:
+                driver.execute_script(
+                    "arguments[0].querySelector('.pagination-first a, .paginator-first a').click();",
+                    dropdown,
                 )
+            except Exception:
+                pass
+            time.sleep(0.5)
+
+            clicou = False
+            for pagina in range(6):
+                rows = dropdown.find_elements(
+                    By.XPATH, ".//div[@class='lookup-wrapper']//tr[@data-val-id]"
+                )
+                for row in rows:
+                    try:
+                        td = row.find_element(
+                            By.XPATH, ".//td[@data-val-field='Value']"
+                        )
+                        texto = td.text.strip()
+                        if texto.lower() == escolha.lower():
+                            driver.execute_script(
+                                "arguments[0].scrollIntoView({block:'center'});", row
+                            )
+                            time.sleep(0.3)
+                            try:
+                                row.click()
+                            except Exception:
+                                driver.execute_script("arguments[0].click();", row)
+                            logging.info(f"[ACAO] Escolha de descricao: '{escolha}'")
+                            clicou = True
+                            break
+                    except Exception:
+                        continue
+                if clicou:
+                    break
+                try:
+                    btn_next = dropdown.find_element(
+                        By.XPATH, ".//a[contains(@class, 'paginator-next')]"
+                    )
+                    if not btn_next.is_displayed():
+                        break
+                    driver.execute_script("arguments[0].click();", btn_next)
+                    time.sleep(1.0)
+                except Exception:
+                    break
+            if not clicou:
+                for pagina in range(6):
+                    rows = dropdown.find_elements(
+                        By.XPATH, ".//div[@class='lookup-wrapper']//tr[@data-val-id]"
+                    )
+                    for row in rows:
+                        try:
+                            td = row.find_element(
+                                By.XPATH, ".//td[@data-val-field='Value']"
+                            )
+                            texto = td.text.strip()
+                            if (
+                                    escolha.lower() in texto.lower()
+                                    or texto.lower() in escolha.lower()
+                            ):
+                                driver.execute_script(
+                                    "arguments[0].scrollIntoView({block:'center'});", row
+                                )
+                                time.sleep(0.3)
+                                try:
+                                    row.click()
+                                except Exception:
+                                    driver.execute_script("arguments[0].click();", row)
+                                logging.info(f"[ACAO] Escolha de descricao: '{escolha}'")
+                                clicou = True
+                                break
+                        except Exception:
+                            continue
+                    if clicou:
+                        break
+                    try:
+                        btn_next = dropdown.find_element(
+                            By.XPATH, ".//a[contains(@class, 'paginator-next')]"
+                        )
+                        if not btn_next.is_displayed():
+                            break
+                        driver.execute_script("arguments[0].click();", btn_next)
+                        time.sleep(1.0)
+                    except Exception:
+                        break
+            time.sleep(2)
+            try:
+                input_desc = driver.find_element(By.ID, "Descricao")
+                valor = input_desc.get_attribute("value") or ""
+                if escolha.lower() in valor.lower():
+                    logging.info(f"[ACAO] Escolha de descricao: '{escolha}'")
+                else:
+                    logging.warning(
+                        f"[ACAO] Escolha de descricao nao encontrada: '{escolha}' (valor: '{valor}')"
+                    )
+            except Exception:
+                logging.warning(
+                    "[ACAO] Nao foi possivel verificar se a descricao foi selecionada."
+                )
+        else:
+            logging.info("[ACAO] Nao foi possivel classificar a descricao.")
 
     except Exception as e:
         logging.error(f"[ACAO] Falha ao navegar na aba do processo: {e}")

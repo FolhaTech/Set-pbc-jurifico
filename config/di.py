@@ -149,9 +149,9 @@ def verificar_cliente_planilha(polo_a: str, numero_processo: str = None) -> dict
                 }
 
             if (
-                cliente_norm
-                and polo_a_norm
-                and (polo_a_norm in cliente_norm or cliente_norm in polo_a_norm)
+                    cliente_norm
+                    and polo_a_norm
+                    and (polo_a_norm in cliente_norm or cliente_norm in polo_a_norm)
             ):
                 return {
                     "e_nosso": True,
@@ -183,6 +183,7 @@ class Container:
     @property
     def navegador(self) -> SeleniumNavegador:
         if self._navegador is None:
+            _ = self.cliente_ia
             self._navegador = SeleniumNavegador(
                 usar_undetected=True,
                 cliente_ia=self._cliente_ia,
