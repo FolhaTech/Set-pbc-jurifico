@@ -139,7 +139,7 @@
   },
   {
     "url_pagina": "https://firm.legalone.com.br/publications",
-    "data_raspagem": "2026-06-11T15:40:22.942321",
+    "data_raspagem": "2026-06-11T15:52:48.151187",
     "processo_numero": "1122458-90.2023.8.26.0100",
     "processo_href": null,
     "tipo": "Publicação",
@@ -173,7 +173,7 @@
     },
     "lado_processo": "nosso_cliente",
     "sem_providencia": false,
-    "analise_processualista": "**RESUMO DE AGENDAMENTO:**\n- **Decisão:** AGENDAR\n- **Data do Agendamento:** 27/06/2026",
+    "analise_processualista": "**RESUMO DE AGENDAMENTO:**\n- **Decisão:** AGENDAR\n- **Data do Agendamento:** 15/06/2026",
     "agendamento": {
       "data_limite": "02/07/2026",
       "data_agendamento": "27/06/2026",
@@ -183,7 +183,7 @@
     "data_agendada": "27/06/2026",
     "decisao_agendamento": "AGENDAR",
     "analise_gemini": {
-      "resumo": "**RESUMO DE AGENDAMENTO:**\n- **Decisão:** AGENDAR\n- **Data do Agendamento:** 27/06/2026",
+      "resumo": "**RESUMO DE AGENDAMENTO:**\n- **Decisão:** AGENDAR\n- **Data do Agendamento:** 15/06/2026",
       "lado_processo": "nosso_cliente",
       "urgencia": "MEDIA",
       "prazo_recomendado_dias_uteis": 15,
