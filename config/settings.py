@@ -22,7 +22,7 @@ URL_LOGIN = (
 )
 USERNAME = os.getenv("THOMSON_USERNAME", "")
 PASSWORD = os.getenv("THOMSON_PASSWORD", "")
-RESPONSAVEL_ALVO = "Aline Frutuoso"
+RESPONSAVEL_ALVO = os.getenv("RESPONSAVEL_ALVO", "")
 DOMINIOS_VALIDOS = ["legalone.com.br", "novajus.com.br"]
 
 # ─── Timeouts ────────────────────────────────────────────────────────────────

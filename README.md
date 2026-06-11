@@ -1,6 +1,8 @@
-# Automação de Publicações Jurídicas — Legal One (v2 Hexagonal)
+# Automação de Publicações Jurídicas — Legal One
 
-Automação Selenium que acessa o sistema **Legal One** (Thomson Reuters / NovaJus), extrai publicações processuais, classifica automaticamente se o processo é do escritório ou da parte contrária (operadora), envia o conteúdo para análise via **Adapta ONE** (IA) e agenda compromissos ou marca como "Sem providência" diretamente no sistema.
+Automação Selenium que acessa o sistema **Legal One** (Thomson Reuters / NovaJus), extrai publicações processuais,
+classifica automaticamente se o processo é do escritório ou da parte contrária (operadora), envia o conteúdo para
+análise via **Adapta ONE** (IA) e agenda compromissos ou marca como "Sem providência" diretamente no sistema.
 
 ---
 
@@ -69,19 +71,20 @@ O projeto segue o padrão **Hexagonal (Ports & Adapters)**:
 └─────────────────────────────────────────────────┘
 ```
 
-**Ports** (interfaces abstratas) definem os contratos. **Adapters** implementam esses contratos com tecnologias concretas. O **Core** não conhece os adapters — ele depende apenas das ports.
+**Ports** (interfaces abstratas) definem os contratos. **Adapters** implementam esses contratos com tecnologias
+concretas. O **Core** não conhece os adapters — ele depende apenas das ports.
 
 ---
 
 ## Pré-requisitos
 
-| Requisito | Versão mínima | Observação |
-|-----------|---------------|------------|
-| Python | 3.12+ | `requires-python = ">=3.12"` no `pyproject.toml` |
-| Node.js | 18+ | Necessário para `extract_token.js` (extração de token JWT) |
-| Google Chrome | Qualquer estável | O `undetected-chromedriver` gerencia o chromedriver automaticamente |
-| Adapta ONE Desktop | Instalado | Caminho padrão: `C:\Program Files\adapta-one-agent-desktop\adapta-one-agent-desktop.exe` |
-| Planilha Excel | — | `../Automação publicação Juridico/3. Relatório Base x Advogado.xlsx` |
+| Requisito          | Versão mínima    | Observação                                                                               |
+| ------------------ | ---------------- | ---------------------------------------------------------------------------------------- |
+| Python             | 3.12+            | `requires-python = ">=3.12"` no `pyproject.toml`                                         |
+| Node.js            | 18+              | Necessário para `extract_token.js` (extração de token JWT)                               |
+| Google Chrome      | Qualquer estável | O `undetected-chromedriver` gerencia o chromedriver automaticamente                      |
+| Adapta ONE Desktop | Instalado        | Caminho padrão: `C:\Program Files\adapta-one-agent-desktop\adapta-one-agent-desktop.exe` |
+| Planilha Excel     | —                | `../Automação publicação Juridico/3. Relatório Base x Advogado.xlsx`                     |
 
 ---
 
@@ -100,14 +103,14 @@ pip install -r Set-pbc-jurifico\requirements.txt
 
 **Dependências principais:**
 
-| Pacote | Finalidade |
-|--------|------------|
-| `selenium` | Automação do navegador Chrome |
-| `undetected-chromedriver` | Chrome driver que evita detecção de bots |
-| `groq` | Cliente API para IA (disponível mas não utilizado diretamente no fluxo principal) |
-| `python-dotenv` | Carregamento de variáveis de ambiente do arquivo `.env` |
-| `requests` | Requisições HTTP para a API do Adapta ONE |
-| `openpyxl` | Leitura da planilha Excel de referência de clientes |
+| Pacote                    | Finalidade                                                                        |
+| ------------------------- | --------------------------------------------------------------------------------- |
+| `selenium`                | Automação do navegador Chrome                                                     |
+| `undetected-chromedriver` | Chrome driver que evita detecção de bots                                          |
+| `groq`                    | Cliente API para IA (disponível mas não utilizado diretamente no fluxo principal) |
+| `python-dotenv`           | Carregamento de variáveis de ambiente do arquivo `.env`                           |
+| `requests`                | Requisições HTTP para a API do Adapta ONE                                         |
+| `openpyxl`                | Leitura da planilha Excel de referência de clientes                               |
 
 ---
 
@@ -123,11 +126,13 @@ Copy-Item .env.example .env
 
 Preencha as variáveis:
 
-| Variável | Obrigatória | Descrição |
-|----------|-------------|-----------|
-| `THOMSON_USERNAME` | Sim | Usuário de login do Legal One (Thomson Reuters) |
-| `THOMSON_PASSWORD` | Sim | Senha do login do Legal One |
-| `ADAPTA_TOKEN` | Não | Token JWT do Adapta ONE. Se vazio, o sistema tenta extraí-lo automaticamente do app desktop |
+| Variável           | Obrigatória | Descrição                                                                                   |
+| ------------------ | ----------- | ------------------------------------------------------------------------------------------- |
+| `THOMSON_USERNAME` | Sim         | Usuário de login do Legal One (Thomson Reuters)                                             |
+| `THOMSON_PASSWORD` | Sim         | Senha do login do Legal One                                                                 |
+| `RESPONSAVEL_ALVO` | Não         | Nome do responsável alvo nos filtros                                                        |
+| `ADAPTA_TOKEN`     | Não         | Token JWT do Adapta ONE. Se vazio, o sistema tenta extraí-lo automaticamente do app desktop |
+| `PLANILHA_BASE`    | Sim         | Caminho completo da planilha Excel.                                                         |
 
 ### Arquivo `config/settings.py`
 
@@ -139,16 +144,16 @@ USERNAME = os.getenv("THOMSON_USERNAME", "")
 PASSWORD = os.getenv("THOMSON_PASSWORD", "")
 
 # Responsável alvo nos filtros
-RESPONSAVEL_ALVO = "Aline Frutuoso"
+RESPONSAVEL_ALVO = os.getenv("RESPONSAVEL_ALVO", "")
 
 # Timeouts (segundos)
-TIMEOUT = 20              # Timeout padrão de element wait
-TIMEOUT_POS_LOGIN = 30    # Timeout pós-login (aguarda SPA)
+TIMEOUT = 20  # Timeout padrão de element wait
+TIMEOUT_POS_LOGIN = 30  # Timeout pós-login (aguarda SPA)
 
 # Automação
-MAX_PUBLICACOES = 50      # Limite padrão de publicações por execução
-RPM_DELAY = 1             # Segundos entre requisições
-ANTECEDENCIA_DIAS = 5     # Dias antes do prazo para agendar
+MAX_PUBLICACOES = 50  # Limite padrão de publicações por execução
+RPM_DELAY = 1  # Segundos entre requisições
+ANTECEDENCIA_DIAS = 5  # Dias antes do prazo para agendar
 
 # Caminhos de saída (calculados automaticamente)
 PASTA_SCREENSHOTS = "<raiz>/screenshots_debug"
@@ -158,12 +163,26 @@ PASTA_DADOS = "<raiz>/dados"
 
 ### Planilha de Referência
 
-O sistema espera uma planilha Excel em:
-```
-../Automação publicação Juridico/3. Relatório Base x Advogado.xlsx
+O caminho é configurável via `.env`:
+
+```env
+PLANILHA_BASE=C:\caminho\completo\3. Relatório Base x Advogado.xlsx
 ```
 
+Se não configurado, o sistema tenta detectar automaticamente subindo até 4 níveis a partir de `config/`, procurando por
+`Automação publicação Juridico/3. Relatório Base x Advogado.xlsx`.
+
+**⚠️ Se a planilha não for encontrada**, o script **para com erro** (não assume `e_nosso=True`):
+
+```
+❌ Planilha NÃO encontrada em: <caminho>
+Configure PLANILHA_BASE no arquivo .env
+```
+
+Se `openpyxl` não estiver instalado, o script também emite erro claro.
+
 A planilha deve conter (nas colunas esperadas):
+
 - **Coluna C (índice 2)**: Número do processo
 - **Coluna D (índice 3)**: Nome do cliente
 - **Coluna J (índice 9)**: Nome da parte contrária
@@ -197,7 +216,8 @@ Processa todas as publicações disponíveis (até o limite de `MAX_PUBLICACOES`
 python run_v2.py --sem-adapta
 ```
 
-Desativa a integração com Adapta ONE. A análise é feita localmente com dados da planilha. Útil quando o token do Adapta ONE não está disponível.
+Desativa a integração com Adapta ONE. A análise é feita localmente com dados da planilha. Útil quando o token do Adapta
+ONE não está disponível.
 
 ### Combinações
 
@@ -214,11 +234,11 @@ python run_v2.py
 
 ### Resumo dos Flags
 
-| Flag | Efeito | Padrão |
-|------|--------|--------|
-| `--todas` | Processa todas as publicações (não apenas a primeira) | `False` |
-| `--sem-adapta` | Desativa envio ao Adapta ONE (modo offline) | `False` (IA ativa) |
-| `--max N` | Limite máximo de publicações a processar | `50` (de `settings.py`) |
+| Flag           | Efeito                                                | Padrão                  |
+| -------------- | ----------------------------------------------------- | ----------------------- |
+| `--todas`      | Processa todas as publicações (não apenas a primeira) | `False`                 |
+| `--sem-adapta` | Desativa envio ao Adapta ONE (modo offline)           | `False` (IA ativa)      |
+| `--max N`      | Limite máximo de publicações a processar              | `50` (de `settings.py`) |
 
 ---
 
@@ -304,6 +324,7 @@ AnalisarPublicacao.executar(pub, e_nosso)
             → Clica no link do processo (nova aba)
             → Aba "Compromissos e tarefas" → "Novo compromisso"
             → Lookup de descrição (classificado por IA)
+            → Lookup de tipo via lookuptree (classificado por IA com base na Descrição)
             → Retorna para aba original
 ```
 
@@ -316,64 +337,70 @@ AnalisarPublicacao.executar(pub, e_nosso)
 ```python
 @dataclass
 class Publicacao:
-    url_pagina: str                    # URL da página da publicação
-    data_raspagem: datetime            # Data/hora do scraping
-    processo_numero: str               # Número CNJ do processo
-    processo_href: Optional[str]       # Link para detalhes do processo
-    tipo: str                          # Tipo da publicação
-    badge: str                         # Badge/classificação visual
+    url_pagina: str  # URL da página da publicação
+    data_raspagem: datetime  # Data/hora do scraping
+    processo_numero: str  # Número CNJ do processo
+    processo_href: Optional[str]  # Link para detalhes do processo
+    tipo: str  # Tipo da publicação
+    badge: str  # Badge/classificação visual
     data_disponibilizacao: Optional[date]  # Data de disponibilização
-    fonte_tribunal: str                # Tribunal de origem
-    fonte_diario: str                  # Diário de publicação
-    conteudo: str                      # Texto bruto da publicação
-    conteudo_parsed: ConteudoParsed    # Conteúdo estruturado
-    analise: Optional[Analise]         # Resultado da análise
+    fonte_tribunal: str  # Tribunal de origem
+    fonte_diario: str  # Diário de publicação
+    conteudo: str  # Texto bruto da publicação
+    conteudo_parsed: ConteudoParsed  # Conteúdo estruturado
+    analise: Optional[Analise]  # Resultado da análise
+
 
 @dataclass
 class ConteudoParsed:
-    campos: dict                       # Campos extraídos (polo_a, polo_p, etc.)
-    advogados: list[Advogado]          # Lista de advogados com OAB
-    flags: FlagsPublicacao             # Flags (sigiloso, autos digitais)
-    texto_bruto: str                   # Texto original completo
+    campos: dict  # Campos extraídos (polo_a, polo_p, etc.)
+    advogados: list[Advogado]  # Lista de advogados com OAB
+    flags: FlagsPublicacao  # Flags (sigiloso, autos digitais)
+    texto_bruto: str  # Texto original completo
+
 
 @dataclass
 class Analise:
-    lado: LadoProcesso                # NOSSO_CLIENTE ou OPERADORA
-    resumo: str                        # Resumo da análise
-    urgencia: Urgencia                 # ALTA / MEDIA / BAIXA
-    prazo_dias: int                    # Prazo em dias
-    acao_recomendada: str              # Ação recomendada
-    requer_acao: bool                  # Se requer ação do escritório
-    fonte_ia: str                      # Fonte: "adapta_one" ou "offline"
-    analise_completa: Optional[str]    # Texto completo da resposta IA
-    agendamento: Optional[Agendamento] # Datas de agendamento
-    decisao_agendamento: Optional[str] # "AGENDAR" ou "SEM PROVIDÊNCIA"
-    status_acao: StatusAcao            # PENDENTE / TRATADO / SEM_PROVIDENCIA / FALHA
+    lado: LadoProcesso  # NOSSO_CLIENTE ou OPERADORA
+    resumo: str  # Resumo da análise
+    urgencia: Urgencia  # ALTA / MEDIA / BAIXA
+    prazo_dias: int  # Prazo em dias
+    acao_recomendada: str  # Ação recomendada
+    requer_acao: bool  # Se requer ação do escritório
+    fonte_ia: str  # Fonte: "adapta_one" ou "offline"
+    analise_completa: Optional[str]  # Texto completo da resposta IA
+    agendamento: Optional[Agendamento]  # Datas de agendamento
+    decisao_agendamento: Optional[str]  # "AGENDAR" ou "SEM PROVIDÊNCIA"
+    status_acao: StatusAcao  # PENDENTE / TRATADO / SEM_PROVIDENCIA / FALHA
+
 
 @dataclass
 class Agendamento:
-    data_limite: date                  # Prazo final
-    data_agendamento: date             # Data para agendar (5 dias antes)
-    status_temporal: StatusTemporal    # OK / URGENTE / ATRASADO
-    dias_restantes: int                # Dias restantes até agendamento
+    data_limite: date  # Prazo final
+    data_agendamento: date  # Data para agendar (5 dias antes)
+    status_temporal: StatusTemporal  # OK / URGENTE / ATRASADO
+    dias_restantes: int  # Dias restantes até agendamento
 ```
 
 ### Enums (`core/enums.py`)
 
 ```python
 class LadoProcesso(Enum):
-    NOSSO_CLIENTE = "nosso_cliente"    # Processo em que somos Polo A
-    OPERADORA = "operadora"            # Processo da parte contrária
+    NOSSO_CLIENTE = "nosso_cliente"  # Processo em que somos Polo A
+    OPERADORA = "operadora"  # Processo da parte contrária
+
 
 class StatusTemporal(Enum):
-    OK = "OK"                          # Prazo tranquilo
-    URGENTE = "URGENTE"                # Até 2 dias restantes
-    ATRASADO = "ATRASADO"              # Prazo já vencido
+    OK = "OK"  # Prazo tranquilo
+    URGENTE = "URGENTE"  # Até 2 dias restantes
+    ATRASADO = "ATRASADO"  # Prazo já vencido
+
 
 class Urgencia(Enum):
-    ALTA = "ALTA"                      # Urgência alta
-    MEDIA = "MEDIA"                    # Urgência média
-    BAIXA = "BAIXA"                    # Urgência baixa
+    ALTA = "ALTA"  # Urgência alta
+    MEDIA = "MEDIA"  # Urgência média
+    BAIXA = "BAIXA"  # Urgência baixa
+
 
 class StatusAcao(Enum):
     SEM_PROVIDENCIA = "Sem providencia"
@@ -467,7 +494,8 @@ O Container monta todas as dependências sob demanda (lazy loading):
 - **`obter_token_adapta()`**: Executa `extract_token.js` via `subprocess` para obter o token JWT do Adapta ONE
 - **`verificar_token_expirado(token)`**: Decodifica o payload Base64 do JWT e verifica se expira em menos de 60 segundos
 - **`renovar_token()`**: Tenta abrir o app Adapta ONE Desktop em modo oculto e aguarda até 12s por um novo token
-- **`verificar_cliente_planilha(polo_a, numero_processo)`**: Consulta a planilha Excel e retorna `{'e_nosso': bool, 'cliente_planilha': str, 'contrario': str}`
+- **`verificar_cliente_planilha(polo_a, numero_processo)`**: Consulta a planilha Excel e retorna
+  `{'e_nosso': bool, 'cliente_planilha': str, 'contrario': str}`
 
 ### `adapters/web/driver_setup.py` — Configuração do Chrome
 
@@ -478,13 +506,16 @@ O Container monta todas as dependências sob demanda (lazy loading):
 
 ### `adapters/web/scraper.py` — Extração de Dados
 
-- **`parse_conteudo_dinamico(texto)`**: Parser regex que extrai campos chave-valor, advogados (nome + OAB) e flags (sigiloso, autos digitais)
-- **`_extrair_numero_cnj(texto, driver)`**: Tenta múltiplos padrões regex para encontrar o número CNJ, incluindo conversão de "Número Único" (20 dígitos) para formato CNJ
+- **`parse_conteudo_dinamico(texto)`**: Parser regex que extrai campos chave-valor, advogados (nome + OAB) e flags
+  (sigiloso, autos digitais)
+- **`_extrair_numero_cnj(texto, driver)`**: Tenta múltiplos padrões regex para encontrar o número CNJ, incluindo
+  conversão de "Número Único" (20 dígitos) para formato CNJ
 - **`raspar_detalhes_publicacao(driver)`**: Coleta conteúdo, fonte do tribunal, data de disponibilização, badge e tipo
 
 ### `adapters/web/acoes.py` — Ações no Sistema
 
-- **`marcar_sem_providencia(driver)`**: Abre dropdown de status → seleciona "Sem providências" (múltiplos XPaths de fallback)
+- **`marcar_sem_providencia(driver)`**: Abre dropdown de status → seleciona "Sem providências" (múltiplos XPaths de
+  fallback)
 - **`clicar_link_processo(driver, dados, adapta_info)`**: Fluxo complexo que:
   1. Clica no link do processo (abre nova aba)
   2. Navega para aba "Compromissos e tarefas"
@@ -492,24 +523,34 @@ O Container monta todas as dependências sob demanda (lazy loading):
   4. Abre lookup de descrição
   5. Coleta todas as opções disponíveis (até 5 páginas)
   6. Envia opções para IA classificar a melhor descrição
-  7. Seleciona a opção classificada no lookup
-  8. Retorna para a aba original
+  7. Seleciona a opção classificada no lookup (dropdown mantido aberto durante IA)
+  8. **Campo Tipo**:
+     - Limpa `TipoText` e `TipoId`
+     - Clica no botão `.lookup-button` do lookuptree
+     - Aguarda popup e extrai texto bruto das opções
+     - IA classifica o tipo com base na Descrição + Publicação
+     - Seta valor via JavaScript nos campos (com eventos `input`/`change`)
+     - Se IA não classificar, restaura "Diversos"
+  9. Retorna para a aba original
 
 ### `adapters/ia/adapta_one_cliente.py` — Cliente Adapta ONE
 
-- **`analisar(pub, lado)`**: Monta um prompt estruturado com dados da publicação e envia via streaming para `https://agent.adapta.one/api/chat/stream/v1`
+- **`analisar(pub, lado)`**: Monta um prompt estruturado com dados da publicação e envia via streaming para
+  `https://agent.adapta.one/api/chat/stream/v1`
 - **`_localizar_expert()`**: Busca o expert "o processualista v2" na lista de experts do Adapta ONE
-- **`_enviar_mensagem(text)`**: Envia mensagem via SSE streaming, ignora chunks `reasoning-delta`, monta resposta completa
+- **`_enviar_mensagem(text)`**: Envia mensagem via SSE streaming, ignora chunks `reasoning-delta`, monta resposta
+  completa
 - **Fallback**: Se a IA falhar, retorna análise offline com prazo padrão de 15 dias
 
 ### `core/services/calcular_prazo.py` — Cálculo de Prazos
 
 ```python
-MULTIPLICADOR_DIAS_UTEIS = 1.4   # Conversão dias corridos → dias úteis
-ANTECEDENCIA_DIAS = 5            # Margem antes do prazo
+MULTIPLICADOR_DIAS_UTEIS = 1.4  # Conversão dias corridos → dias úteis
+ANTECEDENCIA_DIAS = 5  # Margem antes do prazo
 
 data_limite = data_disponibilizacao + (dias_uteis × 1.4)
-data_agendamento = data_limite - 5 dias
+data_agendamento = data_limite - 5
+dias
 
 # Classificação:
 # data_agendamento < hoje         → ATRASADO
@@ -561,24 +602,10 @@ Array de objetos JSON, cada um representando uma publicação processada:
 }
 ```
 
-### `dados/relatorio_analise.json`
-
-```json
-{
-  "timestamp": "2025-01-15T15:00:00",
-  "total": 25,
-  "com_analise": 23,
-  "sem_analise": 2,
-  "nosso_tratado": [...],
-  "pendentes_acao": [...],
-  "operadora_sem_providencia": [...],
-  "urgencias_nossas": [...]
-}
-```
-
 ### `screenshots_debug/` e `debug_html/`
 
 Diretórios de diagnóstico auto-gerados:
+
 - **`pos_login.png`**: Screenshot pós-login
 - **`pos_publicacoes.png`**: Screenshot pós-navegação
 - **`erro_fatal_v2.png`**: Screenshot ao erro fatal
@@ -598,7 +625,8 @@ Diretórios de diagnóstico auto-gerados:
 ### Chrome não inicia
 
 - Verifique se o Google Chrome está instalado
-- O `undetected-chromedriver` baixa o chromedriver automaticamente, mas pode falhar se a versão do Chrome for muito recente
+- O `undetected-chromedriver` baixa o chromedriver automaticamente, mas pode falhar se a versão do Chrome for muito
+  recente
 - Fallback: desinstale `undetected-chromedriver` e use Selenium padrão
 
 ### Token Adapta ONE não obtido
@@ -610,7 +638,7 @@ Diretórios de diagnóstico auto-gerados:
 
 ### Publicações não aparecem
 
-- A planilha Excel precisa estar no caminho correto: `../Automação publicação Juridico/`
+- A planilha Excel precisa estar no caminho correto ou configurada via `PLANILHA_BASE` no `.env`
 - O filtro de responsável está hardcoded como "Aline Frutuoso" — altere em `settings.py` se necessário
 - O período de filtro é fixo em 60 dias
 
@@ -618,8 +646,28 @@ Diretórios de diagnóstico auto-gerados:
 
 - O Legal One é um SPA (Single Page Application) — o código usa vários `time.sleep()` para aguardar carregamento
 - Screenshots de diagnóstico são salvos em `screenshots_debug/` e HTMLs em `debug_html/`
-- Se o layout do Legal One mudar, os seletores CSS/XPath em `navegacao.py`, `scraper.py` e `acoes.py` precisarão de atualização
+- Se o layout do Legal One mudar, os seletores CSS/XPath em `navegacao.py`, `scraper.py` e `acoes.py` precisarão de
+  atualização
 
 ### Plano de fundo: Multiplicador 1.4x
 
-O cálculo de prazos usa `dias_uteis × 1.4` para converter dias úteis em dias corridos (considerando fins de semana). Isso significa que 15 dias úteis ≈ 21 dias corridos.
+O cálculo de prazos usa `dias_uteis × 1.4` para converter dias úteis em dias corridos (considerando fins de semana).
+Isso significa que 15 dias úteis ≈ 21 dias corridos.
+
+### Planilha classifica tudo como "Nosso Cliente"
+
+- A partir da v2, se a planilha não existe, o script **para com erro** em vez de assumir `e_nosso=True`
+- Verifique se `openpyxl` está instalado: `pip show openpyxl`
+- Confirme que `PLANILHA_BASE` está configurada no `.env` ou acessível pelo caminho automático
+
+### Campo Tipo não é preenchido
+
+- Verifique se o Adapta ONE está disponível (`--sem-adapta` desativa a IA)
+- O campo Tipo usa um lookuptree diferente da Descrição — a IA classifica a partir do texto bruto do popup
+- Se o campo Tipo ficar vazio após a execução, a IA retornou "N/A" e o valor padrão "Diversos" é restaurado
+
+### Campo Descrição não é preenchido
+
+- O Adapta ONE precisa estar acessível para classificar a Descrição
+- O dropdown de opções deve estar aberto durante a chamada da IA
+- Se a IA retornar "N/A", o campo fica em branco para preenchimento manual

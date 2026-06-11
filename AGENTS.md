@@ -27,6 +27,9 @@ python run_v2.py --sem-adapta
 
 # Limit number of publications
 python run_v2.py --todas --max 10
+
+# Verify planilha path (critical — script halts if missing)
+python -c "from config.settings import PLANILHA_BASE; import os; print(f'{PLANILHA_BASE}\nExists: {os.path.exists(PLANILHA_BASE)}')"
 ```
 
 ## Architecture
@@ -66,7 +69,8 @@ Set-pbc-jurifico/
 - **Node.js** (for `extract_token.js` token extraction)
 - **Chrome + chromedriver** (managed by undetected-chromedriver)
 - **Adapta ONE Desktop** installed at `C:\Program Files\adapta-one-agent-desktop\` (for AI mode)
-- **Excel spreadsheet** at `../Automação publicação Juridico/3. Relatório Base x Advogado.xlsx` (client reference)
+- **openpyxl** (`pip install openpyxl`) — script errors out if missing
+- **Excel spreadsheet**: `3. Relatório Base x Advogado.xlsx` with columns: C=processo, D=cliente, J=parte contrária
 
 ## Environment
 
@@ -74,14 +78,18 @@ Copy `.env.example` to `.env` and fill:
 
 - `THOMSON_USERNAME` / `THOMSON_PASSWORD` — Legal One login
 - `ADAPTA_TOKEN` — can be left blank (auto-extracted from desktop app)
+- `PLANILHA_BASE` — full path to spreadsheet (optional; auto-detected by walking up 4 dirs from `config/`)
 
 ## Important quirks
 
-- **Dual package layout**: Root `../pyproject.toml` is a stub. Real code lives in `` with its own `requirements.txt`.
-- **Spreadsheet path is relative**: `PLANILHA_BASE` in `settings.py` points to `../Automação publicação Juridico/` — the
-  sibling folder must exist.
-- **Token extraction is Windows-specific**: `extract_token.js` reads from Windows Registry and
-  `%APPDATA%\AdaptaONE\auth-session.enc`.
+- **Spreadsheet is REQUIRED, configurable via `.env`**: If the spreadsheet is missing, the script **halts with error** (no longer silently defaults `e_nosso=True`). Set `PLANILHA_BASE` in `.env` or ensure `Automação publicação Juridico/3. Relatório Base x Advogado.xlsx` exists at `../../` from `config/`.
+- **`openpyxl` must be installed**: Script raises `ImportError` if missing.
+- **Lookup dropdowns must stay OPEN during IA calls**: The code opens the Description lookup, reads options, then calls the Adapta ONE IA with the dropdown still open. Closing it (ESC) before the IA call causes chromedriver crashes when trying to re-open — elements become stale.
+- **Tipo field uses a lookuptree, not a standard lookup**: The HTML structure is `<div data-val-control="lookuptree">` with inputs `TipoText`/`TipoId` (not `#Tipo`). Options are extracted as raw text from the popup, classified by IA, then set via JS (`input.value = ...` + `dispatchEvent`). If IA returns "N/A", "Diversos" is restored.
+- **IA client public method**: `AdaptaOneCliente.enviar_mensagem(text)` — wraps expert/chat resolution + `_enviar_mensagem`. Never call `send_message_stream` (doesn't exist) or `_enviar_prompt`.
+- **Container init order**: `Container.navegador` forces `cliente_ia` to init first (line `_ = self.cliente_ia`). This ensures `AdaptaOneCliente` is created before `SeleniumNavegador`.
 - **Deadline multiplier**: Business days are multiplied by 1.4 in `CalcularPrazo` to account for non-working days.
+- **Dual package layout**: Root `../pyproject.toml` is a stub. Real code lives in this dir with its own `requirements.txt`.
+- **Token extraction is Windows-specific**: `extract_token.js` reads from Windows Registry and `%APPDATA%\AdaptaONE\auth-session.enc`.
 - **No tests, linting, or type checking** configured in this repo.
-- **`../.venv` is at project root** (not inside ``).
+- **`../.venv` is at project root** (not inside the code dir).
