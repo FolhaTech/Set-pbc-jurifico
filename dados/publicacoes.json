@@ -68,7 +68,7 @@
   },
   {
     "url_pagina": "https://firm.legalone.com.br/publications",
-    "data_raspagem": "2026-06-09T13:31:09.850246",
+    "data_raspagem": "2026-06-12T09:33:11.307236",
     "processo_numero": "1013756-37.2025.8.26.0405",
     "processo_href": null,
     "tipo": "Publicação",
@@ -112,30 +112,27 @@
       },
       "texto_bruto": "Processo 1013756-37.2025.8.26.0405 - Procedimento Comum Cível - Indenização por Dano Moral - Patricia de Castro Fernandes - Michel Ribeiro Fernandes - Vistos. Cumpra a Serventia a decisão de fls. 671, expedindo-se o mandado de levantamento em favor da perita judicial. Fls. 678/701: ciência à autora. Não havendo mais provas a serem produzidas, dou por encerrada a instrução do processo. Defiro o prazo de 05 dias para que as partes apresentem as alegações finais. Oportunamente, tornem conclusos para sentença. Intime-se. - ADV: MONIQUE NUNES MARTINS (OAB 161242/RJ), LUCIANA VIEIRA DA ROSA SIQUEIRA (OAB 120372/RJ), LYMARK KAMAROFF (OAB 109192/RJ), HELLEN AGUIAR DE MENDONCA (OAB 198997/RJ), RAPHAELLA ARANTES ARIMURA (OAB 361873/SP)\nNúmero único: 10137563720258260405\nPartes:\nPolo A: PATRICIA DE CASTRO FERNANDES\nPolo P: MICHEL RIBEIRO FERNANDES\nAdvogados:\nRAPHAELLA ARANTES ARIMURA - OAB: 361873-361873\nMONIQUE NUNES MARTINS - OAB: 161242-161242\nLYMARK KAMAROFF - OAB: 109192-109192\nLUCIANA VIEIRA DA ROSA SIQUEIRA - OAB: 120372-120372\nHELLEN AGUIAR DE MENDONCA - OAB: 198997-198997"
     },
-    "advogados": [],
     "lado_processo": "nosso_cliente",
     "sem_providencia": false,
-    "analise_processualista": "A instrução processual foi encerrada, com prazo de 5 dias para apresentação das alegações finais pela nossa cliente. A equipe deve elaborar e protocolar a peça de alegações finais até a data limite. O despacho também deu ciência à autora sobre os documentos de fls. 678/701.\n\n***\n\n**RESUMO DE AGENDAMENTO:**\n- **Decisão:** AGENDAR\n- **Data do Agendamento:** 12/06/2026",
+    "analise_processualista": "**RESUMO DE AGENDAMENTO:**\n- **Decisão:** AGENDAR\n- **Data do Agendamento:** 28/06/2026",
     "agendamento": {
-      "data_limite": "30/06/2026",
-      "data_agendamento": "12/06/2026",
+      "data_limite": "03/07/2026",
+      "data_agendamento": "28/06/2026",
       "status_temporal": "OK",
-      "dias_restantes": 15
+      "dias_restantes": 16
     },
-    "data_agendada": "12/06/2026",
+    "data_agendada": "28/06/2026",
     "decisao_agendamento": "AGENDAR",
     "analise_gemini": {
-      "resumo": "A instrução processual foi encerrada, com prazo de 5 dias para apresentação das alegações finais pela nossa cliente. A equipe deve elaborar e protocolar a peça de alegações finais até a data limite. O despacho também deu ciência à autora sobre os documentos de fls. 678/701.\n\n***\n\n**RESUMO DE AGENDAM...",
+      "resumo": "**RESUMO DE AGENDAMENTO:**\n- **Decisão:** AGENDAR\n- **Data do Agendamento:** 28/06/2026",
       "lado_processo": "nosso_cliente",
       "urgencia": "MEDIA",
       "prazo_recomendado_dias_uteis": 15,
       "acao_recomendada": "Revisar análise processual.",
-      "requer_acao": true,
-      "polo_a": "PATRICIA DE CASTRO FERNANDES",
-      "polo_p": "MICHEL RIBEIRO FERNANDES"
+      "requer_acao": true
     },
     "acao_executada": "Pendente revisao manual",
-    "status_decidido": "Pendente"
+    "status_decidido": "Pendente revisao manual"
   },
   {
     "url_pagina": "https://firm.legalone.com.br/publications",

@@ -667,7 +667,7 @@ def clicar_link_processo(driver, dados: dict = None, adapta_info: dict = None) -
                 else:
                     driver.execute_script("""
                         var tt = document.getElementById('TipoText');
-                        if (tt && !tt.value) {{ tt.value = 'Diversos'; tt.dispatchEvent(new Event('input',{{bubbles:true}})); }}
+                        if (tt && !tt.value) { tt.value = 'Diversos'; tt.dispatchEvent(new Event('input', {bubbles:true})); }
                     """)
                     logging.info("[ACAO] Tipo nao classificado. Restaurado 'Diversos'.")
 
