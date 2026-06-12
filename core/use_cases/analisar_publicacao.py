@@ -28,9 +28,15 @@ class AnalisarPublicacao:
     def executar(self, publicacao: Publicacao, e_nosso: bool) -> Publicacao:
         lado = self._classificador.classificar(e_nosso)
         analise = self._obter_analise(publicacao, lado)
-        prazo_dias = analise.prazo_dias or 15
-        data_disp = publicacao.data_disponibilizacao or date.today()
-        analise.agendamento = self._calc.calcular_prazo(prazo_dias, data_disp)
+        if analise.data_solicitada_juiz:
+            analise.agendamento = self._calc.calcular_prazo_solicitado_juiz(
+                analise.data_solicitada_juiz
+            )
+        else:
+            prazo_dias = analise.prazo_dias or 15
+            data_disp = publicacao.data_disponibilizacao or date.today()
+            analise.agendamento = self._calc.calcular_prazo(prazo_dias, data_disp)
+
         publicacao.analise = analise
         self._executar_acao(publicacao)
         self._repo.salvar(publicacao)

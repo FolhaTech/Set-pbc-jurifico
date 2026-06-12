@@ -30,3 +30,22 @@ class CalcularPrazo:
             status_temporal=status_temporal,
             dias_restantes=dias_restantes,
         )
+
+    def calcular_prazo_solicitado_juiz(self, data_solicitada: date) -> Agendamento:
+        hoje = date.today()
+        data_agendamento = data_solicitada - timedelta(days=self.ANTECEDENCIA_DIAS)
+        dias_restantes = (data_agendamento - hoje).days
+
+        if data_agendamento < hoje:
+            status_temporal = StatusTemporal.ATRASADO
+        elif dias_restantes <= 2:
+            status_temporal = StatusTemporal.URGENTE
+        else:
+            status_temporal = StatusTemporal.OK
+
+        return Agendamento(
+            data_limite=data_solicitada,
+            data_agendamento=data_agendamento,
+            status_temporal=status_temporal,
+            dias_restantes=dias_restantes,
+        )

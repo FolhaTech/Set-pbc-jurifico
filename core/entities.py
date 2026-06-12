@@ -46,6 +46,7 @@ class Analise:
     analise_completa: Optional[str] = None
     agendamento: Optional[Agendamento] = None
     decisao_agendamento: Optional[str] = None
+    data_solicitada_juiz: Optional[date] = None
     status_acao: StatusAcao = StatusAcao.PENDENTE
 
 

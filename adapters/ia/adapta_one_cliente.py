@@ -89,9 +89,11 @@ class AdaptaOneCliente(ClienteIA):
             f"---\n\n"
             f"**INSTRUÇÕES:**\n"
             f"1. Identifique o prazo dado pelo juiz (em dias).\n"
-            f"2. Com base na Data de Disponibilização ({data_disp}) e no prazo, calcule:\n"
-            f"   - **Data Limite** = Data de Disponibilização + prazo\n"
-            f"   - **Data de Agendamento** = Data Limite - 5 dias\n"
+            f"1b. Se o juiz determinou uma DATA ESPECÍFICA (ex: 'audiência dia 15/07/2026', "
+            f"'designado o dia 20/08'), extraia e informe no formato "
+            f"**Data Determinada Pelo Juiz: DD/MM/AAAA**.\n"
+            f"2. Se houver data específica: Data de Agendamento = Data do juiz - 5 dias.\n"
+            f"   Se NÃO houver: Data Limite = Disponibilização + prazo; Agendamento = Data Limite - 5 dias.\n"
             f"3. {instrucao}\n"
             f"4. Responda SOMENTE com a tabela + resumo de agendamento.\n\n"
             f"**RESUMO DE AGENDAMENTO:**\n"
@@ -113,24 +115,27 @@ class AdaptaOneCliente(ClienteIA):
                     publicacao, lado, agendamento_fallback, decisao_str
                 )
 
-            data_ia = re.search(
-                r"Data d[oe] Agendamento[^\d]*(\d{2}/\d{2}/\d{4})",
+            data_juiz_match = re.search(
+                r"Data Determinada P[eo]lo Juiz[^\d]*(\d{2}/\d{2}/\d{4})",
                 resposta_texto,
                 re.IGNORECASE,
             )
-            data_agendada_final = data_ia.group(1) if data_ia else data_agend_sugerida
-
+            data_juiz = None
+            if data_juiz_match:
+                data_juiz = datetime.strptime(
+                    data_juiz_match.group(1), "%d/%m/%Y"
+                ).date()
+                agendamento_fallback = calc.calcular_prazo_solicitado_juiz(data_juiz)
+            else:
+                agendamento_fallback = calc.calcular_prazo(
+                    prazo_dias,
+                    publicacao.data_disponibilizacao or datetime.now().date(),
+                )
             prazo_ia = re.search(
                 r"Prazo Identificado[^\d]*(\d+)", resposta_texto, re.IGNORECASE
             )
             if prazo_ia:
                 prazo_dias = int(prazo_ia.group(1))
-
-            from datetime import date as date_type
-
-            agend = calc.calcular_prazo(
-                prazo_dias, publicacao.data_disponibilizacao or datetime.now().date()
-            )
 
             return Analise(
                 lado=lado,
@@ -141,7 +146,8 @@ class AdaptaOneCliente(ClienteIA):
                 ),
                 urgencia=(
                     Urgencia.ALTA
-                    if agend.status_temporal.value in ("URGENTE", "ATRASADO")
+                    if agendamento_fallback.status_temporal.value
+                    in ("URGENTE", "ATRASADO")
                     else Urgencia.MEDIA
                 ),
                 prazo_dias=prazo_dias,
@@ -153,8 +159,9 @@ class AdaptaOneCliente(ClienteIA):
                 requer_acao=(lado == LadoProcesso.NOSSO_CLIENTE),
                 fonte_ia="adapta_one",
                 analise_completa=resposta_texto,
-                agendamento=agend,
+                agendamento=agendamento_fallback,
                 decisao_agendamento=decisao_str,
+                data_solicitada_juiz=data_juiz,
                 status_acao=(
                     StatusAcao.PENDENTE
                     if lado == LadoProcesso.NOSSO_CLIENTE
