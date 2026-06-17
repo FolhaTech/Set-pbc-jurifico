@@ -942,6 +942,42 @@ def clicar_link_processo(driver, dados: dict = None, adapta_info: dict = None) -
                 "[ACAO] Pulando DtInicial - nenhuma data disponivel."
             )
 
+        data_publicacao_str = None
+        if dados:
+            dp = dados.get("data_disponibilizacao", "N/A")
+            if dp and dp != "N/A":
+                data_publicacao_str = dp
+                logging.info(f"[ACAO] Data de disponibilizacao: '{data_publicacao_str}'")
+
+        if data_publicacao_str:
+            time.sleep(0.5)
+            try:
+                driver.execute_script(f"""
+                            var el = document.getElementById('DtPublicacao');
+                            if (el) {{
+                                el.removeAttribute('readonly');
+                                el.removeAttribute('disabled');
+                                el.value = '{data_publicacao_str}';
+                                el.dispatchEvent(new Event('input', {{bubbles: true}}));
+                                el.dispatchEvent(new Event('change', {{bubbles: true}}));
+                                el.dispatchEvent(new Event('blur', {{bubbles: true}}));
+                                if (window.jQuery && typeof jQuery(el).datepicker === 'function') {{
+                                    try {{
+                                        var partes = '{data_publicacao_str}'.split('/');
+                                        var dataObj = new Date(partes[2], partes[1] - 1, partes[0]);
+                                        jQuery(el).datepicker('setDate', dataObj);
+                                    }} catch(e) {{}}
+                                }}
+                                return 'OK:' + el.value;
+                            }}
+                            return 'NO_ELEMENT';
+                            """)
+                logging.info(f"[ACAO] DtPublicacao preenchido: '{data_publicacao_str}'")
+            except Exception as e:
+                logging.warning(f"[ACAO] Falha ao preencher DtPublicacao: {e}")
+        else:
+            logging.info("[ACAO] Pulando DtPublicacao - data indisponivel.")
+
         logging.info("[ACAO] Clicando em 'Salvar e Fechar'...")
         time.sleep(1)
         try:

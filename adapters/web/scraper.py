@@ -1,14 +1,11 @@
+import logging
 import re
 import time
-import logging
-
-from selenium.webdriver.common.by import By
-from selenium.webdriver.support.ui import WebDriverWait
-from selenium.webdriver.support import expected_conditions as EC
-
 from datetime import datetime
 
-from adapters.infra.logging_utils import salvar_screenshot
+from selenium.webdriver.common.by import By
+from selenium.webdriver.support import expected_conditions as EC
+from selenium.webdriver.support.ui import WebDriverWait
 
 
 def _normalizar_key(label: str) -> str:
@@ -208,11 +205,28 @@ def raspar_detalhes_publicacao(driver) -> dict:
     except Exception:
         pass
 
-    data_match = re.search(
-        r"dia\s+(\d{2}/\d{2}/\d{4})|em\s+(\d{2}/\d{2}/\d{4})", conteudo, re.IGNORECASE
-    )
-    if data_match:
-        dados["data_disponibilizacao"] = data_match.group(1) or data_match.group(2)
+    data_disp = "N/A"
+    try:
+        header_span = driver.find_element(
+            By.XPATH, "//span[contains(normalize-space(.), 'Data da disponibilização')]"
+        )
+        parent_text = driver.execute_script(
+            "return arguments[0].parentElement.innerText;", header_span
+        )
+        match = re.search(r"(\d{2}/\d{2}/\d{4})", parent_text)
+        if match:
+            data_disp = match.group(1)
+            logging.info(f"[SCRAPER] Data Disponibilizacao: {data_disp}")
+    except Exception:
+        pass
+
+    if data_disp == "N/A":
+        data_match = re.search(
+            r"dia\s+(\d{2}/\d{2}/\d{4})|em\s+(\d{2}/\d{2}/\d{4})", conteudo, re.IGNORECASE
+        )
+        if data_match:
+            data_disp = data_match.group(1) or data_match.group(2)
+    dados["data_disponibilizacao"] = data_disp
 
     try:
         dados["badge"] = driver.find_element(
