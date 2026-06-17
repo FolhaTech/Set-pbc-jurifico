@@ -1,6 +1,8 @@
 ﻿import logging
+import re
 import time
 
+from selenium.webdriver import Keys
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.support.ui import WebDriverWait
@@ -139,6 +141,138 @@ def marcar_tratado(driver) -> bool:
     except Exception as e:
         logging.warning(f"[ACAO] Falha em marcar_tratado: {e}")
         return False
+
+
+def preencher_data_inicial(driver, data_str: str) -> bool:
+    """
+    Preenche o campo DtInicial.
+    Estrategia: 1) Fechar modal-masks  2) Setar via JS nativo  3) Fallback send_keys
+    data_str: no formato 'dd/mm/aaaa' (ex: '03/07/2026').
+    """
+    if not re.match(r"^\d{2}/\d{2}/\d{4}$", data_str):
+        logging.warning(f"[ACAO] Data invalida para DtInicial: '{data_str}'")
+        return False
+
+    try:
+        wait = WebDriverWait(driver, 10)
+        input_dt = wait.until(
+            EC.presence_of_element_located((By.ID, "DtInicial"))
+        )
+
+        # ── PASSO 0: Fechar qualquer modal-mask que esteja bloqueando ──
+        fechou_modal = driver.execute_script("""
+            var masks = document.querySelectorAll('.modal-mask, .modal, .k-overlay');
+            var fechou = 0;
+            masks.forEach(function(m) {
+                if (m.offsetParent !== null && m.style.display !== 'none') {
+                    m.click();
+                    fechou++;
+                }
+            });
+            document.body.dispatchEvent(new KeyboardEvent('keydown', {key: 'Escape', keyCode: 27, bubbles: true}));
+            document.body.dispatchEvent(new KeyboardEvent('keyup', {key: 'Escape', keyCode: 27, bubbles: true}));
+            return fechou;
+        """)
+        if fechou_modal:
+            logging.info(f"[ACAO] {fechou_modal} modal(s) fechado(s) antes de preencher DtInicial.")
+            time.sleep(1.0)
+
+        # ── PASSO 1: Scroll + foco ──
+        driver.execute_script(
+            "arguments[0].scrollIntoView({block:'center'});", input_dt
+        )
+        time.sleep(0.3)
+        driver.execute_script("arguments[0].focus();", input_dt)
+        time.sleep(0.3)
+
+        # ── PASSO 2: Setar valor via JS nativo (método primário) ──
+        sucesso = driver.execute_script(f"""
+            var el = document.getElementById('DtInicial');
+            if (!el) return 'NO_ELEMENT';
+
+            el.removeAttribute('readonly');
+            el.removeAttribute('disabled');
+
+            var data = '{data_str}';
+            el.value = data;
+            el.dispatchEvent(new Event('input', {{bubbles: true}}));
+            el.dispatchEvent(new Event('change', {{bubbles: true}}));
+            el.dispatchEvent(new Event('blur', {{bubbles: true}}));
+
+            // Tentativa adicional via datepicker (nao bloqueante)
+            if (window.jQuery && typeof jQuery(el).datepicker === 'function') {{
+                try {{
+                    var partes = data.split('/');
+                    var dataObj = new Date(partes[2], partes[1] - 1, partes[0]);
+                    jQuery(el).datepicker('setDate', dataObj);
+                    jQuery(el).trigger('change');
+                    jQuery(el).trigger('blur');
+                }} catch(e) {{}}
+            }}
+
+            return 'OK:' + el.value;
+        """)
+        logging.info(f"[ACAO] JS nativo setDate retorno: {sucesso}")
+        time.sleep(0.5)
+
+        # ── PASSO 3: Verificar ──
+        valor_final = input_dt.get_attribute("value") or ""
+        if data_str in valor_final:
+            logging.info(f"[ACAO] Data inicial preenchida com sucesso: '{valor_final}'")
+            return True
+
+        # ── PASSO 4: Fallback send_keys (via JS click para bypassar modal-mask) ──
+        logging.warning(
+            f"[ACAO] JS nativo nao persistiu valor ({valor_final!r}). "
+            f"Tentando send_keys como fallback."
+        )
+        try:
+            driver.execute_script("arguments[0].click();", input_dt)
+            time.sleep(0.3)
+            input_dt.send_keys(Keys.CONTROL, "a")
+            time.sleep(0.1)
+            input_dt.send_keys(Keys.DELETE)
+            time.sleep(0.2)
+            for ch in data_str:
+                input_dt.send_keys(ch)
+                time.sleep(0.08)
+            time.sleep(0.5)
+            input_dt.send_keys(Keys.TAB)
+            time.sleep(0.5)
+        except Exception as e:
+            logging.warning(f"[ACAO] Fallback send_keys falhou: {e}")
+
+        valor_final = input_dt.get_attribute("value") or ""
+        if data_str in valor_final:
+            logging.info(f"[ACAO] Data inicial preenchida (fallback send_keys): '{valor_final}'")
+            return True
+
+        logging.warning(
+            f"[ACAO] Nao foi possivel preencher DtInicial. "
+            f"Esperado '{data_str}', atual '{valor_final}'."
+        )
+        salvar_screenshot(driver, "erro_preencher_dt_inicial")
+        return False
+
+    except Exception as e:
+        logging.warning(f"[ACAO] Falha em preencher_data_inicial: {e}")
+        try:
+            salvar_screenshot(driver, "erro_preencher_dt_inicial")
+        except Exception:
+            pass
+        return False
+
+
+def extrair_data_agendamento(resposta_ia: str) -> str | None:
+    if not resposta_ia:
+        return None
+    match = re.search(r"Data do Agendamento:\s*(\d{2}/\d{2}/\d{4})", resposta_ia)
+    if match:
+        return match.group(1)
+    match = re.search(r"(\d{2}/\d{2}/\d{4})", resposta_ia)
+    if match:
+        return match.group(1)
+    return None
 
 
 def marcar_sem_providencia(driver) -> bool:
@@ -458,6 +592,7 @@ def clicar_link_processo(driver, dados: dict = None, adapta_info: dict = None) -
             )
 
             opcoes = []
+            opcoes_map = {}  # texto -> data-val-id (para setar via JS depois)
             paginas_visitadas = 0
             while paginas_visitadas < 5:
                 rows = dropdown.find_elements(
@@ -469,8 +604,10 @@ def clicar_link_processo(driver, dados: dict = None, adapta_info: dict = None) -
                             By.XPATH, ".//td[@data-val-field='Value']"
                         )
                         texto = td.text.strip()
+                        val_id = row.get_attribute("data-val-id") or ""
                         if texto and texto not in opcoes:
                             opcoes.append(texto)
+                            opcoes_map[texto] = val_id
                     except Exception:
                         continue
 
@@ -500,106 +637,110 @@ def clicar_link_processo(driver, dados: dict = None, adapta_info: dict = None) -
         logging.info(f"[ACAO] Escolha de descricao: '{escolha}'")
 
         if escolha and escolha != "N/A":
-            try:
-                driver.execute_script(
-                    "arguments[0].querySelector('.pagination-first a, .paginator-first a').click();",
-                    dropdown,
-                )
-            except Exception:
-                pass
-            time.sleep(0.5)
+            val_id = opcoes_map.get(escolha, "")
+            # Se não encontrou por exatidão, tenta correspondência parcial
+            if not val_id:
+                for texto, vid in opcoes_map.items():
+                    if escolha.lower() in texto.lower() or texto.lower() in escolha.lower():
+                        val_id = vid
+                        escolha = texto  # usa o texto exato da lista
+                        break
 
-            clicou = False
-            for pagina in range(6):
-                rows = dropdown.find_elements(
-                    By.XPATH, ".//div[@class='lookup-wrapper']//tr[@data-val-id]"
+            if val_id:
+                logging.info(
+                    f"[ACAO] Setando Descricao via JS: texto='{escolha}' id='{val_id}'"
                 )
-                for row in rows:
-                    try:
-                        td = row.find_element(
-                            By.XPATH, ".//td[@data-val-field='Value']"
-                        )
-                        texto = td.text.strip()
-                        if texto.lower() == escolha.lower():
-                            driver.execute_script(
-                                "arguments[0].scrollIntoView({block:'center'});", row
-                            )
-                            time.sleep(0.3)
-                            try:
-                                row.click()
-                            except Exception:
-                                driver.execute_script("arguments[0].click();", row)
-                            logging.info(f"[ACAO] Escolha de descricao: '{escolha}'")
-                            clicou = True
-                            break
-                    except Exception:
-                        continue
-                if clicou:
-                    break
+                texto_escapado = escolha.replace("'", "\\'").replace('"', '\\"')
+                driver.execute_script(f"""
+                    var descInput = document.getElementById('Descricao');
+                    var descId = document.getElementById('DescricaoId');
+                    if (descInput) {{
+                        descInput.value = '{texto_escapado}';
+                        descInput.dispatchEvent(new Event('input', {{bubbles: true}}));
+                        descInput.dispatchEvent(new Event('change', {{bubbles: true}}));
+                    }}
+                    if (descId) {{
+                        descId.value = '{val_id}';
+                        descId.dispatchEvent(new Event('change', {{bubbles: true}}));
+                    }}
+                    var hidden = document.querySelector('input[data-val-control="lookup"][data-val-field="Value"]');
+                    if (hidden && hidden.id !== 'Descricao') {{
+                        hidden.value = '{val_id}';
+                        hidden.dispatchEvent(new Event('change', {{bubbles: true}}));
+                    }}
+                """)
+                time.sleep(1)
                 try:
-                    btn_next = dropdown.find_element(
-                        By.XPATH, ".//a[contains(@class, 'paginator-next')]"
-                    )
-                    if not btn_next.is_displayed():
-                        break
-                    driver.execute_script("arguments[0].click();", btn_next)
-                    time.sleep(1.0)
-                except Exception:
-                    break
-            if not clicou:
-                for pagina in range(6):
-                    rows = dropdown.find_elements(
-                        By.XPATH, ".//div[@class='lookup-wrapper']//tr[@data-val-id]"
-                    )
-                    for row in rows:
-                        try:
-                            td = row.find_element(
-                                By.XPATH, ".//td[@data-val-field='Value']"
-                            )
-                            texto = td.text.strip()
-                            if (
-                                    escolha.lower() in texto.lower()
-                                    or texto.lower() in escolha.lower()
-                            ):
-                                driver.execute_script(
-                                    "arguments[0].scrollIntoView({block:'center'});", row
-                                )
-                                time.sleep(0.3)
-                                try:
-                                    row.click()
-                                except Exception:
-                                    driver.execute_script("arguments[0].click();", row)
-                                logging.info(f"[ACAO] Escolha de descricao: '{escolha}'")
-                                clicou = True
-                                break
-                        except Exception:
-                            continue
-                    if clicou:
-                        break
-                    try:
-                        btn_next = dropdown.find_element(
-                            By.XPATH, ".//a[contains(@class, 'paginator-next')]"
+                    input_desc = driver.find_element(By.ID, "Descricao")
+                    valor = input_desc.get_attribute("value") or ""
+                    if escolha.lower() in valor.lower():
+                        logging.info(f"[ACAO] Descricao confirmada via JS: '{escolha}'")
+                    else:
+                        logging.warning(
+                            f"[ACAO] JS nao colou Descricao. Esperado '{escolha}', atual '{valor}'."
                         )
-                        if not btn_next.is_displayed():
-                            break
-                        driver.execute_script("arguments[0].click();", btn_next)
-                        time.sleep(1.0)
-                    except Exception:
-                        break
-            time.sleep(2)
-            try:
-                input_desc = driver.find_element(By.ID, "Descricao")
-                valor = input_desc.get_attribute("value") or ""
-                if escolha.lower() in valor.lower():
-                    logging.info(f"[ACAO] Escolha de descricao: '{escolha}'")
-                else:
-                    logging.warning(
-                        f"[ACAO] Escolha de descricao nao encontrada: '{escolha}' (valor: '{valor}')"
-                    )
-            except Exception:
+                except Exception:
+                    logging.warning("[ACAO] Nao foi possivel verificar Descricao apos JS.")
+            else:
                 logging.warning(
-                    "[ACAO] Nao foi possivel verificar se a descricao foi selecionada."
+                    f"[ACAO] Nao foi possivel encontrar data-val-id para '{escolha}'. "
+                    f"Tentando abrir lookup como fallback..."
                 )
+                try:
+                    btn_lookup = WebDriverWait(driver, 5).until(
+                        EC.element_to_be_clickable((By.XPATH, xpath_lookup_btn))
+                    )
+                    btn_lookup.click()
+                    time.sleep(2.5)
+                    dropdown = WebDriverWait(driver, 5).until(
+                        EC.presence_of_element_located((By.XPATH, xpath_dropdown))
+                    )
+                    driver.execute_script(
+                        "arguments[0].querySelector('.pagination-first a, .paginator-first a').click();",
+                        dropdown,
+                    )
+                    time.sleep(0.5)
+                    clicou = False
+                    for pagina in range(6):
+                        rows = dropdown.find_elements(
+                            By.XPATH, ".//div[@class='lookup-wrapper']//tr[@data-val-id]"
+                        )
+                        for row in rows:
+                            try:
+                                td = row.find_element(
+                                    By.XPATH, ".//td[@data-val-field='Value']"
+                                )
+                                texto = td.text.strip()
+                                if escolha.lower() in texto.lower() or texto.lower() in escolha.lower():
+                                    driver.execute_script(
+                                        "arguments[0].scrollIntoView({block:'center'});", row
+                                    )
+                                    time.sleep(0.3)
+                                    try:
+                                        row.click()
+                                    except Exception:
+                                        driver.execute_script("arguments[0].click();", row)
+                                    logging.info(f"[ACAO] Descricao (fallback) selecionada: '{texto}'")
+                                    clicou = True
+                                    break
+                            except Exception:
+                                continue
+                        if clicou:
+                            break
+                        try:
+                            btn_next = dropdown.find_element(
+                                By.XPATH, ".//a[contains(@class, 'paginator-next')]"
+                            )
+                            if not btn_next.is_displayed():
+                                break
+                            driver.execute_script("arguments[0].click();", btn_next)
+                            time.sleep(1.0)
+                        except Exception:
+                            break
+                    if not clicou:
+                        logging.warning("[ACAO] Fallback de lookup tambem nao encontrou a descricao.")
+                except Exception:
+                    logging.warning("[ACAO] Fallback de lookup tambem falhou.")
         else:
             logging.info("[ACAO] Nao foi possivel classificar a descricao.")
 
@@ -607,6 +748,7 @@ def clicar_link_processo(driver, dados: dict = None, adapta_info: dict = None) -
             logging.info("[ACAO] ETAPA 1: Abrindo lookup do Tipo e extraindo opcoes...")
             time.sleep(1.5)
 
+            # Abre a lookuptree clicando no botao .lookup-show (nao .lookup-button!)
             driver.execute_script("""
                 var tt = document.getElementById('TipoText');
                 var ti = document.getElementById('TipoId');
@@ -614,64 +756,151 @@ def clicar_link_processo(driver, dados: dict = None, adapta_info: dict = None) -
                 if (ti) { ti.value = ''; }
                 var container = document.getElementById('lookup_tipo');
                 if (container) {
-                    var btn = container.querySelector('.lookup-button');
-                    if (btn) btn.click();
+                    // lookup-show abre a árvore de opções (lookup-filter é só busca)
+                    var btnShow = container.querySelector('.lookup-show');
+                    if (btnShow) {
+                        btnShow.click();
+                        return 'CLICOU_LOOKUP_SHOW';
+                    }
+                    // fallback: tenta o segundo .lookup-button
+                    var btns = container.querySelectorAll('.lookup-button');
+                    if (btns.length > 1) {
+                        btns[1].click();
+                        return 'CLICOU_SEGUNDO_BTN';
+                    }
+                    if (btns.length > 0) {
+                        btns[0].click();
+                        return 'CLICOU_PRIMEIRO_BTN';
+                    }
                 }
+                return 'NENHUM_BTN';
             """)
-            logging.info("[ACAO] Lookup do Tipo aberto.")
-            time.sleep(2.5)
+            logging.info("[ACAO] Lookup tree do Tipo aberto (lookup-show).")
+            # Aguarda o AJAX carregar a árvore
+            time.sleep(2.0)
 
-            dropdown_tipo = None
-            for sel in [
-                "div[class*='lookup-wrapper']:not([style*='display: none'])",
-                "div.lookup-tree-container",
-            ]:
-                try:
-                    dropdown_tipo = WebDriverWait(driver, 3).until(
-                        EC.presence_of_element_located((By.CSS_SELECTOR, sel))
-                    )
-                    if dropdown_tipo.is_displayed():
-                        break
-                except Exception:
-                    continue
+            opcoes_tipo = []
+            opcoes_tipo_map = {}  # Value -> Id (para setar depois)
+            try:
+                # Estratégia 1: Buscar dados diretamente via XHR no contentUrl da lookuptree
+                logging.info("[ACAO] Buscando dados da árvore via XHR no contentUrl...")
+                html_arvore = driver.execute_script("""
+                    try {
+                        var xhr = new XMLHttpRequest();
+                        xhr.open('GET', '/config/TipoAndamentoCompromissoTarefa/LookupTreeTiposCompromisso', false);
+                        xhr.send();
+                        return xhr.responseText;
+                    } catch(e) {
+                        return 'XHR_ERR:' + e.message;
+                    }
+                """)
+                if html_arvore and not html_arvore.startswith("XHR_ERR:"):
+                    logging.info(f"[ACAO] XHR retornou {len(html_arvore)} chars.")
 
-            if not dropdown_tipo:
-                logging.warning("[ACAO] Popup do Tipo nao encontrado. Pulando.")
-            else:
-                texto_popup = dropdown_tipo.text or ""
-                logging.info(f"[ACAO] Texto do popup: {len(texto_popup)} chars")
-                linhas = [l.strip() for l in texto_popup.split("\n") if l.strip()]
-
-                opcoes_tipo = [l for l in linhas if len(l) > 3]
-                logging.info(f"[ACAO] {len(opcoes_tipo)} opcoes extraidas do texto.")
-
-                # 4. IA Classification
-                escolha_tipo = "N/A"
-                if dados and opcoes_tipo:
-                    escolha_tipo = obter_classificacao_tipo_ia(
-                        dados, opcoes_tipo, adapta_info, escolha
-                    )
-                logging.info(f"[ACAO] IA escolheu Tipo: '{escolha_tipo}'")
-
-                if escolha_tipo and escolha_tipo != "N/A":
-                    driver.execute_script(f"""
-                        var tt = document.getElementById('TipoText');
-                        if (tt) {{
-                            tt.value = '{escolha_tipo}';
-                            tt.dispatchEvent(new Event('input', {{bubbles:true}}));
-                            tt.dispatchEvent(new Event('change', {{bubbles:true}}));
-                        }}
-                    """)
-                    logging.info(f"[ACAO] TipoText setado para: '{escolha_tipo}'")
-                    time.sleep(1)
+                    # O XHR retorna JSON, nao HTML! Parse como JSON
+                    import json
+                    try:
+                        data = json.loads(html_arvore)
+                        rows = data.get("Rows", [])
+                        opcoes_tipo = []
+                        opcoes_tipo_map = {}  # Value -> Id (para setar depois)
+                        for row in rows:
+                            value = (row.get("Value") or "").strip()
+                            rid = row.get("Id") or ""
+                            if value and value not in opcoes_tipo:
+                                opcoes_tipo.append(value)
+                                opcoes_tipo_map[value] = rid
+                        logging.info(
+                            f"[ACAO] JSON parseado: {len(opcoes_tipo)} opcoes de Tipo. "
+                            f"Amostra: {opcoes_tipo[:10]}"
+                        )
+                    except json.JSONDecodeError as je:
+                        logging.warning(f"[ACAO] JSON invalido no XHR: {je}")
                 else:
-                    driver.execute_script("""
-                        var tt = document.getElementById('TipoText');
-                        if (tt && !tt.value) { tt.value = 'Diversos'; tt.dispatchEvent(new Event('input', {bubbles:true})); }
-                    """)
-                    logging.info("[ACAO] Tipo nao classificado. Restaurado 'Diversos'.")
+                    logging.warning(f"[ACAO] XHR falhou ou retornou vazio: {str(html_arvore)[:200]}")
+            except Exception as e:
+                logging.warning(f"[ACAO] Erro na estratégia XHR: {e}")
 
-            # 6. Confirmar
+            # Estratégia 2: fallback — extrair via JS do DOM (se algo apareceu)
+            if not opcoes_tipo:
+                try:
+                    opcoes_js = driver.execute_script("""
+                        var resultados = [];
+                        var containers = document.querySelectorAll(
+                            '.lookup-tree-container, .k-popup, .k-animation-container, ' +
+                            '[data-role="treeview"], div[class*="tree"], ' +
+                            '.modal:not(.modal-mask), .modal-content, .modal-body'
+                        );
+                        if (containers.length === 0) { containers = [document.body]; }
+                        containers.forEach(function(container) {
+                            if (container !== document.body && container.offsetParent === null) return;
+                            var elementos = container.querySelectorAll('span, li, .k-in, .k-item, a.k-link, [data-uid], div[role="treeitem"]');
+                            elementos.forEach(function(el) {
+                                if (el.offsetParent === null) return;
+                                var txt = (el.innerText || el.textContent || '').trim();
+                                if (txt && txt.length > 3 && txt.length < 150 && !txt.includes('\\n') && resultados.indexOf(txt) === -1) {
+                                    resultados.push(txt);
+                                }
+                            });
+                        });
+                        return resultados;
+                    """)
+                    if opcoes_js:
+                        opcoes_tipo = [t for t in opcoes_js if len(t) > 3]
+                except Exception as e2:
+                    logging.warning(f"[ACAO] Erro na estrategia DOM: {e2}")
+
+            logging.info(
+                f"[ACAO] {len(opcoes_tipo)} opcoes de Tipo extraidas."
+            )
+
+            # ── IA Classification ──
+            escolha_tipo = "N/A"
+            if dados and opcoes_tipo:
+                escolha_tipo = obter_classificacao_tipo_ia(
+                    dados, opcoes_tipo, adapta_info, escolha
+                )
+            logging.info(f"[ACAO] IA escolheu Tipo: '{escolha_tipo}'")
+
+            if escolha_tipo and escolha_tipo != "N/A":
+                # Setar via JS usando o ID do JSON (evita reabrir popup)
+                tipo_id = opcoes_tipo_map.get(escolha_tipo, "")
+                if not tipo_id:
+                    for texto, tid in opcoes_tipo_map.items():
+                        if escolha_tipo.lower() in texto.lower() or texto.lower() in escolha_tipo.lower():
+                            tipo_id = tid
+                            escolha_tipo = texto
+                            break
+
+                texto_escapado = escolha_tipo.replace("'", "\\'")
+                driver.execute_script(f"""
+                    var tt = document.getElementById('TipoText');
+                    var ti = document.getElementById('TipoId');
+                    if (tt) {{
+                        tt.value = '{texto_escapado}';
+                        tt.dispatchEvent(new Event('input', {{bubbles:true}}));
+                        tt.dispatchEvent(new Event('change', {{bubbles:true}}));
+                    }}
+                    if (ti) {{
+                        ti.value = '{tipo_id}';
+                        ti.dispatchEvent(new Event('change', {{bubbles:true}}));
+                    }}
+                """)
+                logging.info(
+                    f"[ACAO] Tipo setado via JS: texto='{escolha_tipo}' id='{tipo_id}'"
+                )
+                time.sleep(1)
+            else:
+                driver.execute_script("""
+                    var tt = document.getElementById('TipoText');
+                    if (tt && !tt.value) {
+                        tt.value = 'Diversos';
+                        tt.dispatchEvent(new Event('input', {bubbles:true}));
+                    }
+                """)
+                logging.info("[ACAO] Tipo nao classificado. Restaurado 'Diversos'.")
+
+            # ── Confirmar Tipo ──
             time.sleep(2)
             try:
                 input_tipo = driver.find_element(By.ID, "TipoText")
@@ -682,8 +911,75 @@ def clicar_link_processo(driver, dados: dict = None, adapta_info: dict = None) -
                     logging.warning("[ACAO] Campo Tipo continua vazio.")
             except Exception as e:
                 logging.warning(f"[ACAO] Erro ao confirmar Tipo: {e}")
+
+            # ── Preencher DtInicial (Início previsto/efetivo) ──
+        data_inicial = None
+        # 1) Fonte preferencial: data_agendamento vinda do use case
+        if dados and dados.get("data_agendamento"):
+            data_inicial = dados["data_agendamento"]
+            logging.info(
+                f"[ACAO] Data de agendamento recebida do use case: '{data_inicial}'"
+            )
+        # 2) Fallback: extrair do texto da IA
+        elif dados and dados.get("resumo_ia"):
+            data_inicial = extrair_data_agendamento(dados["resumo_ia"])
+            if data_inicial:
+                logging.info(
+                    f"[ACAO] Data extraida da resposta da IA: '{data_inicial}'"
+                )
+
+        if data_inicial:
+            # Converter date -> dd/mm/aaaa se necessário
+            if hasattr(data_inicial, "strftime"):
+                data_str = data_inicial.strftime("%d/%m/%Y")
+            else:
+                data_str = str(data_inicial)
+            time.sleep(1)
+            if not preencher_data_inicial(driver, data_str):
+                logging.warning("[ACAO] Falha ao preencher DtInicial.")
         else:
-            logging.info("[ACAO] Pulando Tipo - descricao nao classificada.")
+            logging.info(
+                "[ACAO] Pulando DtInicial - nenhuma data disponivel."
+            )
+
+        logging.info("[ACAO] Clicando em 'Salvar e Fechar'...")
+        time.sleep(1)
+        try:
+            btn_salvar = WebDriverWait(driver, 10).until(
+                EC.element_to_be_clickable(
+                    (By.XPATH, "//button[@name='ButtonSave' and contains(normalize-space(.), 'Salvar')]")
+                )
+            )
+            driver.execute_script(
+                "arguments[0].scrollIntoView({block:'center'});", btn_salvar
+            )
+            time.sleep(0.3)
+            try:
+                btn_salvar.click()
+            except Exception:
+                driver.execute_script("arguments[0].click();", btn_salvar)
+            logging.info("[ACAO] Botao 'Salvar e fechar' clicado.")
+            time.sleep(3)
+        except Exception as e:
+            logging.warning(f"[ACAO] Erro ao clicar em 'Salvar e Fechar': {e}")
+            try:
+                driver.execute_script("""
+                                var btns = document.querySelectorAll('button[type="submit"]');
+                                for (var i = 0; i < btns.length; i++) {
+                                    var txt = (btns[i].innerText || '').trim();
+                                    if (txt.indexOf('Salvar') >= 0) {
+                                        btns[i].scrollIntoView({block:'center'});
+                                        btns[i].click();
+                                        return txt;
+                                    }
+                                }
+                                return null;
+                            """)
+                logging.info("[ACAO] 'Salvar e fechar' clicado via JS fallback.")
+                time.sleep(3)
+            except Exception:
+                logging.warning("[ACAO] Fallback 'Salvar e fechar' tambem falhou.")
+
 
     except Exception as e:
         logging.error(f"[ACAO] Falha ao navegar na aba do processo: {e}")

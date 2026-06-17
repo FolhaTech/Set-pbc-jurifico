@@ -1,17 +1,14 @@
-import time
 import logging
+import time
 from datetime import datetime
 from typing import Optional
 
-from core.entities import (
-    Publicacao,
-    Analise,
-    ConteudoParsed,
-    FlagsPublicacao,
-    Advogado,
-)
-from ports.navegador_web import NavegadorWeb
-from ports.cliente_ia import ClienteIA
+from selenium.webdriver.common.by import By
+from selenium.webdriver.support import expected_conditions as EC
+from selenium.webdriver.support.ui import WebDriverWait
+
+from adapters.infra.logging_utils import diagnosticar_pagina
+from adapters.web.acoes import marcar_sem_providencia, clicar_link_processo
 from adapters.web.driver_setup import configurar_driver
 from adapters.web.login import login_thomson_reuters
 from adapters.web.navegacao import (
@@ -22,13 +19,16 @@ from adapters.web.navegacao import (
     aplicar_filtros,
 )
 from adapters.web.scraper import raspar_detalhes_publicacao
-from adapters.web.acoes import marcar_sem_providencia, clicar_link_processo
-from adapters.infra.logging_utils import diagnosticar_pagina
 from config.settings import RESPONSAVEL_ALVO
-
-from selenium.webdriver.support.ui import WebDriverWait
-from selenium.webdriver.support import expected_conditions as EC
-from selenium.webdriver.common.by import By
+from core.entities import (
+    Publicacao,
+    Analise,
+    ConteudoParsed,
+    FlagsPublicacao,
+    Advogado,
+)
+from ports.cliente_ia import ClienteIA
+from ports.navegador_web import NavegadorWeb
 
 logger = logging.getLogger(__name__)
 
@@ -37,7 +37,7 @@ class SeleniumNavegador(NavegadorWeb):
     """Implementacao de NavegadorWeb usando Selenium + modulos existentes."""
 
     def __init__(
-        self, usar_undetected: bool = True, cliente_ia: ClienteIA | None = None
+            self, usar_undetected: bool = True, cliente_ia: ClienteIA | None = None
     ):
         self._driver = None
         self._usar_undetected = usar_undetected
@@ -99,9 +99,15 @@ class SeleniumNavegador(NavegadorWeb):
         return marcar_sem_providencia(self.driver)
 
     def abrir_e_criar_compromisso(
-        self, publicacao: Publicacao, analise: Analise
+            self, publicacao: Publicacao, analise: Analise
     ) -> bool:
         dados_dict = self._publicacao_para_dict(publicacao)
+        if analise is not None:
+            if analise.analise_completa:
+                dados_dict["resumo_ia"] = analise.analise_completa
+            if analise.agendamento and analise.agendamento.data_agendamento:
+                dados_dict["data_agendamento"] = analise.agendamento.data_agendamento
+
         adapta_info = None
         if self._cliente_ia is not None:
             from adapters.ia.adapta_one_cliente import AdaptaOneCliente

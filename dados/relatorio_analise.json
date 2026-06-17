@@ -1,7 +1,7 @@
 {
-  "timestamp": "2026-06-12T09:54:34.918970",
-  "total": 3,
-  "com_analise": 3,
+  "timestamp": "2026-06-17T16:38:29.610107",
+  "total": 7,
+  "com_analise": 7,
   "sem_analise": 0,
   "nosso_tratado": [],
   "pendentes_acao": [
@@ -11,9 +11,19 @@
       "lado_processo": "nosso_cliente",
       "status_acao": "Aguardando acao manual do responsavel",
       "urgencia": "MEDIA",
-      "resumo": "**RESUMO DE AGENDAMENTO:**\n- **Decisão:** AGENDAR\n- **Data do Agendamento:** 14/06/2026",
+      "resumo": "**RESUMO DE AGENDAMENTO:**\n- **Decisão:** AGENDAR\n- **Data do Agendamento:** 03/07/2026",
       "acao_recomendada": "Revisar análise processual.",
-      "data_raspagem": "2026-06-12T09:52:10.874783"
+      "data_raspagem": "2026-06-17T11:49:59.714307"
+    },
+    {
+      "processo": "0014360-63.2025.8.26.0001",
+      "decisao_agente": "Tratar",
+      "lado_processo": "nosso_cliente",
+      "status_acao": "Aguardando acao manual do responsavel",
+      "urgencia": "MEDIA",
+      "resumo": "## Análise da Publicação\n\n**O que foi determinado:** O juiz determinou que a parte autora (nosso cliente A.S.P.) se manifeste sobre o mandado de citação/cumprimento devolvido negativo (certidão de fl. 37), no **prazo legal**.\n\n---\n\n### 1. Prazo\n**15 dias** — é o prazo legal para manifestação da part...",
+      "acao_recomendada": "Revisar análise processual.",
+      "data_raspagem": "2026-06-17T16:36:56.064420"
     }
   ],
   "operadora_sem_providencia": [
@@ -36,6 +46,46 @@
       "resumo": "**RESUMO DE AGENDAMENTO:**\n- **Decisão:** SEM PROVIDÊNCIA\n- **Data do Agendamento:** 27/06/2026 (Sugestão de data para verificar o resultado do julgamento)",
       "acao_recomendada": "Sem providências necessárias.",
       "data_raspagem": "2026-06-11T17:23:13.475815"
+    },
+    {
+      "processo": "1013517-37.2023.8.26.0006",
+      "decisao_agente": "Sem providencia",
+      "lado_processo": "operadora",
+      "status_acao": "Marcado como Sem providencia",
+      "urgencia": "MEDIA",
+      "resumo": "**RESUMO DE AGENDAMENTO:**\n- **Decisão:** SEM PROVIDÊNCIA\n- **Data do Agendamento:** 01/07/2026",
+      "acao_recomendada": "Sem providências necessárias.",
+      "data_raspagem": "2026-06-15T12:13:06.007060"
+    },
+    {
+      "processo": "1001795-35.2025.8.26.0006",
+      "decisao_agente": "Sem providencia",
+      "lado_processo": "operadora",
+      "status_acao": "Marcado como Sem providencia",
+      "urgencia": "MEDIA",
+      "resumo": "**RESUMO DE AGENDAMENTO:**\n- **Decisão:** SEM PROVIDÊNCIA\n- **Data do Agendamento:** 01/07/2026",
+      "acao_recomendada": "Sem providências necessárias.",
+      "data_raspagem": "2026-06-15T12:15:32.140628"
+    },
+    {
+      "processo": "0100236-81.2025.8.19.0000",
+      "decisao_agente": "Sem providencia",
+      "lado_processo": "operadora",
+      "status_acao": "Marcado como Sem providencia",
+      "urgencia": "MEDIA",
+      "resumo": "**RESUMO DE AGENDAMENTO:**\n\n*   **Decisão:** SEM PROVIDÊNCIA. A publicação informa a pauta de julgamento de Agravo de Instrumento interposto pela parte contrária (UNIMED). Nenhuma ação ativa é necessária, apenas o acompanhamento do resultado.\n*   **Data do Agendamento:** 26/06/2026",
+      "acao_recomendada": "Sem providências necessárias.",
+      "data_raspagem": "2026-06-17T10:04:24.507465"
+    },
+    {
+      "processo": "0014360-63.2025.8.26.0001",
+      "decisao_agente": "Sem providencia",
+      "lado_processo": "operadora",
+      "status_acao": "Marcado como Sem providencia",
+      "urgencia": "MEDIA",
+      "resumo": "**RESUMO DE AGENDAMENTO:**\n- **Decisão:** SEM PROVIDÊNCIA\n- **Data do Agendamento:** 03/07/2026",
+      "acao_recomendada": "Sem providências necessárias.",
+      "data_raspagem": "2026-06-17T11:45:51.061250"
     }
   ],
   "urgencias_nossas": []

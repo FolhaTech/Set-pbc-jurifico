@@ -38,7 +38,9 @@ class ProcessarLista:
         if self._verificacao_planilha:
             polo_a = pub.conteudo_parsed.campos.get("polo_a", "")
             resultado = self._verificacao_planilha(
-                polo_a=polo_a, numero_processo=pub.processo_numero
+                polo_a=polo_a,
+                numero_processo=pub.processo_numero,
+                conteudo_publicacao=pub.conteudo or "",
             )
             return resultado.get("e_nosso", True)
         return True

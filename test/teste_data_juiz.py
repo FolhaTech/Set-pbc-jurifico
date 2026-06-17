@@ -1,4 +1,5 @@
 import sys
+
 sys.path.insert(0, ".")
 
 from datetime import date
@@ -18,7 +19,7 @@ print(f"Dias restantes        : {resultado.dias_restantes}")
 print()
 
 expected = date(2026, 7, 10)
-assert resultado.data_agendamento == expected, (
-    f"ERRO! Esperado {expected}, obtido {resultado.data_agendamento}"
-)
+assert (
+        resultado.data_agendamento == expected
+), f"ERRO! Esperado {expected}, obtido {resultado.data_agendamento}"
 print("✅ TESTE PASSOU: Agendamento = 10/07/2026 (15/07 - 5 dias)")

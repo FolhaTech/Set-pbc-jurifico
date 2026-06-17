@@ -11,6 +11,7 @@ import logging
 import os
 import subprocess
 import time
+import re
 
 from adapters.ia.adapta_one_cliente import AdaptaOneCliente
 from adapters.persistencia.json_repositorio import JsonRepositorio
@@ -21,7 +22,7 @@ from core.use_cases.analisar_publicacao import AnalisarPublicacao
 from core.use_cases.processar_lista import ProcessarLista
 
 logger = logging.getLogger(__name__)
-
+_PADRAO_ABREVIACAO = re.compile(r"^[A-Z](\.[A-Z])+\.?$")
 
 # ─── Token Adapta ONE ──────────────────────────────────────────────────────
 
@@ -94,11 +95,45 @@ def renovar_token() -> str:
 # ─── Verificador de cliente (planilha) ──────────────────────────────────────
 
 
-def verificar_cliente_planilha(polo_a: str, numero_processo: str = None) -> dict:
+def verificar_cliente_planilha(
+    polo_a: str, numero_processo: str = None, conteudo_publicacao: str = None
+) -> dict:
     """
     Verifica se polo_a é nosso cliente na planilha Excel.
     Retorna: {'e_nosso': bool, 'cliente_planilha': str|None, 'contrario': str|None}
     """
+    parte_ativa = [
+        "autora",
+        "autor",
+        "requerente" "reclamante",
+        "exequente",
+        "embargante",
+        "impetrante",
+        "alimentando",
+        "alimentanda",
+        "apelante",
+        "agravante",
+        "recorrente",
+    ]
+
+    if _PADRAO_ABREVIACAO.match(polo_a.strip()) and conteudo_publicacao:
+        conteudo_lower = conteudo_publicacao.lower()
+        tem_manifeste_autor = (
+            "manifeste-se a parte autora" in conteudo_lower.lower()
+            or any(
+                f"manifeste-se a parte {term}" in conteudo_lower for term in parte_ativa
+            )
+        )
+        logger.info(
+            f"[DI] polo_a='{polo_a}' é abreviação — "
+            f"contém 'Manifeste-se a parte autora'? {tem_manifeste_autor}"
+        )
+
+        if tem_manifeste_autor:
+            return {"e_nosso": True, "cliente_planilha": None, "contrario": None}
+        else:
+            return {"e_nosso": False, "cliente_planilha": None, "contrario": None}
+
     try:
         import openpyxl
     except ImportError:
@@ -149,9 +184,9 @@ def verificar_cliente_planilha(polo_a: str, numero_processo: str = None) -> dict
                 }
 
             if (
-                    cliente_norm
-                    and polo_a_norm
-                    and (polo_a_norm in cliente_norm or cliente_norm in polo_a_norm)
+                cliente_norm
+                and polo_a_norm
+                and (polo_a_norm in cliente_norm or cliente_norm in polo_a_norm)
             ):
                 return {
                     "e_nosso": True,
@@ -230,12 +265,15 @@ class Container:
             cliente_ia=self.cliente_ia,
         )
 
-    def criar_processar_lista(self, max_publicacoes: int = 50) -> ProcessarLista:
+    def criar_processar_lista(
+        self, max_publicacoes: int = 50, verificacao_planilha=None
+    ) -> ProcessarLista:
         return ProcessarLista(
             navegador=self.navegador,
             repositorio=self.repositorio,
             cliente_ia=self.cliente_ia,
             max_publicacoes=max_publicacoes,
+            verificacao_planilha=verificacao_planilha,
         )
 
     def fechar(self) -> None:

@@ -88,6 +88,7 @@ def main() -> None:
                 resultado = verificar_cliente_planilha(
                     polo_a=pub.conteudo_parsed.campos.get("polo_a", ""),
                     numero_processo=pub.processo_numero,
+                    conteudo_publicacao=pub.conteudo or "",
                 )
                 caso.executar(pub, e_nosso=resultado["e_nosso"])
                 container.repositorio.salvar(pub)
