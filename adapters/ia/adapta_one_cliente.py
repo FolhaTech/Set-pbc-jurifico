@@ -1,8 +1,9 @@
-import re
 import json
-import uuid
 import logging
-from datetime import datetime, timedelta
+import re
+import time
+import uuid
+from datetime import datetime
 from typing import Optional
 
 import requests
@@ -11,7 +12,6 @@ from core.entities import Publicacao, Analise, Agendamento
 from core.enums import LadoProcesso, Urgencia, StatusAcao
 from core.services.calcular_prazo import CalcularPrazo
 from ports.cliente_ia import ClienteIA
-from config.settings import ARQUIVO_JSON
 
 logger = logging.getLogger(__name__)
 
@@ -147,7 +147,7 @@ class AdaptaOneCliente(ClienteIA):
                 urgencia=(
                     Urgencia.ALTA
                     if agendamento_fallback.status_temporal.value
-                    in ("URGENTE", "ATRASADO")
+                       in ("URGENTE", "ATRASADO")
                     else Urgencia.MEDIA
                 ),
                 prazo_dias=prazo_dias,
@@ -205,52 +205,6 @@ class AdaptaOneCliente(ClienteIA):
 
     # ── Métodos internos do Adapta ONE ───────────────────────────
 
-    def _enviar_mensagem(self, text: str) -> str:
-        payload = {
-            "chatId": self._chat_id or str(uuid.uuid4()),
-            "modelAi": "ONE",
-            "messages": [{"role": "user", "parts": [{"type": "text", "text": text}]}],
-            "trigger": "user",
-            "messageId": str(uuid.uuid4()),
-            "isTemporaryChat": False,
-        }
-
-        logger.info(f"[ADAPTA_CLIENT] === PAYLOAD ENVIADO ===\n{json.dumps(payload, indent=2, ensure_ascii=False)}")
-
-        if self._expert_id:
-            payload["expertId"] = self._expert_id
-
-        r = requests.post(
-            f"{self.BASE_URL}/api/chat/stream/v1",
-            headers=self.headers,
-            json=payload,
-            stream=True,
-        )
-        r.raise_for_status()
-
-        full_text = []
-        for line in r.iter_lines():
-            if line:
-                decoded = line.decode("utf-8").strip()
-                if decoded.startswith("data:"):
-                    data_json = decoded[5:].strip()
-                    if data_json == "[DONE]":
-                        break
-                    try:
-                        chunk = json.loads(data_json)
-                        if chunk.get("type") == "reasoning-delta":
-                            continue
-                        delta = chunk.get("delta", "") or chunk.get("text", "")
-
-                        if delta:
-                            full_text.append(delta)
-                    except json.JSONDecodeError:
-                        pass
-
-        resposta_final = "".join(full_text).strip()
-        logger.info(f"[ADAPTA_CLIENT] Resposta do Expert: '{resposta_final[:200]}...'")
-        return resposta_final
-
     def _localizar_expert(self, nome: str = "o processualista v2") -> Optional[str]:
         for fn in [self._list_personal_experts, self._list_all_experts]:
             try:
@@ -271,28 +225,45 @@ class AdaptaOneCliente(ClienteIA):
         return None
 
     def _obter_chat_id(self) -> str:
-        try:
-            r = requests.get(f"{self.BASE_URL}/api/chat/v1", headers=self.headers)
-            r.raise_for_status()
-            data = r.json()
-            chats = data.get("data", []) if isinstance(data, dict) else data
-            if chats:
-                chat_id = chats[0].get("id", str(uuid.uuid4()))
-                logger.info(f"[ADAPTA_CLIENT] Chat ID obtido: {chat_id}")
-                return chat_id
-        except Exception:
-            pass
+        for tentativa in range(2):
+            try:
+                r = requests.get(f"{self.BASE_URL}/api/chat/v1", headers=self.headers, timeout=15)
+                if r.status_code == 401 and tentativa == 0:
+                    logger.warning("[ADAPTA_CLIENT] 401 em _obter_chat_id. Renovando token...")
+                    if self._renovar_token():
+                        continue
+                    break
+                r.raise_for_status()
+                data = r.json()
+                chats = data.get("data", []) if isinstance(data, dict) else data
+                if chats:
+                    chat_id = chats[0].get("id", str(uuid.uuid4()))
+                    logger.info(f"[ADAPTA_CLIENT] Chat ID obtido: {chat_id}")
+                    return chat_id
+            except Exception:
+                break
         fallback = str(uuid.uuid4())
         logger.warning(f"[ADAPTA_CLIENT] Fallback Chat ID: {fallback}")
         return fallback
 
-    def _list_all_experts(self, limit: int = 6000):
-        r = requests.get(
-            f"{self.BASE_URL}/api/expert/getAll/v1?limit={limit}",
-            headers=self.headers,
-        )
-        r.raise_for_status()
-        return r.json()
+    def _list_all_experts(self, limit: int = 100):
+        for tentativa in range(2):
+            try:
+                r = requests.get(
+                    f"{self.BASE_URL}/api/expert/getAll/v1?limit={limit}",
+                    headers=self.headers,
+                    timeout=15,
+                )
+                if r.status_code == 401 and tentativa == 0:
+                    logger.warning("[ADAPTA_CLIENT] 401 em _list_all_experts. Renovando token...")
+                    if self._renovar_token():
+                        continue
+                    break
+                r.raise_for_status()
+                return r.json()
+            except Exception:
+                break
+        return {"data": []}
 
     def _list_personal_experts(self):
         import base64
@@ -306,9 +277,27 @@ class AdaptaOneCliente(ClienteIA):
         url = f"{self.BASE_URL}/api/expert/getAllByUserId/v1"
         if user_id:
             url += f"?userId={user_id}"
-        r = requests.get(url, headers=self.headers)
-        r.raise_for_status()
-        return r.json()
+        for tentativa in range(2):
+            try:
+                r = requests.get(url, headers=self.headers, timeout=15)
+                if r.status_code == 401 and tentativa == 0:
+                    logger.warning("[ADAPTA_CLIENT] 401 em _list_personal_experts. Renovando token...")
+                    if self._renovar_token():
+                        # Rebuild URL in case user_id changed
+                        parts_new = self.clerk_token.split(".")
+                        if len(parts_new) == 3:
+                            p_b64 = parts_new[1] + "=" * (-len(parts_new[1]) % 4)
+                            p_new = json.loads(base64.urlsafe_b64decode(p_b64).decode("utf-8"))
+                            uid_new = p_new.get("sub")
+                            if uid_new:
+                                url = f"{self.BASE_URL}/api/expert/getAllByUserId/v1?userId={uid_new}"
+                        continue
+                    break
+                r.raise_for_status()
+                return r.json()
+            except Exception:
+                break
+        return {"data": []}
 
     def enviar_mensagem(self, text: str) -> str:
         if not self._expert_id:
@@ -316,3 +305,89 @@ class AdaptaOneCliente(ClienteIA):
         if not self._chat_id:
             self._chat_id = self._obter_chat_id()
         return self._enviar_mensagem(text)
+
+    def _enviar_mensagem(self, text: str, _retry: bool = False) -> str:
+        payload = {
+            "chatId": self._chat_id or str(uuid.uuid4()),
+            "modelAi": "ONE",
+            "messages": [{"role": "user", "parts": [{"type": "text", "text": text}]}],
+            "trigger": "user",
+            "messageId": str(uuid.uuid4()),
+            "isTemporaryChat": False,
+        }
+        logger.info(f"[ADAPTA_CLIENT] === PAYLOAD ENVIADO ===\n{json.dumps(payload, indent=2, ensure_ascii=False)}")
+
+        if self._expert_id:
+            payload["expertId"] = self._expert_id
+
+        r = requests.post(
+            f"{self.BASE_URL}/api/chat/stream/v1",
+            headers=self.headers,
+            json=payload,
+            stream=True,
+            timeout=(20, 120)
+        )
+
+        if r.status_code == 401 and not _retry:
+            logger.warning("[ADAPTA_CLIENT] Token expirado (401). Renovando...")
+            novo_token = self._renovar_token()
+            if novo_token:
+                logger.info("[ADAPTA_CLIENT] Token renovado. Reynoldsando requisição...")
+                return self._enviar_mensagem(text, _retry=True)
+            logger.error("[ADAPTA_CLIENT] Falha ao renovar token. Retornando vazio.")
+            return ""
+
+        r.raise_for_status()
+
+        full_text = []
+        CHUNK_TIMEOUT = 90
+
+        last_chunk_time = time.time()
+        for line in r.iter_lines(chunk_size=512):
+            now = time.time()
+            if line:
+                last_chunk_time = now
+                decoded = line.decode("utf-8").strip()
+                if decoded.startswith("data:"):
+                    data_json = decoded[5:].strip()
+                    if data_json == "[DONE]":
+                        break
+                    try:
+                        chunk = json.loads(data_json)
+                        if chunk.get("type") == "reasoning-delta":
+                            continue
+                        delta = chunk.get("delta", "") or chunk.get("text", "")
+                        if delta:
+                            full_text.append(delta)
+                    except json.JSONDecodeError:
+                        pass
+            elif now - last_chunk_time > CHUNK_TIMEOUT:
+                logger.warning(f"[ADAPTA_CLIENT] Timeout de chunk recebido. Finalizando...")
+                break
+        resposta_final = "".join(full_text).strip()
+        logger.info(f"[ADAPTA_CLIENT] Resposta do Expert: '{resposta_final[:200]}...'")
+        return resposta_final
+
+    def _renovar_token(self) -> str | None:
+        try:
+            from config.di import obter_token_adapta, verificar_token_expirado, renovar_token
+            token = obter_token_adapta()
+            if token and not verificar_token_expirado(token):
+                self.clerk_token = token
+                self.headers["Authorization"] = f"Bearer {token}"
+                logger.info("[ADAPTA_CLIENT] ✅ Token renovado via extract_token.js")
+                return token
+
+            logger.info("[ADAPTA_CLIENT] Token extraído expirado. Abrindo desktop app...")
+            token = renovar_token()
+            if token:
+                self.clerk_token = token
+                self.headers["Authorization"] = f"Bearer {token}"
+                logger.info("[ADAPTA_CLIENT] ✅ Token renovado via desktop app")
+                return token
+
+            logger.error("[ADAPTA_CLIENT] ❌ Não foi possível renovar o token.")
+            return None
+        except Exception as e:
+            logger.error(f"[ADAPTA_CLIENT] Erro ao renovar token: {e}")
+            return None

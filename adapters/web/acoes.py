@@ -1,4 +1,4 @@
-﻿import logging
+import logging
 import re
 import time
 
@@ -630,6 +630,40 @@ def clicar_link_processo(driver, dados: dict = None, adapta_info: dict = None) -
                 f"[ACAO] Coletadas {len(opcoes)} opcoes de descricao para classificacao."
             )
 
+        opcoes_tipo_pre = []
+        opcoes_tipo_map_pre = {}
+        try:
+            logging.info("[ACAO] Pre-buscando opcoes de Tipo via XHR...")
+            html_tipo = driver.execute_script("""
+                        try {
+                            var xhr = new XMLHttpRequest();
+                            xhr.open('GET', '/config/TipoAndamentoCompromissoTarefa/LookupTreeTiposCompromisso', false);
+                            xhr.send();
+                            return xhr.responseText;
+                        } catch(e) {
+                            return 'XHR_ERR:' + e.message;
+                        }
+                    """)
+            if html_tipo and not html_tipo.startswith("XHR_ERR:"):
+                import json as _json
+                try:
+                    data_tipo = _json.loads(html_tipo)
+                    rows_tipo = data_tipo.get("Rows", [])
+                    for row in rows_tipo:
+                        value = (row.get("Value") or "").strip()
+                        rid = row.get("Id") or ""
+                        if value and value not in opcoes_tipo_pre:
+                            opcoes_tipo_pre.append(value)
+                            opcoes_tipo_map_pre[value] = rid
+                    logging.info(
+                        f"[ACAO] Pre-busca Tipo: {len(opcoes_tipo_pre)} opcoes via XHR. "
+                        f"Amostra: {opcoes_tipo_pre[:10]}"
+                    )
+                except Exception as e:
+                    logging.warning(f"[ACAO] Erro ao parsear XHR de Tipo na pre-busca: {e}")
+        except Exception as e:
+            logging.warning(f"[ACAO] Pre-busca de Tipo via XHR falhou: {e}")
+
         escolha = "N/A"
         if dados and opcoes:
             escolha = obter_classificacao_ia(dados, opcoes, adapta_info)
@@ -745,110 +779,75 @@ def clicar_link_processo(driver, dados: dict = None, adapta_info: dict = None) -
             logging.info("[ACAO] Nao foi possivel classificar a descricao.")
 
         if escolha and escolha != "N/A":
-            logging.info("[ACAO] ETAPA 1: Abrindo lookup do Tipo e extraindo opcoes...")
-            time.sleep(1.5)
-
-            # Abre a lookuptree clicando no botao .lookup-show (nao .lookup-button!)
-            driver.execute_script("""
-                var tt = document.getElementById('TipoText');
-                var ti = document.getElementById('TipoId');
-                if (tt) { tt.value = ''; tt.dispatchEvent(new Event('input',{bubbles:true})); }
-                if (ti) { ti.value = ''; }
-                var container = document.getElementById('lookup_tipo');
-                if (container) {
-                    // lookup-show abre a árvore de opções (lookup-filter é só busca)
-                    var btnShow = container.querySelector('.lookup-show');
-                    if (btnShow) {
-                        btnShow.click();
-                        return 'CLICOU_LOOKUP_SHOW';
-                    }
-                    // fallback: tenta o segundo .lookup-button
-                    var btns = container.querySelectorAll('.lookup-button');
-                    if (btns.length > 1) {
-                        btns[1].click();
-                        return 'CLICOU_SEGUNDO_BTN';
-                    }
-                    if (btns.length > 0) {
-                        btns[0].click();
-                        return 'CLICOU_PRIMEIRO_BTN';
-                    }
-                }
-                return 'NENHUM_BTN';
-            """)
-            logging.info("[ACAO] Lookup tree do Tipo aberto (lookup-show).")
-            # Aguarda o AJAX carregar a árvore
-            time.sleep(2.0)
-
             opcoes_tipo = []
             opcoes_tipo_map = {}  # Value -> Id (para setar depois)
-            try:
-                # Estratégia 1: Buscar dados diretamente via XHR no contentUrl da lookuptree
-                logging.info("[ACAO] Buscando dados da árvore via XHR no contentUrl...")
-                html_arvore = driver.execute_script("""
-                    try {
-                        var xhr = new XMLHttpRequest();
-                        xhr.open('GET', '/config/TipoAndamentoCompromissoTarefa/LookupTreeTiposCompromisso', false);
-                        xhr.send();
-                        return xhr.responseText;
-                    } catch(e) {
-                        return 'XHR_ERR:' + e.message;
-                    }
-                """)
-                if html_arvore and not html_arvore.startswith("XHR_ERR:"):
-                    logging.info(f"[ACAO] XHR retornou {len(html_arvore)} chars.")
 
-                    # O XHR retorna JSON, nao HTML! Parse como JSON
-                    import json
-                    try:
-                        data = json.loads(html_arvore)
-                        rows = data.get("Rows", [])
-                        opcoes_tipo = []
-                        opcoes_tipo_map = {}  # Value -> Id (para setar depois)
-                        for row in rows:
-                            value = (row.get("Value") or "").strip()
-                            rid = row.get("Id") or ""
-                            if value and value not in opcoes_tipo:
-                                opcoes_tipo.append(value)
-                                opcoes_tipo_map[value] = rid
-                        logging.info(
-                            f"[ACAO] JSON parseado: {len(opcoes_tipo)} opcoes de Tipo. "
-                            f"Amostra: {opcoes_tipo[:10]}"
-                        )
-                    except json.JSONDecodeError as je:
-                        logging.warning(f"[ACAO] JSON invalido no XHR: {je}")
-                else:
-                    logging.warning(f"[ACAO] XHR falhou ou retornou vazio: {str(html_arvore)[:200]}")
-            except Exception as e:
-                logging.warning(f"[ACAO] Erro na estratégia XHR: {e}")
-
-            # Estratégia 2: fallback — extrair via JS do DOM (se algo apareceu)
-            if not opcoes_tipo:
+            # ESTRATÉGIA 1: Usar dados já pré-buscados via XHR
+            if opcoes_tipo_pre:
+                opcoes_tipo = opcoes_tipo_pre
+                opcoes_tipo_map = opcoes_tipo_map_pre
+                logging.info(f"[ACAO] Usando {len(opcoes_tipo)} opcoes de Tipo da pre-busca.")
+            else:
+                # Fallback: buscar via XHR agora
                 try:
-                    opcoes_js = driver.execute_script("""
-                        var resultados = [];
-                        var containers = document.querySelectorAll(
-                            '.lookup-tree-container, .k-popup, .k-animation-container, ' +
-                            '[data-role="treeview"], div[class*="tree"], ' +
-                            '.modal:not(.modal-mask), .modal-content, .modal-body'
-                        );
-                        if (containers.length === 0) { containers = [document.body]; }
-                        containers.forEach(function(container) {
-                            if (container !== document.body && container.offsetParent === null) return;
-                            var elementos = container.querySelectorAll('span, li, .k-in, .k-item, a.k-link, [data-uid], div[role="treeitem"]');
-                            elementos.forEach(function(el) {
-                                if (el.offsetParent === null) return;
-                                var txt = (el.innerText || el.textContent || '').trim();
-                                if (txt && txt.length > 3 && txt.length < 150 && !txt.includes('\\n') && resultados.indexOf(txt) === -1) {
-                                    resultados.push(txt);
-                                }
-                            });
-                        });
-                        return resultados;
-                    """)
-                    if opcoes_js:
-                        opcoes_tipo = [t for t in opcoes_js if len(t) > 3]
-                except Exception as e2:
-                    logging.warning(f"[ACAO] Erro na estrategia DOM: {e2}")
+                    logging.info("[ACAO] Buscando dados da arvore via XHR (fallback)...")
+                    html_arvore = driver.execute_script("""
+                                    try {
+                                        var xhr = new XMLHttpRequest();
+                                        xhr.open('GET', '/config/TipoAndamentoCompromissoTarefa/LookupTreeTiposCompromisso', false);
+                                        xhr.send();
+                                        return xhr.responseText;
+                                    } catch(e) {
+                                        return 'XHR_ERR:' + e.message;
+                                    }
+                                """)
+                    if html_arvore and not html_arvore.startswith("XHR_ERR:"):
+                        import json
+                        try:
+                            data = json.loads(html_arvore)
+                            rows = data.get("Rows", [])
+                            for row in rows:
+                                value = (row.get("Value") or "").strip()
+                                rid = row.get("Id") or ""
+                                if value and value not in opcoes_tipo:
+                                    opcoes_tipo.append(value)
+                                    opcoes_tipo_map[value] = rid
+                            logging.info(
+                                f"[ACAO] Fallback XHR: {len(opcoes_tipo)} opcoes de Tipo."
+                            )
+                        except json.JSONDecodeError as je:
+                            logging.warning(f"[ACAO] JSON invalido no XHR: {je}")
+                except Exception as e:
+                    logging.warning(f"[ACAO] Erro na estrategia XHR: {e}")
+
+                # ESTRATÉGIA 2: fallback DOM (se XHR também falhou)
+                if not opcoes_tipo:
+                    try:
+                        opcoes_js = driver.execute_script("""
+                                        var resultados = [];
+                                        var containers = document.querySelectorAll(
+                                            '.lookup-tree-container, .k-popup, .k-animation-container, ' +
+                                            '[data-role="treeview"], div[class*="tree"], ' +
+                                            '.modal:not(.modal-mask), .modal-content, .modal-body'
+                                        );
+                                        if (containers.length === 0) { containers = [document.body]; }
+                                        containers.forEach(function(container) {
+                                            if (container !== document.body && container.offsetParent === null) return;
+                                            var elementos = container.querySelectorAll('span, li, .k-in, .k-item, a.k-link, [data-uid], div[role="treeitem"]');
+                                            elementos.forEach(function(el) {
+                                                if (el.offsetParent === null) return;
+                                                var txt = (el.innerText || el.textContent || '').trim();
+                                                if (txt && txt.length > 3 && txt.length < 150 && !txt.includes('\\n') && resultados.indexOf(txt) === -1) {
+                                                    resultados.push(txt);
+                                                }
+                                            });
+                                        });
+                                        return resultados;
+                                    """)
+                        if opcoes_js:
+                            opcoes_tipo = [t for t in opcoes_js if len(t) > 3]
+                    except Exception as e2:
+                        logging.warning(f"[ACAO] Erro na estrategia DOM: {e2}")
 
             logging.info(
                 f"[ACAO] {len(opcoes_tipo)} opcoes de Tipo extraidas."

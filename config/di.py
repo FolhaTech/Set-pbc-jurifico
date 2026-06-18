@@ -9,9 +9,9 @@ Injeção de dependências — monta todos os objetos e retorna os casos de uso 
 import json
 import logging
 import os
+import re
 import subprocess
 import time
-import re
 
 from adapters.ia.adapta_one_cliente import AdaptaOneCliente
 from adapters.persistencia.json_repositorio import JsonRepositorio
@@ -23,6 +23,7 @@ from core.use_cases.processar_lista import ProcessarLista
 
 logger = logging.getLogger(__name__)
 _PADRAO_ABREVIACAO = re.compile(r"^[A-Z](\.[A-Z])+\.?$")
+
 
 # ─── Token Adapta ONE ──────────────────────────────────────────────────────
 
@@ -71,18 +72,40 @@ def verificar_token_expirado(token: str) -> bool:
 
 def renovar_token() -> str:
     """Tenta renovar o token abrindo o Adapta ONE Desktop."""
-    exe_path = r"C:\Program Files\adapta-one-agent-desktop\adapta-one-agent-desktop.exe"
-    if not os.path.exists(exe_path):
-        logger.warning("[DI] Executável do Adapta ONE não encontrado.")
+    import glob as _glob
+    caminhos_possiveis = [
+        r"C:\Program Files\adapta-one-agent-desktop\adapta-one-agent-desktop.exe",
+        r"C:\Program Files (x86)\adapta-one-agent-desktop\adapta-one-agent-desktop.exe",
+        os.path.join(os.environ.get("LOCALAPPDATA", ""), "Programs", "Programs", "adapta-one-agent-desktop",
+                     "adapta-one-agent-desktop.exe"),
+    ]
+
+    exe_path = ""
+    for caminho in caminhos_possiveis:
+        if os.path.exists(caminho):
+            exe_path = caminho
+            break
+
+    if not exe_path:
+        appdata_local = os.environ.get("LOCALAPPDATA", "")
+        if appdata_local:
+            resultados = _glob.glob(os.path.join(appdata_local, "Programs", "adapta-one-agent-desktop", "*.exe"))
+            if resultados:
+                exe_path = resultados[0]
+
+    if not exe_path:
+        logger.warning(f"[DI] Executável do Adapta ONE não encontrado. Caminhos verificados: {caminhos_possiveis}")
         return ""
+
     try:
+        logger.info(f"[DI] Iniciando Adapta ONE Desktop: {exe_path}")
         si = subprocess.STARTUPINFO()
         si.dwFlags |= subprocess.STARTF_USESHOWWINDOW
         si.wShowWindow = 7
         subprocess.Popen([exe_path], startupinfo=si)
         start = time.time()
-        while time.time() - start < 12:
-            time.sleep(1)
+        while time.time() - start < 20:
+            time.sleep(2)
             token = obter_token_adapta()
             if token and not verificar_token_expirado(token):
                 logger.info("[DI] ✅ Token renovado com sucesso.")
@@ -96,7 +119,7 @@ def renovar_token() -> str:
 
 
 def verificar_cliente_planilha(
-    polo_a: str, numero_processo: str = None, conteudo_publicacao: str = None
+        polo_a: str, numero_processo: str = None, conteudo_publicacao: str = None
 ) -> dict:
     """
     Verifica se polo_a é nosso cliente na planilha Excel.
@@ -119,10 +142,10 @@ def verificar_cliente_planilha(
     if _PADRAO_ABREVIACAO.match(polo_a.strip()) and conteudo_publicacao:
         conteudo_lower = conteudo_publicacao.lower()
         tem_manifeste_autor = (
-            "manifeste-se a parte autora" in conteudo_lower.lower()
-            or any(
-                f"manifeste-se a parte {term}" in conteudo_lower for term in parte_ativa
-            )
+                "manifeste-se a parte autora" in conteudo_lower.lower()
+                or any(
+            f"manifeste-se a parte {term}" in conteudo_lower for term in parte_ativa
+        )
         )
         logger.info(
             f"[DI] polo_a='{polo_a}' é abreviação — "
@@ -184,9 +207,9 @@ def verificar_cliente_planilha(
                 }
 
             if (
-                cliente_norm
-                and polo_a_norm
-                and (polo_a_norm in cliente_norm or cliente_norm in polo_a_norm)
+                    cliente_norm
+                    and polo_a_norm
+                    and (polo_a_norm in cliente_norm or cliente_norm in polo_a_norm)
             ):
                 return {
                     "e_nosso": True,
@@ -266,7 +289,7 @@ class Container:
         )
 
     def criar_processar_lista(
-        self, max_publicacoes: int = 50, verificacao_planilha=None
+            self, max_publicacoes: int = 50, verificacao_planilha=None
     ) -> ProcessarLista:
         return ProcessarLista(
             navegador=self.navegador,

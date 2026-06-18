@@ -372,12 +372,12 @@
   },
   {
     "url_pagina": "https://firm.legalone.com.br/publications",
-    "data_raspagem": "2026-06-17T16:36:56.064420",
+    "data_raspagem": "2026-06-18T00:35:09.876783",
     "processo_numero": "0014360-63.2025.8.26.0001",
     "processo_href": null,
     "tipo": "Publicação",
     "badge": "Recorte",
-    "data_disponibilizacao": "N/A",
+    "data_disponibilizacao": "2026-06-17",
     "fonte_tribunal": "Texto capturado de Diário da Justiça do Estado de São Paulo",
     "fonte_diario": "Fonte: Diário Eletrônico de Justiça Nacional",
     "conteudo": "Processo 0014360-63.2025.8.26.0001 (processo principal 1044667-17.2024.8.26.0001) - Cumprimento de Sentença de Obrigação de Prestar Alimentos - Fixação - A.S.P. - M.H.S. - Manifeste-se a parte autora acerca do mandado devolvido negativo, conforme certidão de fl 37, no prazo legal. - ADV: RAPHAELLA ARANTES ARIMURA (OAB 361873/SP), RAPHAELLA ARANTES ARIMURA (OAB 361873/SP), EDIVANIA MESQUITA DA SILVA (OAB 240477/SP)\nNúmero único: 00143606320258260001\nPartes:\nPolo A: A.S.P.\nPolo P: M.H.S.\nAdvogados:\nRAPHAELLA ARANTES ARIMURA - OAB: 361873-361873\nEDIVANIA MESQUITA DA SILVA - OAB: 240477-240477",
@@ -406,17 +406,17 @@
     },
     "lado_processo": "nosso_cliente",
     "sem_providencia": false,
-    "analise_processualista": "## Análise da Publicação\n\n**O que foi determinado:** O juiz determinou que a parte autora (nosso cliente A.S.P.) se manifeste sobre o mandado de citação/cumprimento devolvido negativo (certidão de fl. 37), no **prazo legal**.\n\n---\n\n### 1. Prazo\n**15 dias** — é o prazo legal para manifestação da parte, conforme art. 218, § 2º, CPC (\"prazo legal\" = 15 dias quando a lei ou o juiz não fixar prazo diverso).\n\n### 2. Data Limite e Agendamento\n- **Disponibilização (referência):** 17/06/2026 (data atual)\n- **Data Limite:** 17/06/2026 + 15 dias = **02/07/2026**\n- **Data de Agendamento (Limite - 5 dias):** **27/06/2026**\n\n### 3. Ação da Equipe\nNosso cliente (A.S.P.) precisa **indicar novo endereço do executado (M.H.S.) ou requerer medidas alternativas** para localização/citação (ex.: pesquisa por sistema Infojud, Renajud, Serasajud, ou requerer citação por edital, conforme art. 256, CPC). O mandado foi devolvido negativo — o oficial não encontrou o devedor de alimentos.\n\n---\n\n## 📋 Resumo de Agendamento\n\n| Campo | Valor |\n|---|---|\n| **Decisão** | AGENDAR |\n| **Prazo** | 15 dias (art. 218, § 2º, CPC) |\n| **Data Limite** | 02/07/2026 |\n| **Data do Agendamento** | **27/06/2026** |\n| **Ação** | Manifestar sobre mandado negativo — indicar novo endereço ou requerer medidas de localização |\n\n---\n\n> ⚠️ Documento gerado como rascunho; deve ser revisado por advogado(a) licenciado(a) antes do uso.\n\n**Próximas ações:** Quer que eu:\n- `/gerar` minuta de petição com requerimentos alternativos (Infojud, Renajud, edital)?\n- `/auditar` alguma peça já elaborada para este caso?\n- `/pesquisar` jurisprudência sobre citação em execução de alimentos?",
+    "analise_processualista": "## Análise da Publicação\n\n**Prazo determinado pelo juiz:** \"no prazo legal\" → **15 dias úteis** (art. 219 CPC)\n\n**Data de Publicação considerada:** 18/06/2026 (dia útil seguinte à disponibilização)\n\n**Data Limite (15 dias úteis):** 08/07/2026\n\n**Agendamento interno (Data Limite - 5 dias úteis):** 03/07/2026\n\n<table><thead><tr><th>Campo</th><th>Informação</th></tr></thead><tbody><tr><td>Processo</td><td>0014360-63.2025.8.26.0001</td></tr><tr><td>Cliente</td><td>A.S.P. (Polo Ativo ✅)</td></tr><tr><td>Parte Contrária</td><td>M.H.S.</td></tr><tr><td>Determinação Judicial</td><td>Manifestar sobre mandado devolvido negativo (fl. 37)</td></tr><tr><td>Prazo</td><td>15 dias úteis (\"no prazo legal\")</td></tr><tr><td>Data Limite</td><td>08/07/2026</td></tr></tbody></table>\n\n---\n\n**RESUMO DE AGENDAMENTO:**\n- **Decisão:** AGENDAR\n- **Data do Agendamento:** 03/07/2026\n\n**Ação necessária:** O mandado de citação/intimação contra M.H.S. retornou negativo (oficial não encontrou o devedor no endereço). Nossa equipe deve informar aos autos se há novo endereço do executado ou, caso negativo, requerer medidas alternativas (pesquisa de endereço via INFOJUD/RENAJUD, citação por edital, etc.).",
     "agendamento": {
       "data_limite": "08/07/2026",
       "data_agendamento": "03/07/2026",
       "status_temporal": "OK",
-      "dias_restantes": 16
+      "dias_restantes": 15
     },
     "data_agendada": "03/07/2026",
     "decisao_agendamento": "AGENDAR",
     "analise_gemini": {
-      "resumo": "## Análise da Publicação\n\n**O que foi determinado:** O juiz determinou que a parte autora (nosso cliente A.S.P.) se manifeste sobre o mandado de citação/cumprimento devolvido negativo (certidão de fl. 37), no **prazo legal**.\n\n---\n\n### 1. Prazo\n**15 dias** — é o prazo legal para manifestação da part...",
+      "resumo": "## Análise da Publicação\n\n**Prazo determinado pelo juiz:** \"no prazo legal\" → **15 dias úteis** (art. 219 CPC)\n\n**Data de Publicação considerada:** 18/06/2026 (dia útil seguinte à disponibilização)\n\n**Data Limite (15 dias úteis):** 08/07/2026\n\n**Agendamento interno (Data Limite - 5 dias úteis):** 03...",
       "lado_processo": "nosso_cliente",
       "urgencia": "MEDIA",
       "prazo_recomendado_dias_uteis": 15,

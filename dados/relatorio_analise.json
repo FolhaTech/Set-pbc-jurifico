@@ -1,5 +1,5 @@
 {
-  "timestamp": "2026-06-17T16:38:29.610107",
+  "timestamp": "2026-06-18T00:37:17.105416",
   "total": 7,
   "com_analise": 7,
   "sem_analise": 0,
@@ -21,9 +21,9 @@
       "lado_processo": "nosso_cliente",
       "status_acao": "Aguardando acao manual do responsavel",
       "urgencia": "MEDIA",
-      "resumo": "## Análise da Publicação\n\n**O que foi determinado:** O juiz determinou que a parte autora (nosso cliente A.S.P.) se manifeste sobre o mandado de citação/cumprimento devolvido negativo (certidão de fl. 37), no **prazo legal**.\n\n---\n\n### 1. Prazo\n**15 dias** — é o prazo legal para manifestação da part...",
+      "resumo": "## Análise da Publicação\n\n**Prazo determinado pelo juiz:** \"no prazo legal\" → **15 dias úteis** (art. 219 CPC)\n\n**Data de Publicação considerada:** 18/06/2026 (dia útil seguinte à disponibilização)\n\n**Data Limite (15 dias úteis):** 08/07/2026\n\n**Agendamento interno (Data Limite - 5 dias úteis):** 03...",
       "acao_recomendada": "Revisar análise processual.",
-      "data_raspagem": "2026-06-17T16:36:56.064420"
+      "data_raspagem": "2026-06-18T00:35:09.876783"
     }
   ],
   "operadora_sem_providencia": [
