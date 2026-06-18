@@ -79,7 +79,7 @@ concretas. O **Core** não conhece os adapters — ele depende apenas das ports.
 ## Pré-requisitos
 
 | Requisito          | Versão mínima    | Observação                                                                               |
-| ------------------ | ---------------- | ---------------------------------------------------------------------------------------- |
+|--------------------|------------------|------------------------------------------------------------------------------------------|
 | Python             | 3.12+            | `requires-python = ">=3.12"` no `pyproject.toml`                                         |
 | Node.js            | 18+              | Necessário para `extract_token.js` (extração de token JWT)                               |
 | Google Chrome      | Qualquer estável | O `undetected-chromedriver` gerencia o chromedriver automaticamente                      |
@@ -104,7 +104,7 @@ pip install -r Set-pbc-jurifico\requirements.txt
 **Dependências principais:**
 
 | Pacote                    | Finalidade                                                                        |
-| ------------------------- | --------------------------------------------------------------------------------- |
+|---------------------------|-----------------------------------------------------------------------------------|
 | `selenium`                | Automação do navegador Chrome                                                     |
 | `undetected-chromedriver` | Chrome driver que evita detecção de bots                                          |
 | `groq`                    | Cliente API para IA (disponível mas não utilizado diretamente no fluxo principal) |
@@ -127,7 +127,7 @@ Copy-Item .env.example .env
 Preencha as variáveis:
 
 | Variável           | Obrigatória | Descrição                                                                                   |
-| ------------------ | ----------- | ------------------------------------------------------------------------------------------- |
+|--------------------|-------------|---------------------------------------------------------------------------------------------|
 | `THOMSON_USERNAME` | Sim         | Usuário de login do Legal One (Thomson Reuters)                                             |
 | `THOMSON_PASSWORD` | Sim         | Senha do login do Legal One                                                                 |
 | `RESPONSAVEL_ALVO` | Não         | Nome do responsável alvo nos filtros                                                        |
@@ -193,22 +193,23 @@ A verificação normaliza textos (remove acentos, lowercase) para comparação f
 
 ## Uso
 
-### Modo Padrão — Primeira Publicação
+### Modo Padrão — Todas as Publicações (com skip)
 
 ```powershell
 cd Set-pbc-jurifico
 python run_v2.py
 ```
 
-Processa apenas a primeira publicação da fila. Ideal para testes e validação.
+Processa **todas** as publicações disponíveis (até `MAX_PUBLICACOES`). Publicações já analisadas e agendadas em
+execuções anteriores são automaticamente **puladas** (skip), evitando reprocessamento e chamadas desnecessárias à IA.
 
-### Todas as Publicações
+### Apenas a Primeira Publicação
 
 ```powershell
-python run_v2.py --todas
+python run_v2.py --primeira
 ```
 
-Processa todas as publicações disponíveis (até o limite de `MAX_PUBLICACOES`).
+Processa somente a primeira publicação da fila, sem verificação de skip. Ideal para testes pontuais.
 
 ### Modo Offline (sem IA)
 
@@ -217,28 +218,35 @@ python run_v2.py --sem-adapta
 ```
 
 Desativa a integração com Adapta ONE. A análise é feita localmente com dados da planilha. Útil quando o token do Adapta
-ONE não está disponível.
+ONE não está disponível. O skip continua ativo.
 
 ### Combinações
 
 ```powershell
 # Todas as publicações em modo offline
-python run_v2.py --todas --sem-adapta
+python run_v2.py --sem-adapta
 
 # Limitar a 10 publicações
-python run_v2.py --todas --max 10
+python run_v2.py --max 10
 
 # Primeira publicação com IA
-python run_v2.py
+python run_v2.py --primeira
+
+# Primeira publicação offline
+python run_v2.py --primeira --sem-adapta
 ```
 
 ### Resumo dos Flags
 
-| Flag           | Efeito                                                | Padrão                  |
-| -------------- | ----------------------------------------------------- | ----------------------- |
-| `--todas`      | Processa todas as publicações (não apenas a primeira) | `False`                 |
-| `--sem-adapta` | Desativa envio ao Adapta ONE (modo offline)           | `False` (IA ativa)      |
-| `--max N`      | Limite máximo de publicações a processar              | `50` (de `settings.py`) |
+| Flag           | Efeito                                           | Padrão                  |
+|----------------|--------------------------------------------------|-------------------------|
+| `--primeira`   | Processa apenas a primeira publicação (sem skip) | `False`                 |
+| `--sem-adapta` | Desativa envio ao Adapta ONE (modo offline)      | `False` (IA ativa)      |
+| `--max N`      | Limite máximo de publicações a processar         | `50` (de `settings.py`) |
+
+> **Novo:** Por padrão, o script processa **todas** as publicações e pula automaticamente
+> processos que já foram analisados e agendados em execuções anteriores.
+> Use `--primeira` para o comportamento antigo (processar só a primeira).
 
 ---
 
@@ -281,16 +289,19 @@ run_v2.py main()
     │
     └── 6. Processamento (single ou batch)
             │
-            ├── [Single] nav.raspar_proxima_publicacao()
+            ├── [Single: --primeira] nav.raspar_proxima_publicacao()
             │   → verificar_cliente_planilha()
             │   → AnalisarPublicacao.executar(pub, e_nosso)
             │
-            └── [Batch] ProcessarLista.executar_todas()
+            └── [Batch: padrão] ProcessarLista.executar_todas()
                 Para cada publicação:
-                    1. nav.raspar_proxima_publicacao()
-                    2. verificar_cliente_planilha(polo_a, processo)
-                    3. AnalisarPublicacao.executar(pub, e_nosso)
-                    4. repositorio.salvar(pub)
+                    1. nav.raspar_proxima_publicacao()  ← usa índice (avança)
+                    2. _ja_foi_processado(pub)?         ← consulta JSON
+                       ├── SIM → fechar painel + pular ⏭️
+                       └── NÃO → continuar ⬇️
+                    3. verificar_cliente_planilha(polo_a, processo)
+                    4. AnalisarPublicacao.executar(pub, e_nosso)
+                    5. repositorio.salvar(pub)           ← persiste para skip futuro
 ```
 
 ### Detalhe: Análise de Publicação
@@ -517,21 +528,21 @@ O Container monta todas as dependências sob demanda (lazy loading):
 - **`marcar_sem_providencia(driver)`**: Abre dropdown de status → seleciona "Sem providências" (múltiplos XPaths de
   fallback)
 - **`clicar_link_processo(driver, dados, adapta_info)`**: Fluxo complexo que:
-  1. Clica no link do processo (abre nova aba)
-  2. Navega para aba "Compromissos e tarefas"
-  3. Clica em "Adicionar" → "Novo compromisso"
-  4. Abre lookup de descrição
-  5. Coleta todas as opções disponíveis (até 5 páginas)
-  6. Envia opções para IA classificar a melhor descrição
-  7. Seleciona a opção classificada no lookup (dropdown mantido aberto durante IA)
-  8. **Campo Tipo**:
-     - Limpa `TipoText` e `TipoId`
-     - Clica no botão `.lookup-button` do lookuptree
-     - Aguarda popup e extrai texto bruto das opções
-     - IA classifica o tipo com base na Descrição + Publicação
-     - Seta valor via JavaScript nos campos (com eventos `input`/`change`)
-     - Se IA não classificar, restaura "Diversos"
-  9. Retorna para a aba original
+    1. Clica no link do processo (abre nova aba)
+    2. Navega para aba "Compromissos e tarefas"
+    3. Clica em "Adicionar" → "Novo compromisso"
+    4. Abre lookup de descrição
+    5. Coleta todas as opções disponíveis (até 5 páginas)
+    6. Envia opções para IA classificar a melhor descrição
+    7. Seleciona a opção classificada no lookup (dropdown mantido aberto durante IA)
+    8. **Campo Tipo**:
+        - Limpa `TipoText` e `TipoId`
+        - Clica no botão `.lookup-button` do lookuptree
+        - Aguarda popup e extrai texto bruto das opções
+        - IA classifica o tipo com base na Descrição + Publicação
+        - Seta valor via JavaScript nos campos (com eventos `input`/`change`)
+        - Se IA não classificar, restaura "Diversos"
+    9. Retorna para a aba original
 
 ### `adapters/ia/adapta_one_cliente.py` — Cliente Adapta ONE
 
@@ -563,10 +574,10 @@ dias
 - Salva/atualiza publicações em `dados/publicacoes.json` (upsert por `processo_numero`)
 - Se `processo_numero` é "N/A", gera um ID temporário via MD5 do conteúdo
 - **`gerar_relatorio()`**: Gera `dados/relatorio_analise.json` com:
-  - `nosso_tratado`: publicações do escritório já marcadas como "Tratado"
-  - `pendentes_acao`: publicações do escritório ainda pendentes
-  - `operadora_sem_providencia`: publicações da operadora marcadas
-  - `urgencias_nossas`: processos com status URGENTE ou ATRASADO
+    - `nosso_tratado`: publicações do escritório já marcadas como "Tratado"
+    - `pendentes_acao`: publicações do escritório ainda pendentes
+    - `operadora_sem_providencia`: publicações da operadora marcadas
+    - `urgencias_nossas`: processos com status URGENTE ou ATRASADO
 
 ---
 
@@ -611,6 +622,40 @@ Diretórios de diagnóstico auto-gerados:
 - **`erro_fatal_v2.png`**: Screenshot ao erro fatal
 - **`debug_dropdown_nao_encontrado.png`**: Falha ao abrir dropdown de status
 - **`<contexto>.html`**: HTML completo da página no momento do diagnóstico
+
+---
+
+## Sistema de Skip Inteligente
+
+A partir da v2, o script mantém um registro de todos os processos já analisados no arquivo
+`dados/publicacoes.json`. Em execuções subsequentes, antes de processar cada publicação, o sistema:
+
+1. Consulta o JSON pelo **número do processo** (normalizado — ignora `.` e `-`)
+2. Se o processo **já foi analisado e possui agendamento** → **pula** (evita IA desnecessária)
+3. Se o processo foi marcado como **"Sem providência"** ou **"Tratado"** → **pula**
+4. Caso contrário → processa normalmente, analisa com IA, agenda e **salva no JSON**
+
+**Benefícios:**
+
+- Execuções subsequentes são muito mais rápidas (pula o que já foi feito)
+- Economiza chamadas à IA (Adapta ONE) para processos já tratados
+- Seguro: o índice avança corretamente e o script termina sozinho ao fim da lista
+- O `publicacoes.json` serve como base de conhecimento cumulativa
+
+**Exemplo de log com skip:**
+
+```
+[SCRAPER] Processo: 0014360-63.2025.8.26.0001 | Conteudo: 596 chars
+[PULAR] Processo 0014360-63.2025.8.26.0001 já analisado e agendado em 2026-07-03. Status: Pendente revisao manual
+[NAV] Painel de detalhes fechado.
+[SCRAPER] Processo: 1013756-37.2025.8.26.0405 | Conteudo: 1985 chars
+[PULAR] Processo 1013756-37.2025.8.26.0405 já analisado e agendado em 2026-07-03. Status: Pendente revisao manual
+...
+[NAV] Fim da lista de publicações.
+```
+
+> **Para forçar o reprocessamento** de um processo, remova sua entrada do arquivo
+> `dados/publicacoes.json` antes de executar o script.
 
 ---
 

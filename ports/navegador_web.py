@@ -21,5 +21,8 @@ class NavegadorWeb(ABC):
 
     @abstractmethod
     def abrir_e_criar_compromisso(
-        self, publicacao: Publicacao, analise: Analise
+            self, publicacao: Publicacao, analise: Analise
     ) -> bool: ...
+
+    @abstractmethod
+    def fechar_painel_detalhes(self) -> None: ...

@@ -33,9 +33,9 @@ def main() -> None:
         description="Automacao de Publicacoes Juridicas — Legal One (v2 Hexagonal)"
     )
     parser.add_argument(
-        "--todas",
+        "--primeira",
         action="store_true",
-        help="Processa todas as publicacoes (padrao: apenas a primeira)",
+        help="Processa apenas a primeira publicacao (padrao: todas com skip)",
     )
     parser.add_argument(
         "--sem-adapta",
@@ -55,7 +55,7 @@ def main() -> None:
 
     print("\n" + "=" * 70)
     print("  AUTOMACAO DE PUBLICACOES JURIDICAS — Legal One (v2 Hexagonal)")
-    print(f"  Modo: {'Todas as publicacoes' if args.todas else 'Primeira publicacao'}")
+    print(f"  Modo: {'Primeira publicacao' if args.primeira else 'Todas as publicacoes (com skip)'}")
     print(f"  IA:   {'Adapta ONE ativa' if usar_ia else 'Offline (apenas planilha)'}")
     print("=" * 70 + "\n")
 
@@ -74,14 +74,7 @@ def main() -> None:
         nav.aplicar_filtros()
 
         logging.info("[V2] 4/4 — Processando publicacoes...")
-        if args.todas:
-            caso = container.criar_processar_lista(
-                max_publicacoes=args.max,
-                verificacao_planilha=verificar_cliente_planilha,
-            )
-            total = caso.executar_todas()
-            logging.info(f"[V2] Concluido — {total} publicacoes processadas.")
-        else:
+        if args.primeira:
             caso = container.criar_analisar_publicacao()
             pub = nav.raspar_proxima_publicacao()
             if pub:
@@ -93,6 +86,13 @@ def main() -> None:
                 caso.executar(pub, e_nosso=resultado["e_nosso"])
                 container.repositorio.salvar(pub)
                 logging.info("[V2] Primeira publicacao processada.")
+        else:
+            caso = container.criar_processar_lista(
+                max_publicacoes=args.max,
+                verificacao_planilha=verificar_cliente_planilha,
+            )
+            total = caso.executar_todas()
+            logging.info(f"[V2] Concluido — {total} publicacoes processadas.")
 
         relatorio = container.repositorio.gerar_relatorio()
         logging.info(

@@ -5,19 +5,19 @@ from core.entities import Publicacao, Analise
 from core.enums import LadoProcesso, Urgencia, StatusAcao
 from core.services.calcular_prazo import CalcularPrazo
 from core.services.classificador_polo import ClassificadorPolo
-from ports.repositorio import Repositorio
 from ports.cliente_ia import ClienteIA
 from ports.navegador_web import NavegadorWeb
+from ports.repositorio import Repositorio
 
 
 class AnalisarPublicacao:
     def __init__(
-        self,
-        repositorio: Repositorio,
-        navegador: NavegadorWeb,
-        calculador_prazo: CalcularPrazo,
-        classificador: ClassificadorPolo,
-        cliente_ia: Optional[ClienteIA] = None,
+            self,
+            repositorio: Repositorio,
+            navegador: NavegadorWeb,
+            calculador_prazo: CalcularPrazo,
+            classificador: ClassificadorPolo,
+            cliente_ia: Optional[ClienteIA] = None,
     ):
         self._repo = repositorio
         self._nav = navegador

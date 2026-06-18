@@ -42,6 +42,7 @@ class SeleniumNavegador(NavegadorWeb):
         self._driver = None
         self._usar_undetected = usar_undetected
         self._cliente_ia = cliente_ia
+        self._indice_atual = 0
 
     @property
     def driver(self):
@@ -61,6 +62,7 @@ class SeleniumNavegador(NavegadorWeb):
         diagnosticar_pagina(self.driver, "pos_publicacoes")
 
     def aplicar_filtros(self) -> None:
+        self._indice_atual = 0
         selecionar_periodo_60_dias(self.driver)
         time.sleep(2)
         abrir_mais_filtros(self.driver)
@@ -77,23 +79,44 @@ class SeleniumNavegador(NavegadorWeb):
                     (By.CSS_SELECTOR, "div[id^='publication-item-']")
                 )
             )
-            if not items:
-                logger.warning("[NAV] Nenhuma publicação encontrada.")
+            if self._indice_atual >= len(items):
+                logger.info("[NAV] Fim da lista de publicações.")
                 return None
 
-            primeiro = items[0]
+            item_atual = items[self._indice_atual]
             self.driver.execute_script(
-                "arguments[0].scrollIntoView({block:'center'});", primeiro
+                "arguments[0].scrollIntoView({block:'center'});", item_atual
             )
-            primeiro.click()
+            item_atual.click()
             time.sleep(3)
 
             dados_dict = raspar_detalhes_publicacao(self.driver)
+            self._indice_atual += 1
             return self._dict_para_publicacao(dados_dict)
-
         except Exception as e:
             logger.error(f"[NAV] Erro ao raspar publicação: {e}")
             return None
+
+    def fechar_painel_detalhes(self) -> None:
+        try:
+            self.driver.execute_script("""
+                   var masks = document.querySelectorAll('.modal-mask, .modal, .k-overlay');
+                   masks.forEach(function(m) {
+                       if (m.offsetParent !== null && m.style.display !== 'none') {
+                           m.click();
+                       }
+                   });
+                   document.body.dispatchEvent(
+                       new KeyboardEvent('keydown', {key: 'Escape', keyCode: 27, bubbles: true})
+                   );
+                   document.body.dispatchEvent(
+                       new KeyboardEvent('keyup', {key: 'Escape', keyCode: 27, bubbles: true})
+                   );
+               """)
+            time.sleep(1.5)
+            logger.info("[NAV] Painel de detalhes fechado.")
+        except Exception as e:
+            logger.warning(f"[NAV] Erro ao fechar painel: {e}")
 
     def marcar_sem_providencia(self) -> bool:
         return marcar_sem_providencia(self.driver)

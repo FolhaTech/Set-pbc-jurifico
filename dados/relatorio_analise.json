@@ -1,7 +1,7 @@
 {
-  "timestamp": "2026-06-18T00:37:17.105416",
-  "total": 7,
-  "com_analise": 7,
+  "timestamp": "2026-06-18T16:05:06.509250",
+  "total": 12,
+  "com_analise": 12,
   "sem_analise": 0,
   "nosso_tratado": [],
   "pendentes_acao": [
@@ -21,9 +21,39 @@
       "lado_processo": "nosso_cliente",
       "status_acao": "Aguardando acao manual do responsavel",
       "urgencia": "MEDIA",
-      "resumo": "## Análise da Publicação\n\n**Prazo determinado pelo juiz:** \"no prazo legal\" → **15 dias úteis** (art. 219 CPC)\n\n**Data de Publicação considerada:** 18/06/2026 (dia útil seguinte à disponibilização)\n\n**Data Limite (15 dias úteis):** 08/07/2026\n\n**Agendamento interno (Data Limite - 5 dias úteis):** 03...",
+      "resumo": "## Análise da Publicação\n\n**Prazo:** O juiz determinou \"no prazo legal\". Para manifestação do exequente sobre mandado devolvido negativo em cumprimento de sentença de alimentos, o prazo legal é de **5 dias úteis**.\n\n**Data Limite para Cumprimento:** **25/06/2026** (considerando publicação em 18/06/2...",
       "acao_recomendada": "Revisar análise processual.",
-      "data_raspagem": "2026-06-18T00:35:09.876783"
+      "data_raspagem": "2026-06-18T13:50:10.036747"
+    },
+    {
+      "processo": "5207800-61.2024.8.13.0024",
+      "decisao_agente": "Tratar",
+      "lado_processo": "nosso_cliente",
+      "status_acao": "Aguardando acao manual do responsavel",
+      "urgencia": "MEDIA",
+      "resumo": "Análise offline baseada na planilha.",
+      "acao_recomendada": "Revisar análise processual.",
+      "data_raspagem": "2026-06-18T15:37:55.522971"
+    },
+    {
+      "processo": "1011549-29.2024.8.26.0008",
+      "decisao_agente": "Tratar",
+      "lado_processo": "nosso_cliente",
+      "status_acao": "Aguardando acao manual do responsavel",
+      "urgencia": "MEDIA",
+      "resumo": "**TABELA DA PUBLICAÇÃO**\n\n<table><thead><tr><th>Campo</th><th>Informação</th></tr></thead><tbody><tr><td>Tipo</td><td>Intimação de Acórdão — Embargos de Declaração</td></tr><tr><td>Nº Único</td><td>1011549-29.2024.8.26.0008</td></tr><tr><td>Cliente (Polo A)</td><td>José Luis Perez Garcia ✅</td></tr>...",
+      "acao_recomendada": "Revisar análise processual.",
+      "data_raspagem": "2026-06-18T16:03:29.056559"
+    },
+    {
+      "processo": "4009338-32.2025.8.26.0008",
+      "decisao_agente": "Tratar",
+      "lado_processo": "nosso_cliente",
+      "status_acao": "Aguardando acao manual do responsavel",
+      "urgencia": "MEDIA",
+      "resumo": "## 📋 Análise da Publicação\n\n| Campo | Detalhe |\n|---|---|\n| **Nº Único** | 4009338-32.2025.8.26.0008 |\n| **Cliente** | RAPHAELLA ARANTES ARIMURA (Polo Ativo) |\n| **Parte Contrária** | FACEBOOK SERVICOS ONLINE DO BRASIL LTDA. |\n| **Tipo de Decisão** | Sentença — Julgamento de Mérito (art. 487, I, CPC...",
+      "acao_recomendada": "Revisar análise processual.",
+      "data_raspagem": "2026-06-18T16:04:35.577908"
     }
   ],
   "operadora_sem_providencia": [
@@ -86,6 +116,26 @@
       "resumo": "**RESUMO DE AGENDAMENTO:**\n- **Decisão:** SEM PROVIDÊNCIA\n- **Data do Agendamento:** 03/07/2026",
       "acao_recomendada": "Sem providências necessárias.",
       "data_raspagem": "2026-06-17T11:45:51.061250"
+    },
+    {
+      "processo": "1044667-17.2024.8.26.0001",
+      "decisao_agente": "Sem providencia",
+      "lado_processo": "operadora",
+      "status_acao": "Marcado como Sem providencia",
+      "urgencia": "MEDIA",
+      "resumo": "Análise offline baseada na planilha.",
+      "acao_recomendada": "Sem providências necessárias.",
+      "data_raspagem": "2026-06-18T15:37:44.667294"
+    },
+    {
+      "processo": "1014639-43.2023.8.26.0020",
+      "decisao_agente": "Sem providencia",
+      "lado_processo": "operadora",
+      "status_acao": "Marcado como Sem providencia",
+      "urgencia": "MEDIA",
+      "resumo": "Análise offline baseada na planilha.",
+      "acao_recomendada": "Sem providências necessárias.",
+      "data_raspagem": "2026-06-18T15:38:07.651029"
     }
   ],
   "urgencias_nossas": []

@@ -372,7 +372,7 @@
   },
   {
     "url_pagina": "https://firm.legalone.com.br/publications",
-    "data_raspagem": "2026-06-18T00:35:09.876783",
+    "data_raspagem": "2026-06-18T13:50:10.036747",
     "processo_numero": "0014360-63.2025.8.26.0001",
     "processo_href": null,
     "tipo": "Publicação",
@@ -406,7 +406,7 @@
     },
     "lado_processo": "nosso_cliente",
     "sem_providencia": false,
-    "analise_processualista": "## Análise da Publicação\n\n**Prazo determinado pelo juiz:** \"no prazo legal\" → **15 dias úteis** (art. 219 CPC)\n\n**Data de Publicação considerada:** 18/06/2026 (dia útil seguinte à disponibilização)\n\n**Data Limite (15 dias úteis):** 08/07/2026\n\n**Agendamento interno (Data Limite - 5 dias úteis):** 03/07/2026\n\n<table><thead><tr><th>Campo</th><th>Informação</th></tr></thead><tbody><tr><td>Processo</td><td>0014360-63.2025.8.26.0001</td></tr><tr><td>Cliente</td><td>A.S.P. (Polo Ativo ✅)</td></tr><tr><td>Parte Contrária</td><td>M.H.S.</td></tr><tr><td>Determinação Judicial</td><td>Manifestar sobre mandado devolvido negativo (fl. 37)</td></tr><tr><td>Prazo</td><td>15 dias úteis (\"no prazo legal\")</td></tr><tr><td>Data Limite</td><td>08/07/2026</td></tr></tbody></table>\n\n---\n\n**RESUMO DE AGENDAMENTO:**\n- **Decisão:** AGENDAR\n- **Data do Agendamento:** 03/07/2026\n\n**Ação necessária:** O mandado de citação/intimação contra M.H.S. retornou negativo (oficial não encontrou o devedor no endereço). Nossa equipe deve informar aos autos se há novo endereço do executado ou, caso negativo, requerer medidas alternativas (pesquisa de endereço via INFOJUD/RENAJUD, citação por edital, etc.).",
+    "analise_processualista": "## Análise da Publicação\n\n**Prazo:** O juiz determinou \"no prazo legal\". Para manifestação do exequente sobre mandado devolvido negativo em cumprimento de sentença de alimentos, o prazo legal é de **5 dias úteis**.\n\n**Data Limite para Cumprimento:** **25/06/2026** (considerando publicação em 18/06/2026 + 5 dias úteis)\n\n**Data de Agendamento Interno:** **19/06/2026** (5 dias antes do prazo final)\n\n> ✅ **Classificação: Nosso Cliente (Polo Ativo)**\n\n---\n\n## Tabela Resumo\n\n| Campo | Valor |\n|---|---|\n| **Nº Único** | 0014360-63.2025.8.26.0001 |\n| **Cliente** | A.S.P. (Polo Ativo) |\n| **Parte Contrária** | M.H.S. |\n| **Tipo de Ação** | Cumprimento de Sentença de Obrigação de Prestar Alimentos |\n| **Determinação do Juiz** | Manifestar-se sobre mandado devolvido negativo (certidão fl. 37) |\n| **Prazo** | 5 dias úteis |\n| **Data Limite** | **25/06/2026** |\n| **Data Agendamento** | **19/06/2026** |\n\n---\n\n## Decisão e Ação Necessária\n\nA ação determinada é: **AGENDAR**\n\nA publicação determina que a parte autora (nosso cliente) se manifeste acerca do mandado de citação/cumprimento devolvido **negativo**, conforme certidão de fl. 37. Isso significa que o oficial de justiça não conseguiu localizar o executado (M.H.S.) para ciência da execução de alimentos.\n\n**Ação que nossa equipe deve tomar:**\n- Verificar nos autos a certidão do oficial de justiça (fl. 37) para identificar o motivo da devolução negativa\n- Fornecer novo endereço/localização do executado M.H.S., se disponível\n- Caso não haja endereço atualizado, solicitar diligências como pesquisa de endereço no INFOSEG, SISBAJUD ou outros meios\n- Protocolar a manifestação dentro do prazo\n\n---\n\n**RESUMO DE AGENDAMENTO:**\n- **Decisão:** AGENDAR\n- **Data do Agendamento:** 19/06/2026",
     "agendamento": {
       "data_limite": "08/07/2026",
       "data_agendamento": "03/07/2026",
@@ -416,7 +416,300 @@
     "data_agendada": "03/07/2026",
     "decisao_agendamento": "AGENDAR",
     "analise_gemini": {
-      "resumo": "## Análise da Publicação\n\n**Prazo determinado pelo juiz:** \"no prazo legal\" → **15 dias úteis** (art. 219 CPC)\n\n**Data de Publicação considerada:** 18/06/2026 (dia útil seguinte à disponibilização)\n\n**Data Limite (15 dias úteis):** 08/07/2026\n\n**Agendamento interno (Data Limite - 5 dias úteis):** 03...",
+      "resumo": "## Análise da Publicação\n\n**Prazo:** O juiz determinou \"no prazo legal\". Para manifestação do exequente sobre mandado devolvido negativo em cumprimento de sentença de alimentos, o prazo legal é de **5 dias úteis**.\n\n**Data Limite para Cumprimento:** **25/06/2026** (considerando publicação em 18/06/2...",
+      "lado_processo": "nosso_cliente",
+      "urgencia": "MEDIA",
+      "prazo_recomendado_dias_uteis": 15,
+      "acao_recomendada": "Revisar análise processual.",
+      "requer_acao": true
+    },
+    "acao_executada": "Pendente revisao manual",
+    "status_decidido": "Pendente revisao manual"
+  },
+  {
+    "url_pagina": "https://firm.legalone.com.br/publications",
+    "data_raspagem": "2026-06-18T15:37:44.667294",
+    "processo_numero": "1044667-17.2024.8.26.0001",
+    "processo_href": null,
+    "tipo": "Publicação",
+    "badge": "Recorte",
+    "data_disponibilizacao": "2026-06-17",
+    "fonte_tribunal": "Texto capturado de Diário da Justiça do Estado de São Paulo",
+    "fonte_diario": "Fonte: Diário Eletrônico de Justiça Nacional",
+    "conteudo": "Processo 1044667-17.2024.8.26.0001 - Alimentos - Lei Especial Nº 5.478/68 - Fixação - A.S.P. - M.H.S. - Vistos. Fls. 1.025: Diante das alegações deduzidas e dos documentos acostados aos autos, entendo pertinente, neste momento processual, a minoração dos alimentos para o equivalente a 30% (trinta por cento) do salário mínimo em caso de desemprego e manutenção do patamar de 30% dos rendimentos líquidos em caso de vínculo formal. Cumpre ressaltar que a obrigação alimentar deve observar o binômio necessidade-possibilidade, de modo a compatibilizar as necessidades do alimentando com a real capacidade econômica do alimentante. Nesse contexto, a manutenção do valor anteriormente fixado poderá representar ônus excessivo à parte requerida, sem que haja, por ora, elementos que indiquem a possibilidade de seu adimplemento nas mesmas condições anteriormente estabelecidas. A medida ora adotada possui caráter provisório e poderá ser revista posteriormente, caso sobrevenham novos elementos capazes de demonstrar modificação na situação financeira da parte. No mais, aguarde-se o cumprimento integral da decisão saneadora de fls. 989 em termos de prosseguimento do feito. Intimem-se. - ADV: EDIVANIA MESQUITA DA SILVA (OAB 240477/SP), RAPHAELLA ARANTES ARIMURA (OAB 361873/SP)\nNúmero único: 10446671720248260001\nPartes:\nPolo A: A.S.P.\nPolo P: M.H.S.\nAdvogados:\nRAPHAELLA ARANTES ARIMURA - OAB: 361873-361873\nEDIVANIA MESQUITA DA SILVA - OAB: 240477-240477",
+    "conteudo_parsed": {
+      "campos": {
+        "numero_unico": "10446671720248260001",
+        "polo_a": "A.S.P.",
+        "polo_p": "M.H.S."
+      },
+      "advogados": [
+        {
+          "nome": "RAPHAELLA ARANTES ARIMURA",
+          "oab": "361873-361873"
+        },
+        {
+          "nome": "EDIVANIA MESQUITA DA SILVA",
+          "oab": "240477-240477"
+        }
+      ],
+      "flags": {
+        "eh_sigiloso": false,
+        "processo_sigiloso": false,
+        "consulta_autos_digitais": false
+      },
+      "texto_bruto": "Processo 1044667-17.2024.8.26.0001 - Alimentos - Lei Especial Nº 5.478/68 - Fixação - A.S.P. - M.H.S. - Vistos. Fls. 1.025: Diante das alegações deduzidas e dos documentos acostados aos autos, entendo pertinente, neste momento processual, a minoração dos alimentos para o equivalente a 30% (trinta por cento) do salário mínimo em caso de desemprego e manutenção do patamar de 30% dos rendimentos líquidos em caso de vínculo formal. Cumpre ressaltar que a obrigação alimentar deve observar o binômio necessidade-possibilidade, de modo a compatibilizar as necessidades do alimentando com a real capacidade econômica do alimentante. Nesse contexto, a manutenção do valor anteriormente fixado poderá representar ônus excessivo à parte requerida, sem que haja, por ora, elementos que indiquem a possibilidade de seu adimplemento nas mesmas condições anteriormente estabelecidas. A medida ora adotada possui caráter provisório e poderá ser revista posteriormente, caso sobrevenham novos elementos capazes de demonstrar modificação na situação financeira da parte. No mais, aguarde-se o cumprimento integral da decisão saneadora de fls. 989 em termos de prosseguimento do feito. Intimem-se. - ADV: EDIVANIA MESQUITA DA SILVA (OAB 240477/SP), RAPHAELLA ARANTES ARIMURA (OAB 361873/SP)\nNúmero único: 10446671720248260001\nPartes:\nPolo A: A.S.P.\nPolo P: M.H.S.\nAdvogados:\nRAPHAELLA ARANTES ARIMURA - OAB: 361873-361873\nEDIVANIA MESQUITA DA SILVA - OAB: 240477-240477"
+    },
+    "lado_processo": "operadora",
+    "sem_providencia": true,
+    "analise_processualista": null,
+    "agendamento": {
+      "data_limite": "08/07/2026",
+      "data_agendamento": "03/07/2026",
+      "status_temporal": "OK",
+      "dias_restantes": 15
+    },
+    "data_agendada": "03/07/2026",
+    "decisao_agendamento": "SEM PROVIDÊNCIA",
+    "analise_gemini": {
+      "resumo": "Análise offline baseada na planilha.",
+      "lado_processo": "operadora",
+      "urgencia": "MEDIA",
+      "prazo_recomendado_dias_uteis": 15,
+      "acao_recomendada": "Sem providências necessárias.",
+      "requer_acao": false
+    },
+    "acao_executada": "Sem providencia",
+    "status_decidido": "Sem providencia"
+  },
+  {
+    "url_pagina": "https://firm.legalone.com.br/publications",
+    "data_raspagem": "2026-06-18T15:37:55.522971",
+    "processo_numero": "5207800-61.2024.8.13.0024",
+    "processo_href": null,
+    "tipo": "",
+    "badge": "Recorte",
+    "data_disponibilizacao": "2026-06-17",
+    "fonte_tribunal": "Texto capturado de Diário da Justiça do Estado de Minas Gerais",
+    "fonte_diario": "Fonte: Diário Eletrônico de Justiça Nacional",
+    "conteudo": "PROCEDIMENTO COMUM CÍVEL Nº 5207800-61.2024.8.13.0024/MG\n\n\nAUTOR: NATHALIA FERREIRA PASSOS\n\nRÉU: BRADESCO SAUDE S/A\n\n\n\n\nLocal: (#)LOCALIDADEENDERECOORGAO(#)\nData: 16/06/2026\n\n\n\n\nCERTIDÃO DE MIGRAÇÃO\n\n\n\nCertifico que o processo judicial em epígrafe foi devidamente migrado do Sistema PJe, passando a tramitar exclusivamente no Sistema eproc a partir desta data. A migração foi realizada em conformidade com a Lei nº 13.709/2018 (Lei Geral de Proteção de Dados Pessoais), observando as medidas de privacidade e proteção de dados tratados no âmbito do processo. Eventuais inconsistências ou divergências entre os documentos e/ou dados constantes no PJe e aqueles visualizados no eproc poderão ser objeto de peticionamento das partes a qualquer momento, devidamente fundamentado, com a indicação do(s) documento(s) e/ou dado(s) objeto da inconsistência.\n\nDeclaro que o cadastro das partes foi devidamente alterado, em estrita observância às diretrizes do Sistema de Gestão de Tabelas Processuais Unificadas, instituída pelo Conselho Nacional de Justiça, nos termos da Resolução nº 46/2007, bem como de suas atualizações posteriores.\nTodas as futuras manifestações deverão ser realizadas exclusivamente por meio do sistema eproc.\n\nFicam as partes cientes.\n\nAssinatura do Gerente de Secretaria\nNúmero único: 52078006120248130024\nPartes:\nPolo A: NATHALIA FERREIRA PASSOS\nPolo P: BRADESCO SAUDE S/A\nAdvogados:\nANDRE LUIZ LIMA SOARES - OAB: 101332-101332\nEULER DE MOURA SOARES FILHO - OAB: 45429-45429\nRITA ALCYONE PINTO SOARES - OAB: 56783-56783\nRAPHAELLA ARANTES ARIMURA - OAB: 209451-209451",
+    "conteudo_parsed": {
+      "campos": {
+        "autor": "NATHALIA FERREIRA PASSOS",
+        "reu": "BRADESCO SAUDE S/A",
+        "local": "(#)LOCALIDADEENDERECOORGAO(#)",
+        "data": "16/06/2026",
+        "numero_unico": "52078006120248130024",
+        "polo_a": "NATHALIA FERREIRA PASSOS",
+        "polo_p": "BRADESCO SAUDE S/A"
+      },
+      "advogados": [
+        {
+          "nome": "ANDRE LUIZ LIMA SOARES",
+          "oab": "101332-101332"
+        },
+        {
+          "nome": "EULER DE MOURA SOARES FILHO",
+          "oab": "45429-45429"
+        },
+        {
+          "nome": "RITA ALCYONE PINTO SOARES",
+          "oab": "56783-56783"
+        },
+        {
+          "nome": "RAPHAELLA ARANTES ARIMURA",
+          "oab": "209451-209451"
+        }
+      ],
+      "flags": {
+        "eh_sigiloso": false,
+        "processo_sigiloso": false,
+        "consulta_autos_digitais": false
+      },
+      "texto_bruto": "PROCEDIMENTO COMUM CÍVEL Nº 5207800-61.2024.8.13.0024/MG\n\n\nAUTOR: NATHALIA FERREIRA PASSOS\n\nRÉU: BRADESCO SAUDE S/A\n\n\n\n\nLocal: (#)LOCALIDADEENDERECOORGAO(#)\nData: 16/06/2026\n\n\n\n\nCERTIDÃO DE MIGRAÇÃO\n\n\n\nCertifico que o processo judicial em epígrafe foi devidamente migrado do Sistema PJe, passando a tramitar exclusivamente no Sistema eproc a partir desta data. A migração foi realizada em conformidade com a Lei nº 13.709/2018 (Lei Geral de Proteção de Dados Pessoais), observando as medidas de privacidade e proteção de dados tratados no âmbito do processo. Eventuais inconsistências ou divergências entre os documentos e/ou dados constantes no PJe e aqueles visualizados no eproc poderão ser objeto de peticionamento das partes a qualquer momento, devidamente fundamentado, com a indicação do(s) documento(s) e/ou dado(s) objeto da inconsistência.\n\nDeclaro que o cadastro das partes foi devidamente alterado, em estrita observância às diretrizes do Sistema de Gestão de Tabelas Processuais Unificadas, instituída pelo Conselho Nacional de Justiça, nos termos da Resolução nº 46/2007, bem como de suas atualizações posteriores.\nTodas as futuras manifestações deverão ser realizadas exclusivamente por meio do sistema eproc.\n\nFicam as partes cientes.\n\nAssinatura do Gerente de Secretaria\nNúmero único: 52078006120248130024\nPartes:\nPolo A: NATHALIA FERREIRA PASSOS\nPolo P: BRADESCO SAUDE S/A\nAdvogados:\nANDRE LUIZ LIMA SOARES - OAB: 101332-101332\nEULER DE MOURA SOARES FILHO - OAB: 45429-45429\nRITA ALCYONE PINTO SOARES - OAB: 56783-56783\nRAPHAELLA ARANTES ARIMURA - OAB: 209451-209451"
+    },
+    "lado_processo": "nosso_cliente",
+    "sem_providencia": false,
+    "analise_processualista": null,
+    "agendamento": {
+      "data_limite": "08/07/2026",
+      "data_agendamento": "03/07/2026",
+      "status_temporal": "OK",
+      "dias_restantes": 15
+    },
+    "data_agendada": "03/07/2026",
+    "decisao_agendamento": "AGENDAR",
+    "analise_gemini": {
+      "resumo": "Análise offline baseada na planilha.",
+      "lado_processo": "nosso_cliente",
+      "urgencia": "MEDIA",
+      "prazo_recomendado_dias_uteis": 15,
+      "acao_recomendada": "Revisar análise processual.",
+      "requer_acao": true
+    },
+    "acao_executada": "Pendente revisao manual",
+    "status_decidido": "Pendente revisao manual"
+  },
+  {
+    "url_pagina": "https://firm.legalone.com.br/publications",
+    "data_raspagem": "2026-06-18T15:38:07.651029",
+    "processo_numero": "1014639-43.2023.8.26.0020",
+    "processo_href": null,
+    "tipo": "Publicação",
+    "badge": "Recorte",
+    "data_disponibilizacao": "2026-06-16",
+    "fonte_tribunal": "Texto capturado de Diário da Justiça do Estado de São Paulo",
+    "fonte_diario": "Fonte: Diário Eletrônico de Justiça Nacional",
+    "conteudo": "Processo 1014639-43.2023.8.26.0020 - Interdição/Curatela - Tutela de Urgência - F.S.F. - Tendo em vista não se tratar de justiça gratuita, providencie a parte interessada o envio da sentença que serve como mandado de averbação para registro da interdição. O sistemaCRCJudsó aceita mandados de averbação advindos de processos em que foi deferida a justiça gratuita.Sem prejuízo, para publicação do edital de interdição deverá a parte providenciar o recolhimento da despesa de publicação em guia FEDTJ, código 435-9, no valor de R$ 0,31 por caractere, totalizando 968 caracteres - ADV: RAPHAELLA ARANTES ARIMURA (OAB 361873/SP)\nNúmero único: 10146394320238260020\nPartes:\nPolo A: F.S.F.\nAdvogados:\nRAPHAELLA ARANTES ARIMURA - OAB: 361873-361873",
+    "conteudo_parsed": {
+      "campos": {
+        "numero_unico": "10146394320238260020",
+        "polo_a": "F.S.F."
+      },
+      "advogados": [
+        {
+          "nome": "RAPHAELLA ARANTES ARIMURA",
+          "oab": "361873-361873"
+        }
+      ],
+      "flags": {
+        "eh_sigiloso": false,
+        "processo_sigiloso": false,
+        "consulta_autos_digitais": false
+      },
+      "texto_bruto": "Processo 1014639-43.2023.8.26.0020 - Interdição/Curatela - Tutela de Urgência - F.S.F. - Tendo em vista não se tratar de justiça gratuita, providencie a parte interessada o envio da sentença que serve como mandado de averbação para registro da interdição. O sistemaCRCJudsó aceita mandados de averbação advindos de processos em que foi deferida a justiça gratuita.Sem prejuízo, para publicação do edital de interdição deverá a parte providenciar o recolhimento da despesa de publicação em guia FEDTJ, código 435-9, no valor de R$ 0,31 por caractere, totalizando 968 caracteres - ADV: RAPHAELLA ARANTES ARIMURA (OAB 361873/SP)\nNúmero único: 10146394320238260020\nPartes:\nPolo A: F.S.F.\nAdvogados:\nRAPHAELLA ARANTES ARIMURA - OAB: 361873-361873"
+    },
+    "lado_processo": "operadora",
+    "sem_providencia": true,
+    "analise_processualista": null,
+    "agendamento": {
+      "data_limite": "07/07/2026",
+      "data_agendamento": "02/07/2026",
+      "status_temporal": "OK",
+      "dias_restantes": 14
+    },
+    "data_agendada": "02/07/2026",
+    "decisao_agendamento": "SEM PROVIDÊNCIA",
+    "analise_gemini": {
+      "resumo": "Análise offline baseada na planilha.",
+      "lado_processo": "operadora",
+      "urgencia": "MEDIA",
+      "prazo_recomendado_dias_uteis": 15,
+      "acao_recomendada": "Sem providências necessárias.",
+      "requer_acao": false
+    },
+    "acao_executada": "Sem providencia",
+    "status_decidido": "Sem providencia"
+  },
+  {
+    "url_pagina": "https://firm.legalone.com.br/publications",
+    "data_raspagem": "2026-06-18T16:03:29.056559",
+    "processo_numero": "1011549-29.2024.8.26.0008",
+    "processo_href": null,
+    "tipo": "",
+    "badge": "",
+    "data_disponibilizacao": "2026-06-16",
+    "fonte_tribunal": "Texto capturado de Diário da Justiça do Estado de São Paulo",
+    "fonte_diario": "Fonte: Diário Eletrônico de Justiça Nacional",
+    "conteudo": "INTIMAÇÃO DE ACÓRDÃO\n\nNº 1011549-29.2024.8.26.0008/50000 - Processo Digital. Petições para juntada devem ser apresentadas exclusivamente por meio eletrônico, nos termos do artigo 7º da Res. 551/2011 - Embargos de Declaração Cível - São Paulo - Embargte: José Luis Perez Garcia - Embargdo: Sul America Companhia de Seguro Saude - Magistrado(a) João Batista Vilhena - Rejeitaram os embargos. V. U. - EMENTA: DIREITO CIVIL. EMBARGOS DE DECLARAÇÃO. CONTRATOS DE PLANO DE SAÚDE. EMBARGOS REJEITADOS.I. CASO EM EXAME1. EMBARGOS DE DECLARAÇÃO OPOSTOS CONTRA ACÓRDÃO QUE DEU PROVIMENTO AO RECURSO DE APELAÇÃO. O EMBARGANTE ALEGA OMISSÕES E CONTRADIÇÕES NO JULGADO, DESTACANDO A FALTA DE ANÁLISE DAS CIRCUNSTÂNCIAS CLÍNICAS DO AUTOR E A NECESSIDADE DOS INSUMOS E MEDICAMENTOS PRESCRITOS. ARGUMENTA QUE O ACÓRDÃO APLICOU GENERICAMENTE A EXCLUSÃO DE COBERTURA SEM CONSIDERAR A LEI Nº 14.454/2022 E OS PRINCÍPIOS DA BOA-FÉ OBJETIVA, FUNÇÃO SOCIAL DO CONTRATO E PROTEÇÃO DO CONSUMIDOR. REQUER O RECONHECIMENTO DA ABUSIVIDADE DA NEGATIVA DE COBERTURA E A REVALORAÇÃO DOS DANOS MORAIS.II. QUESTÃO EM DISCUSSÃO2. A QUESTÃO EM DISCUSSÃO CONSISTE EM (I) VERIFICAR SE HOUVE OMISSÕES E CONTRADIÇÕES NO ACÓRDÃO EMBARGADO QUANTO À ANÁLISE DAS CIRCUNSTÂNCIAS CLÍNICAS DO AUTOR E À APLICAÇÃO DAS LEIS PERTINENTES; (II) DETERMINAR SE OS EMBARGOS DE DECLARAÇÃO PODEM SER UTILIZADOS PARA MODIFICAR O JULGADO.III. RAZÕES DE DECIDIR3. ACÓRDÃO EMBARGADO ESTÁ ADEQUADAMENTE FUNDAMENTADO, TENDO APRECIADO TODOS OS FATOS TRAZIDOS NAS RAZÕES RECURSAIS.4. EMBARGOS DE DECLARAÇÃO NÃO DEVEM SER UTILIZADOS COM CARÁTER INFRINGENTE, SALVO EM CASOS DE ERRO MATERIAL EVIDENTE OU NULIDADE MANIFESTA, O QUE NÃO SE APLICA AO CASO EM QUESTÃO.IV. DISPOSITIVO E TESE5. EMBARGOS DE DECLARAÇÃO REJEITADOS.TESE DE JULGAMENTO: 1. EMBARGOS DE DECLARAÇÃO NÃO SE PRESTAM A MODIFICAR O JULGADO, SALVO EM CASOS EXCEPCIONAIS DE ERRO MATERIAL OU NULIDADE. 2. A FUNDAMENTAÇÃO ADEQUADA DO ACÓRDÃO EMBARGADO AFASTA A ALEGAÇÃO DE OMISSÕES E CONTRADIÇÕES. ART. 1007 CPC - EVENTUAL RECURSO - SE AO STJ: CUSTAS R$ 270,12 - (GUIA GRU NO SITE http://www.stj.jus.br) - RESOLUÇÃO STJ/GP N. 2 DE 1º DE FEVEREIRO DE 2017; SE AO STF: CUSTAS R$ 1.157,59 - GUIA GRU COBRANÇA - FICHA DE COMPENSAÇÃO - (EMITIDA ATRAVÉS DO SITE www.stf.jus.br ) E PORTE DE REMESSA E RETORNO R$ 110,90 - GUIA FEDTJ - CÓD 140-6 - BANCO DO BRASIL OU INTERNET - RESOLUÇÃO N. 875, DE 23 DE JUNHO DE 2025 DO STF. Os valores referentes ao PORTE DE REMESSA E RETORNO, não se aplicam aos PROCESSOS ELETRÔNICOS, de acordo com o art. 3º, inciso II, da RESOLUÇÃO N. 833, DE 13 DE MAIO DE 2024 DO STF. - Advs: Raphaella Arantes Arimura (OAB: 361873/SP) - Ana Rita dos Reis Petraroli (OAB: 130291/SP) - Paulo Fernando dos Reis Petraroli (OAB: 256755/SP) - 4º andar\nNúmero único: 10115492920248260008\nPartes:\nPolo A: JOSé LUIS PEREZ GARCIA\nPolo P: SUL AMERICA COMPANHIA DE SEGURO SAUDE\nAdvogados:\nPAULO FERNANDO DOS REIS PETRAROLI - OAB: 256755-256755\nANA RITA DOS REIS PETRAROLI - OAB: 130291-130291\nRAPHAELLA ARANTES ARIMURA - OAB: 361873-361873",
+    "conteudo_parsed": {
+      "campos": {
+        "numero_unico": "10115492920248260008",
+        "polo_a": "JOSé LUIS PEREZ GARCIA",
+        "polo_p": "SUL AMERICA COMPANHIA DE SEGURO SAUDE"
+      },
+      "advogados": [
+        {
+          "nome": "PAULO FERNANDO DOS REIS PETRAROLI",
+          "oab": "256755-256755"
+        },
+        {
+          "nome": "ANA RITA DOS REIS PETRAROLI",
+          "oab": "130291-130291"
+        },
+        {
+          "nome": "RAPHAELLA ARANTES ARIMURA",
+          "oab": "361873-361873"
+        }
+      ],
+      "flags": {
+        "eh_sigiloso": false,
+        "processo_sigiloso": false,
+        "consulta_autos_digitais": false
+      },
+      "texto_bruto": "INTIMAÇÃO DE ACÓRDÃO\n\nNº 1011549-29.2024.8.26.0008/50000 - Processo Digital. Petições para juntada devem ser apresentadas exclusivamente por meio eletrônico, nos termos do artigo 7º da Res. 551/2011 - Embargos de Declaração Cível - São Paulo - Embargte: José Luis Perez Garcia - Embargdo: Sul America Companhia de Seguro Saude - Magistrado(a) João Batista Vilhena - Rejeitaram os embargos. V. U. - EMENTA: DIREITO CIVIL. EMBARGOS DE DECLARAÇÃO. CONTRATOS DE PLANO DE SAÚDE. EMBARGOS REJEITADOS.I. CASO EM EXAME1. EMBARGOS DE DECLARAÇÃO OPOSTOS CONTRA ACÓRDÃO QUE DEU PROVIMENTO AO RECURSO DE APELAÇÃO. O EMBARGANTE ALEGA OMISSÕES E CONTRADIÇÕES NO JULGADO, DESTACANDO A FALTA DE ANÁLISE DAS CIRCUNSTÂNCIAS CLÍNICAS DO AUTOR E A NECESSIDADE DOS INSUMOS E MEDICAMENTOS PRESCRITOS. ARGUMENTA QUE O ACÓRDÃO APLICOU GENERICAMENTE A EXCLUSÃO DE COBERTURA SEM CONSIDERAR A LEI Nº 14.454/2022 E OS PRINCÍPIOS DA BOA-FÉ OBJETIVA, FUNÇÃO SOCIAL DO CONTRATO E PROTEÇÃO DO CONSUMIDOR. REQUER O RECONHECIMENTO DA ABUSIVIDADE DA NEGATIVA DE COBERTURA E A REVALORAÇÃO DOS DANOS MORAIS.II. QUESTÃO EM DISCUSSÃO2. A QUESTÃO EM DISCUSSÃO CONSISTE EM (I) VERIFICAR SE HOUVE OMISSÕES E CONTRADIÇÕES NO ACÓRDÃO EMBARGADO QUANTO À ANÁLISE DAS CIRCUNSTÂNCIAS CLÍNICAS DO AUTOR E À APLICAÇÃO DAS LEIS PERTINENTES; (II) DETERMINAR SE OS EMBARGOS DE DECLARAÇÃO PODEM SER UTILIZADOS PARA MODIFICAR O JULGADO.III. RAZÕES DE DECIDIR3. ACÓRDÃO EMBARGADO ESTÁ ADEQUADAMENTE FUNDAMENTADO, TENDO APRECIADO TODOS OS FATOS TRAZIDOS NAS RAZÕES RECURSAIS.4. EMBARGOS DE DECLARAÇÃO NÃO DEVEM SER UTILIZADOS COM CARÁTER INFRINGENTE, SALVO EM CASOS DE ERRO MATERIAL EVIDENTE OU NULIDADE MANIFESTA, O QUE NÃO SE APLICA AO CASO EM QUESTÃO.IV. DISPOSITIVO E TESE5. EMBARGOS DE DECLARAÇÃO REJEITADOS.TESE DE JULGAMENTO: 1. EMBARGOS DE DECLARAÇÃO NÃO SE PRESTAM A MODIFICAR O JULGADO, SALVO EM CASOS EXCEPCIONAIS DE ERRO MATERIAL OU NULIDADE. 2. A FUNDAMENTAÇÃO ADEQUADA DO ACÓRDÃO EMBARGADO AFASTA A ALEGAÇÃO DE OMISSÕES E CONTRADIÇÕES. ART. 1007 CPC - EVENTUAL RECURSO - SE AO STJ: CUSTAS R$ 270,12 - (GUIA GRU NO SITE http://www.stj.jus.br) - RESOLUÇÃO STJ/GP N. 2 DE 1º DE FEVEREIRO DE 2017; SE AO STF: CUSTAS R$ 1.157,59 - GUIA GRU COBRANÇA - FICHA DE COMPENSAÇÃO - (EMITIDA ATRAVÉS DO SITE www.stf.jus.br ) E PORTE DE REMESSA E RETORNO R$ 110,90 - GUIA FEDTJ - CÓD 140-6 - BANCO DO BRASIL OU INTERNET - RESOLUÇÃO N. 875, DE 23 DE JUNHO DE 2025 DO STF. Os valores referentes ao PORTE DE REMESSA E RETORNO, não se aplicam aos PROCESSOS ELETRÔNICOS, de acordo com o art. 3º, inciso II, da RESOLUÇÃO N. 833, DE 13 DE MAIO DE 2024 DO STF. - Advs: Raphaella Arantes Arimura (OAB: 361873/SP) - Ana Rita dos Reis Petraroli (OAB: 130291/SP) - Paulo Fernando dos Reis Petraroli (OAB: 256755/SP) - 4º andar\nNúmero único: 10115492920248260008\nPartes:\nPolo A: JOSé LUIS PEREZ GARCIA\nPolo P: SUL AMERICA COMPANHIA DE SEGURO SAUDE\nAdvogados:\nPAULO FERNANDO DOS REIS PETRAROLI - OAB: 256755-256755\nANA RITA DOS REIS PETRAROLI - OAB: 130291-130291\nRAPHAELLA ARANTES ARIMURA - OAB: 361873-361873"
+    },
+    "lado_processo": "nosso_cliente",
+    "sem_providencia": false,
+    "analise_processualista": "**TABELA DA PUBLICAÇÃO**\n\n<table><thead><tr><th>Campo</th><th>Informação</th></tr></thead><tbody><tr><td>Tipo</td><td>Intimação de Acórdão — Embargos de Declaração</td></tr><tr><td>Nº Único</td><td>1011549-29.2024.8.26.0008</td></tr><tr><td>Cliente (Polo A)</td><td>José Luis Perez Garcia ✅</td></tr><tr><td>Parte Contrária</td><td>Sul América Companhia de Seguro Saúde</td></tr><tr><td>Magistrado</td><td>João Batista Vilhena</td></tr><tr><td>Decisão</td><td>**Embargos de Declaração REJEITADOS**</td></tr><tr><td>Prazo</td><td>15 dias úteis (REsp/RE — art. 1.003, §5º, CPC)</td></tr><tr><td>Data Limite</td><td>07/07/2026</td></tr><tr><td>Próximo Passo</td><td>Analisar viabilidade de REsp (STJ) e/ou RE (STF)</td></tr></tbody></table>\n\n---\n\n**RESUMO DE AGENDAMENTO**\n\n- **Decisão:** AGENDAR\n- **Data do Agendamento:** 02/07/2026\n\n---\n\n**ANÁLISE E AÇÃO RECOMENDADA**\n\nOs Embargos de Declaração foram **rejeitados** — o tribunal manteve o acórdão desfavorável ao nosso cliente. A ementa confirmou que o julgado foi devidamente fundamentado e que os embargos não têm caráter infringente.\n\n**O que fazer agora:** Avaliar a viabilidade de interpor **Recurso Especial (STJ)** e/ou **Recurso Extraordinário (STF)** contra o acórdão. O prazo é de **15 dias úteis** a contar da publicação (17/06/2026), encerrando-se em **07/07/2026**.\n\n**Custas informadas na publicação:**\n- **STJ:** R$ 270,12 (GRU — site stj.jus.br)\n- **STF:** R$ 1.157,59 (GRU — site stf.jus.br) + porte de remessa e retorno R$ 110,90 (não aplicável a processos eletrônicos)\n\n**Agendamento sugerido para 02/07/2026** (5 dias antes do prazo final) para revisão e preparação do recurso com antecedência.",
+    "agendamento": {
+      "data_limite": "07/07/2026",
+      "data_agendamento": "02/07/2026",
+      "status_temporal": "OK",
+      "dias_restantes": 14
+    },
+    "data_agendada": "02/07/2026",
+    "decisao_agendamento": "AGENDAR",
+    "analise_gemini": {
+      "resumo": "**TABELA DA PUBLICAÇÃO**\n\n<table><thead><tr><th>Campo</th><th>Informação</th></tr></thead><tbody><tr><td>Tipo</td><td>Intimação de Acórdão — Embargos de Declaração</td></tr><tr><td>Nº Único</td><td>1011549-29.2024.8.26.0008</td></tr><tr><td>Cliente (Polo A)</td><td>José Luis Perez Garcia ✅</td></tr>...",
+      "lado_processo": "nosso_cliente",
+      "urgencia": "MEDIA",
+      "prazo_recomendado_dias_uteis": 15,
+      "acao_recomendada": "Revisar análise processual.",
+      "requer_acao": true
+    },
+    "acao_executada": "Pendente revisao manual",
+    "status_decidido": "Pendente revisao manual"
+  },
+  {
+    "url_pagina": "https://firm.legalone.com.br/publications",
+    "data_raspagem": "2026-06-18T16:04:35.577908",
+    "processo_numero": "4009338-32.2025.8.26.0008",
+    "processo_href": null,
+    "tipo": "",
+    "badge": "",
+    "data_disponibilizacao": "2026-06-16",
+    "fonte_tribunal": "Texto capturado de Diário da Justiça do Estado de São Paulo",
+    "fonte_diario": "Fonte: Diário Eletrônico de Justiça Nacional",
+    "conteudo": "PROCEDIMENTO DO JUIZADO ESPECIAL CÍVEL Nº 4009338-32.2025.8.26.0008/SP\nAUTOR : RAPHAELLA ARANTES ARIMURA\nADVOGADO(A) : RAPHAELLA ARANTES ARIMURA (OAB SP361873)\nRÉU : FACEBOOK SERVICOS ONLINE DO BRASIL LTDA.\nADVOGADO(A) : PETERSON DOS SANTOS (OAB SP336353)\n\nSENTENÇA\n\nÀ vista dessas considerações, resolvo o mérito, na forma do art. 487, I, do Código de Processo Civil, e julgo improcedentes os pedidos formulados. Deixo de condenar a vencida nas verbas da sucumbência nos termos do artigo 55, da Lei 9.099/95.\nNúmero único: 40093383220258260008\nPartes:\nPolo A: RAPHAELLA ARANTES ARIMURA\nPolo P: FACEBOOK SERVICOS ONLINE DO BRASIL LTDA.\nAdvogados:\nPETERSON DOS SANTOS - OAB: 336353-336353\nRAPHAELLA ARANTES ARIMURA - OAB: 361873-361873",
+    "conteudo_parsed": {
+      "campos": {
+        "autor": "RAPHAELLA ARANTES ARIMURA",
+        "reu": "FACEBOOK SERVICOS ONLINE DO BRASIL LTDA.",
+        "numero_unico": "40093383220258260008",
+        "polo_a": "RAPHAELLA ARANTES ARIMURA",
+        "polo_p": "FACEBOOK SERVICOS ONLINE DO BRASIL LTDA."
+      },
+      "advogados": [
+        {
+          "nome": "PETERSON DOS SANTOS",
+          "oab": "336353-336353"
+        },
+        {
+          "nome": "RAPHAELLA ARANTES ARIMURA",
+          "oab": "361873-361873"
+        }
+      ],
+      "flags": {
+        "eh_sigiloso": false,
+        "processo_sigiloso": false,
+        "consulta_autos_digitais": false
+      },
+      "texto_bruto": "PROCEDIMENTO DO JUIZADO ESPECIAL CÍVEL Nº 4009338-32.2025.8.26.0008/SP\nAUTOR : RAPHAELLA ARANTES ARIMURA\nADVOGADO(A) : RAPHAELLA ARANTES ARIMURA (OAB SP361873)\nRÉU : FACEBOOK SERVICOS ONLINE DO BRASIL LTDA.\nADVOGADO(A) : PETERSON DOS SANTOS (OAB SP336353)\n\nSENTENÇA\n\nÀ vista dessas considerações, resolvo o mérito, na forma do art. 487, I, do Código de Processo Civil, e julgo improcedentes os pedidos formulados. Deixo de condenar a vencida nas verbas da sucumbência nos termos do artigo 55, da Lei 9.099/95.\nNúmero único: 40093383220258260008\nPartes:\nPolo A: RAPHAELLA ARANTES ARIMURA\nPolo P: FACEBOOK SERVICOS ONLINE DO BRASIL LTDA.\nAdvogados:\nPETERSON DOS SANTOS - OAB: 336353-336353\nRAPHAELLA ARANTES ARIMURA - OAB: 361873-361873"
+    },
+    "lado_processo": "nosso_cliente",
+    "sem_providencia": false,
+    "analise_processualista": "## 📋 Análise da Publicação\n\n| Campo | Detalhe |\n|---|---|\n| **Nº Único** | 4009338-32.2025.8.26.0008 |\n| **Cliente** | RAPHAELLA ARANTES ARIMURA (Polo Ativo) |\n| **Parte Contrária** | FACEBOOK SERVICOS ONLINE DO BRASIL LTDA. |\n| **Tipo de Decisão** | Sentença — Julgamento de Mérito (art. 487, I, CPC) |\n| **Resultado** | **Improcedente** — pedidos negados |\n| **Condenação em Custas** | Não (art. 55, Lei 9.099/95 — JEC) |\n\n---\n\n## ⚖ O que foi decidido\n\nO Juiz **julgou improcedentes** todos os pedidos da ação, ou seja, o cliente **perdeu** a causa. Não houve condenação em custas por se tratar de Juizado Especial Cível.\n\n---\n\n## 🚀 Ação Necessária\n\nTratando-se de sentença desfavorável em JEC, o prazo para interposição do **Recurso Inominado** é de **10 dias** (art. 42, Lei 9.099/95). **Nossa equipe deve preparar e protocolar o recurso dentro do prazo.**\n\n## 📅 Linha do Tempo\n\n| Evento | Data |\n|---|---|\n| **Disponibilização** | 16/06/2026 (terça) |\n| **Data Limite (10 dias)** | 26/06/2026 (sexta) |\n| **Data do Agendamento** | 19/06/2026 (sexta) |\n\n---\n\n## 🎯 Orientação\n\n**AÇÃO PENDENTE — URGENTE.** Nossa cliente, como autora, foi integralmente vencida. A equipe deve:\n\n1. **Analisar os fundamentos da sentença** (não reproduzidos na publicação) para definir a estratégia do recurso\n2. **Redigir e protocolar o Recurso Inominado** no prazo de **10 dias**\n3. **Agendar interno para 19/06/2026** — 5 dias antes do limite, para garantir tempo hábil de revisão e protocolo\n\n> ⚠️ **Prazo fatal.** O recurso inominado no JEC tem prazo reduzido (10 dias) e não comporta dilação. Recomenda-se iniciar a elaboração da peça recursal imediatamente.",
+    "agendamento": {
+      "data_limite": "07/07/2026",
+      "data_agendamento": "02/07/2026",
+      "status_temporal": "OK",
+      "dias_restantes": 14
+    },
+    "data_agendada": "02/07/2026",
+    "decisao_agendamento": "AGENDAR",
+    "analise_gemini": {
+      "resumo": "## 📋 Análise da Publicação\n\n| Campo | Detalhe |\n|---|---|\n| **Nº Único** | 4009338-32.2025.8.26.0008 |\n| **Cliente** | RAPHAELLA ARANTES ARIMURA (Polo Ativo) |\n| **Parte Contrária** | FACEBOOK SERVICOS ONLINE DO BRASIL LTDA. |\n| **Tipo de Decisão** | Sentença — Julgamento de Mérito (art. 487, I, CPC...",
       "lado_processo": "nosso_cliente",
       "urgencia": "MEDIA",
       "prazo_recomendado_dias_uteis": 15,

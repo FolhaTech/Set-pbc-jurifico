@@ -1,10 +1,11 @@
-import os
-import json
 import hashlib
+import json
 import logging
-from datetime import datetime, date
+import os
+from datetime import datetime
 from typing import Optional, List
 
+from config.settings import ARQUIVO_JSON
 from core.entities import (
     Publicacao,
     Analise,
@@ -15,7 +16,6 @@ from core.entities import (
 )
 from core.enums import LadoProcesso, StatusTemporal, Urgencia, StatusAcao
 from ports.repositorio import Repositorio
-from config.settings import ARQUIVO_JSON
 
 logger = logging.getLogger(__name__)
 
@@ -36,8 +36,8 @@ class JsonRepositorio(Repositorio):
             conteudo = dados.get("conteudo", "")
             if conteudo:
                 hash_id = (
-                    "TMP-"
-                    + hashlib.md5(conteudo.encode("utf-8")).hexdigest()[:12].upper()
+                        "TMP-"
+                        + hashlib.md5(conteudo.encode("utf-8")).hexdigest()[:12].upper()
                 )
                 dados["processo_numero"] = hash_id
                 processo = hash_id
@@ -63,8 +63,10 @@ class JsonRepositorio(Repositorio):
         return [self._de_dict(d) for d in dados]
 
     def buscar_por_processo(self, numero: str) -> Optional[Publicacao]:
+        numero_norm = numero.replace("-", "").replace(".", "").strip()
         for pub in self.listar_todas():
-            if pub.processo_numero == numero:
+            pub_norm = pub.processo_numero.replace("-", "").replace(".", "").strip()
+            if pub_norm == numero_norm:
                 return pub
         return None
 
