@@ -1,4 +1,5 @@
 import logging
+import pathlib
 import re
 import time
 
@@ -155,9 +156,7 @@ def preencher_data_inicial(driver, data_str: str) -> bool:
 
     try:
         wait = WebDriverWait(driver, 10)
-        input_dt = wait.until(
-            EC.presence_of_element_located((By.ID, "DtInicial"))
-        )
+        input_dt = wait.until(EC.presence_of_element_located((By.ID, "DtInicial")))
 
         # ── PASSO 0: Fechar qualquer modal-mask que esteja bloqueando ──
         fechou_modal = driver.execute_script("""
@@ -174,7 +173,9 @@ def preencher_data_inicial(driver, data_str: str) -> bool:
             return fechou;
         """)
         if fechou_modal:
-            logging.info(f"[ACAO] {fechou_modal} modal(s) fechado(s) antes de preencher DtInicial.")
+            logging.info(
+                f"[ACAO] {fechou_modal} modal(s) fechado(s) antes de preencher DtInicial."
+            )
             time.sleep(1.0)
 
         # ── PASSO 1: Scroll + foco ──
@@ -244,7 +245,9 @@ def preencher_data_inicial(driver, data_str: str) -> bool:
 
         valor_final = input_dt.get_attribute("value") or ""
         if data_str in valor_final:
-            logging.info(f"[ACAO] Data inicial preenchida (fallback send_keys): '{valor_final}'")
+            logging.info(
+                f"[ACAO] Data inicial preenchida (fallback send_keys): '{valor_final}'"
+            )
             return True
 
         logging.warning(
@@ -321,13 +324,13 @@ def obter_classificacao_ia(dados: dict, opcoes: list, adapta_info: dict | None) 
         return "N/A"
 
     prompt = (
-            f"Com base na publicacao juridica abaixo, identifique qual das seguintes opcoes de descricao de compromisso "
-            f"do escritorio e a mais adequada.\n\n"
-            f"**PUBLICACAO:**\n{dados.get('conteudo', '')}\n\n"
-            f"**OPCOES DISPONIVEIS:**\n" + "\n".join(f"- {op}" for op in opcoes) + "\n\n"
-                                                                                   f"Responda APENAS com o texto exato da opcao selecionada (copie exatamente como esta na lista acima). "
-                                                                                   f"Nao adicione introducao, pontuacao, explicacao ou qualquer texto extra. "
-                                                                                   f"Se nenhuma opcao se aplicar, responda exatamente: N/A"
+        f"Com base na publicacao juridica abaixo, identifique qual das seguintes opcoes de descricao de compromisso "
+        f"do escritorio e a mais adequada.\n\n"
+        f"**PUBLICACAO:**\n{dados.get('conteudo', '')}\n\n"
+        f"**OPCOES DISPONIVEIS:**\n" + "\n".join(f"- {op}" for op in opcoes) + "\n\n"
+        f"Responda APENAS com o texto exato da opcao selecionada (copie exatamente como esta na lista acima). "
+        f"Nao adicione introducao, pontuacao, explicacao ou qualquer texto extra. "
+        f"Se nenhuma opcao se aplicar, responda exatamente: N/A"
     )
 
     try:
@@ -363,7 +366,7 @@ def obter_classificacao_ia(dados: dict, opcoes: list, adapta_info: dict | None) 
 
 
 def obter_classificacao_tipo_ia(
-        dados: dict, opcoes: list, adapta_info: dict | None, descricao_escolhida: str
+    dados: dict, opcoes: list, adapta_info: dict | None, descricao_escolhida: str
 ) -> str:
     if not adapta_info:
         logging.warning(
@@ -372,15 +375,17 @@ def obter_classificacao_tipo_ia(
         return "N/A"
 
     prompt = (
-            f"Com base na publicacao juridica abaixo e na descricao de compromisso ja selecionada, "
-            f"identifique qual dos seguintes TIPOS de compromisso e o mais adequado.\n\n"
-            f"**DESCRICAO SELECIONADA:** {descricao_escolhida}\n\n"
-            f"**PUBLICACAO:**\n{dados.get('conteudo', '')[:1000]}\n\n"
-            f"**OPCOES DE TIPO DISPONIVEIS:**\n" + "\n".join(f"- {op}" for op in opcoes) + "\n\n"
-                                                                                           f"Responda APENAS com o texto exato da opcao selecionada "
-                                                                                           f"(copie exatamente como esta na lista acima). "
-                                                                                           f"Nao adicione introducao, pontuacao, explicacao ou qualquer texto extra. "
-                                                                                           f"Se nenhuma opcao se aplicar, responda exatamente: N/A"
+        f"Com base na publicacao juridica abaixo e na descricao de compromisso ja selecionada, "
+        f"identifique qual dos seguintes TIPOS de compromisso e o mais adequado.\n\n"
+        f"**DESCRICAO SELECIONADA:** {descricao_escolhida}\n\n"
+        f"**PUBLICACAO:**\n{dados.get('conteudo', '')[:1000]}\n\n"
+        f"**OPCOES DE TIPO DISPONIVEIS:**\n"
+        + "\n".join(f"- {op}" for op in opcoes)
+        + "\n\n"
+        f"Responda APENAS com o texto exato da opcao selecionada "
+        f"(copie exatamente como esta na lista acima). "
+        f"Nao adicione introducao, pontuacao, explicacao ou qualquer texto extra. "
+        f"Se nenhuma opcao se aplicar, responda exatamente: N/A"
     )
 
     try:
@@ -517,7 +522,7 @@ def clicar_link_processo(driver, dados: dict = None, adapta_info: dict = None) -
                     EC.element_to_be_clickable(
                         (
                             By.XPATH,
-                            "//a[contains(text(), 'Novo compromisso') or contains(@href, '/processos/compromissos/CreateFromProcesso/')]",
+                            "//a[contains(text(), 'Nova tarefa') or contains(@href, '/processos/compromissos/CreateFromProcesso/')]",
                         )
                     )
                 )
@@ -533,29 +538,19 @@ def clicar_link_processo(driver, dados: dict = None, adapta_info: dict = None) -
                 )
 
             if not link_clicado_comp:
-                resultado_js = driver.execute_script("""
-                    var links = document.querySelectorAll("a[href*='/processos/compromissos/CreateFromProcesso/']");
-                    for (var i = 0; i < links.length; i++) {
-                        links[i].scrollIntoView({block: 'center'});
-                        links[i].click();
-                        return true;
-                    }
-                    var allLinks = document.querySelectorAll("a");
-                    for (var i = 0; i < allLinks.length; i++) {
-                        if (allLinks[i].innerText.trim() === 'Novo compromisso') {
-                            allLinks[i].scrollIntoView({block: 'center'});
-                            allLinks[i].click();
-                            return true;
-                        }
-                    }
-                    return false;
-                """)
+                scrip_path = (
+                    pathlib.Path(__file__).parent.parent.parent
+                    / "scripts"
+                    / "new-task.js"
+                )
+                js_code = scrip_path.read_text(encoding="utf-8")
+                resultado_js = driver.execute_script(js_code)
                 if resultado_js:
                     link_clicado_comp = True
 
             if link_clicado_comp:
                 logging.info(
-                    "[ACAO] Link 'Novo compromisso' clicado. Aguardando tela de criacao..."
+                    "[ACAO] Link 'Novo Tarefa' clicado. Aguardando tela de criacao..."
                 )
                 time.sleep(3)
             else:
@@ -646,6 +641,7 @@ def clicar_link_processo(driver, dados: dict = None, adapta_info: dict = None) -
                     """)
             if html_tipo and not html_tipo.startswith("XHR_ERR:"):
                 import json as _json
+
                 try:
                     data_tipo = _json.loads(html_tipo)
                     rows_tipo = data_tipo.get("Rows", [])
@@ -660,7 +656,9 @@ def clicar_link_processo(driver, dados: dict = None, adapta_info: dict = None) -
                         f"Amostra: {opcoes_tipo_pre[:10]}"
                     )
                 except Exception as e:
-                    logging.warning(f"[ACAO] Erro ao parsear XHR de Tipo na pre-busca: {e}")
+                    logging.warning(
+                        f"[ACAO] Erro ao parsear XHR de Tipo na pre-busca: {e}"
+                    )
         except Exception as e:
             logging.warning(f"[ACAO] Pre-busca de Tipo via XHR falhou: {e}")
 
@@ -675,7 +673,10 @@ def clicar_link_processo(driver, dados: dict = None, adapta_info: dict = None) -
             # Se não encontrou por exatidão, tenta correspondência parcial
             if not val_id:
                 for texto, vid in opcoes_map.items():
-                    if escolha.lower() in texto.lower() or texto.lower() in escolha.lower():
+                    if (
+                        escolha.lower() in texto.lower()
+                        or texto.lower() in escolha.lower()
+                    ):
                         val_id = vid
                         escolha = texto  # usa o texto exato da lista
                         break
@@ -714,7 +715,9 @@ def clicar_link_processo(driver, dados: dict = None, adapta_info: dict = None) -
                             f"[ACAO] JS nao colou Descricao. Esperado '{escolha}', atual '{valor}'."
                         )
                 except Exception:
-                    logging.warning("[ACAO] Nao foi possivel verificar Descricao apos JS.")
+                    logging.warning(
+                        "[ACAO] Nao foi possivel verificar Descricao apos JS."
+                    )
             else:
                 logging.warning(
                     f"[ACAO] Nao foi possivel encontrar data-val-id para '{escolha}'. "
@@ -737,7 +740,8 @@ def clicar_link_processo(driver, dados: dict = None, adapta_info: dict = None) -
                     clicou = False
                     for pagina in range(6):
                         rows = dropdown.find_elements(
-                            By.XPATH, ".//div[@class='lookup-wrapper']//tr[@data-val-id]"
+                            By.XPATH,
+                            ".//div[@class='lookup-wrapper']//tr[@data-val-id]",
                         )
                         for row in rows:
                             try:
@@ -745,16 +749,24 @@ def clicar_link_processo(driver, dados: dict = None, adapta_info: dict = None) -
                                     By.XPATH, ".//td[@data-val-field='Value']"
                                 )
                                 texto = td.text.strip()
-                                if escolha.lower() in texto.lower() or texto.lower() in escolha.lower():
+                                if (
+                                    escolha.lower() in texto.lower()
+                                    or texto.lower() in escolha.lower()
+                                ):
                                     driver.execute_script(
-                                        "arguments[0].scrollIntoView({block:'center'});", row
+                                        "arguments[0].scrollIntoView({block:'center'});",
+                                        row,
                                     )
                                     time.sleep(0.3)
                                     try:
                                         row.click()
                                     except Exception:
-                                        driver.execute_script("arguments[0].click();", row)
-                                    logging.info(f"[ACAO] Descricao (fallback) selecionada: '{texto}'")
+                                        driver.execute_script(
+                                            "arguments[0].click();", row
+                                        )
+                                    logging.info(
+                                        f"[ACAO] Descricao (fallback) selecionada: '{texto}'"
+                                    )
                                     clicou = True
                                     break
                             except Exception:
@@ -772,7 +784,9 @@ def clicar_link_processo(driver, dados: dict = None, adapta_info: dict = None) -
                         except Exception:
                             break
                     if not clicou:
-                        logging.warning("[ACAO] Fallback de lookup tambem nao encontrou a descricao.")
+                        logging.warning(
+                            "[ACAO] Fallback de lookup tambem nao encontrou a descricao."
+                        )
                 except Exception:
                     logging.warning("[ACAO] Fallback de lookup tambem falhou.")
         else:
@@ -786,11 +800,15 @@ def clicar_link_processo(driver, dados: dict = None, adapta_info: dict = None) -
             if opcoes_tipo_pre:
                 opcoes_tipo = opcoes_tipo_pre
                 opcoes_tipo_map = opcoes_tipo_map_pre
-                logging.info(f"[ACAO] Usando {len(opcoes_tipo)} opcoes de Tipo da pre-busca.")
+                logging.info(
+                    f"[ACAO] Usando {len(opcoes_tipo)} opcoes de Tipo da pre-busca."
+                )
             else:
                 # Fallback: buscar via XHR agora
                 try:
-                    logging.info("[ACAO] Buscando dados da arvore via XHR (fallback)...")
+                    logging.info(
+                        "[ACAO] Buscando dados da arvore via XHR (fallback)..."
+                    )
                     html_arvore = driver.execute_script("""
                                     try {
                                         var xhr = new XMLHttpRequest();
@@ -803,6 +821,7 @@ def clicar_link_processo(driver, dados: dict = None, adapta_info: dict = None) -
                                 """)
                     if html_arvore and not html_arvore.startswith("XHR_ERR:"):
                         import json
+
                         try:
                             data = json.loads(html_arvore)
                             rows = data.get("Rows", [])
@@ -849,9 +868,7 @@ def clicar_link_processo(driver, dados: dict = None, adapta_info: dict = None) -
                     except Exception as e2:
                         logging.warning(f"[ACAO] Erro na estrategia DOM: {e2}")
 
-            logging.info(
-                f"[ACAO] {len(opcoes_tipo)} opcoes de Tipo extraidas."
-            )
+            logging.info(f"[ACAO] {len(opcoes_tipo)} opcoes de Tipo extraidas.")
 
             # ── IA Classification ──
             escolha_tipo = "N/A"
@@ -866,7 +883,10 @@ def clicar_link_processo(driver, dados: dict = None, adapta_info: dict = None) -
                 tipo_id = opcoes_tipo_map.get(escolha_tipo, "")
                 if not tipo_id:
                     for texto, tid in opcoes_tipo_map.items():
-                        if escolha_tipo.lower() in texto.lower() or texto.lower() in escolha_tipo.lower():
+                        if (
+                            escolha_tipo.lower() in texto.lower()
+                            or texto.lower() in escolha_tipo.lower()
+                        ):
                             tipo_id = tid
                             escolha_tipo = texto
                             break
@@ -937,16 +957,16 @@ def clicar_link_processo(driver, dados: dict = None, adapta_info: dict = None) -
             if not preencher_data_inicial(driver, data_str):
                 logging.warning("[ACAO] Falha ao preencher DtInicial.")
         else:
-            logging.info(
-                "[ACAO] Pulando DtInicial - nenhuma data disponivel."
-            )
+            logging.info("[ACAO] Pulando DtInicial - nenhuma data disponivel.")
 
         data_publicacao_str = None
         if dados:
             dp = dados.get("data_disponibilizacao", "N/A")
             if dp and dp != "N/A":
                 data_publicacao_str = dp
-                logging.info(f"[ACAO] Data de disponibilizacao: '{data_publicacao_str}'")
+                logging.info(
+                    f"[ACAO] Data de disponibilizacao: '{data_publicacao_str}'"
+                )
 
         if data_publicacao_str:
             time.sleep(0.5)
@@ -982,7 +1002,10 @@ def clicar_link_processo(driver, dados: dict = None, adapta_info: dict = None) -
         try:
             btn_salvar = WebDriverWait(driver, 10).until(
                 EC.element_to_be_clickable(
-                    (By.XPATH, "//button[@name='ButtonSave' and contains(normalize-space(.), 'Salvar')]")
+                    (
+                        By.XPATH,
+                        "//button[@name='ButtonSave' and contains(normalize-space(.), 'Salvar')]",
+                    )
                 )
             )
             driver.execute_script(
@@ -1014,7 +1037,6 @@ def clicar_link_processo(driver, dados: dict = None, adapta_info: dict = None) -
                 time.sleep(3)
             except Exception:
                 logging.warning("[ACAO] Fallback 'Salvar e fechar' tambem falhou.")
-
 
     except Exception as e:
         logging.error(f"[ACAO] Falha ao navegar na aba do processo: {e}")

@@ -1,7 +1,7 @@
 import os
 import logging
 
-from config.settings import PASTA_SCREENSHOTS, PASTA_HTML
+from config.settings import DEBUG_MODE, PASTA_SCREENSHOTS, PASTA_HTML
 
 
 def configurar_logging() -> None:
@@ -14,6 +14,8 @@ def configurar_logging() -> None:
 
 
 def salvar_screenshot(driver, nome: str) -> None:
+    if not DEBUG_MODE:
+        return
     try:
         os.makedirs(PASTA_SCREENSHOTS, exist_ok=True)
         path = os.path.join(PASTA_SCREENSHOTS, f"{nome}.png")
@@ -24,6 +26,8 @@ def salvar_screenshot(driver, nome: str) -> None:
 
 
 def diagnosticar_pagina(driver, contexto: str) -> None:
+    if not DEBUG_MODE:
+        return
     try:
         title = driver.title
         url = driver.current_url

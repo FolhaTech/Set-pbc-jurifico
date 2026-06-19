@@ -14,6 +14,9 @@ from dotenv import load_dotenv
 # Carrega variáveis do .env automaticamente (se houver)
 load_dotenv(os.path.join(os.path.dirname(__file__), "..", ".env"))
 
+# ─── Debug ────────────────────────────────────────────────────────────────────
+DEBUG_MODE = False  # ← True gera screenshots/HTML, False não gera nada
+
 # ─── URLs e Credenciais ──────────────────────────────────────────────────────
 URL_LOGIN = (
     "https://signon.thomsonreuters.com/?productId=L1NJ"
