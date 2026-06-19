@@ -25,9 +25,12 @@ URL_LOGIN = (
 )
 USERNAME = os.getenv("THOMSON_USERNAME", "")
 PASSWORD = os.getenv("THOMSON_PASSWORD", "")
-RESPONSAVEL_ALVO = os.getenv("RESPONSAVEL_ALVO", "")
+RESPONSAVEL_ALVO_RAW = os.getenv("RESPONSAVEL_ALVO", "")
+RESPONSAVEIS_ALVO = [
+    nome.strip() for nome in RESPONSAVEL_ALVO_RAW.split(",") if nome.strip()
+]
 DOMINIOS_VALIDOS = ["legalone.com.br", "novajus.com.br"]
-
+RESPONSAVEL_ALVO = RESPONSAVEIS_ALVO[0] if RESPONSAVEIS_ALVO else ""
 # ─── Timeouts ────────────────────────────────────────────────────────────────
 TIMEOUT = 20
 TIMEOUT_POS_LOGIN = 30

@@ -19,7 +19,7 @@ if hasattr(sys.stdout, "reconfigure"):
 if hasattr(sys.stderr, "reconfigure"):
     sys.stderr.reconfigure(encoding="utf-8")
 
-from config.settings import MAX_PUBLICACOES
+from config.settings import MAX_PUBLICACOES, RESPONSAVEIS_ALVO
 from config.di import Container, verificar_cliente_planilha
 from adapters.infra.logging_utils import (
     configurar_logging,
@@ -55,44 +55,54 @@ def main() -> None:
 
     print("\n" + "=" * 70)
     print("  AUTOMACAO DE PUBLICACOES JURIDICAS — Legal One (v2 Hexagonal)")
-    print(f"  Modo: {'Primeira publicacao' if args.primeira else 'Todas as publicacoes (com skip)'}")
+    print(
+        f"  Modo: {'Primeira publicacao' if args.primeira else 'Todas as publicacoes (com skip)'}"
+    )
     print(f"  IA:   {'Adapta ONE ativa' if usar_ia else 'Offline (apenas planilha)'}")
     print("=" * 70 + "\n")
 
     container = Container(usar_ia=usar_ia)
+    total_geral = 0
 
     try:
         nav = container.navegador
-
         logging.info("[V2] 1/4 — Login no Legal One...")
         nav.login()
 
-        logging.info("[V2] 2/4 — Navegando para Publicacoes...")
-        nav.navegar_para_publicacoes()
+        for responsavel in RESPONSAVEIS_ALVO:
+            print(f"\n{'#' * 70}")
+            print(f"  PROCESSANDO: {responsavel}")
+            print(f"{'#' * 70}\n")
 
-        logging.info("[V2] 3/4 — Aplicando filtros...")
-        nav.aplicar_filtros()
+            logging.info(f"[V2] 2/4 — Navegando para Publicacoes [{responsavel}]...")
+            nav.navegar_para_publicacoes()
 
-        logging.info("[V2] 4/4 — Processando publicacoes...")
-        if args.primeira:
-            caso = container.criar_analisar_publicacao()
-            pub = nav.raspar_proxima_publicacao()
-            if pub:
-                resultado = verificar_cliente_planilha(
-                    polo_a=pub.conteudo_parsed.campos.get("polo_a", ""),
-                    numero_processo=pub.processo_numero,
-                    conteudo_publicacao=pub.conteudo or "",
+            logging.info(f"[V2] 3/4 — Aplicando filtros [{responsavel}]...")
+            nav.aplicar_filtros(responsavel=responsavel)
+
+            logging.info(f"[V2] 4/4 — Processando publicacoes [{responsavel}]...")
+
+            if args.primeira:
+                caso = container.criar_analisar_publicacao()
+                pub = nav.raspar_proxima_publicacao()
+                if pub:
+                    resultado = verificar_cliente_planilha(
+                        polo_a=pub.conteudo_parsed.campos.get("polo_a", ""),
+                        numero_processo=pub.processo_numero,
+                        conteudo_publicacao=pub.conteudo or "",
+                    )
+                    caso.executar(pub, e_nosso=resultado["e_nosso"])
+                    container.repositorio.salvar(pub)
+                    total_geral += 1
+                    logging.info("[V2] Primeira publicacao processada.")
+            else:
+                caso = container.criar_processar_lista(
+                    max_publicacoes=args.max,
+                    verificacao_planilha=verificar_cliente_planilha,
                 )
-                caso.executar(pub, e_nosso=resultado["e_nosso"])
-                container.repositorio.salvar(pub)
-                logging.info("[V2] Primeira publicacao processada.")
-        else:
-            caso = container.criar_processar_lista(
-                max_publicacoes=args.max,
-                verificacao_planilha=verificar_cliente_planilha,
-            )
-            total = caso.executar_todas()
-            logging.info(f"[V2] Concluido — {total} publicacoes processadas.")
+                total = caso.executar_todas()
+                total_geral += total
+                logging.info(f"[V2] Concluido — {total} publicacoes processadas.")
 
         relatorio = container.repositorio.gerar_relatorio()
         logging.info(
@@ -101,12 +111,12 @@ def main() -> None:
             f"{len(relatorio.get('pendentes_acao', []))} pendentes | "
             f"{len(relatorio.get('operadora_sem_providencia', []))} sem providencia"
         )
-
-        logging.info("[V2] Automacao concluida com sucesso!")
+        logging.info(
+            f"[V2] Automacao concluida — {total_geral} publicacoes processadas para {len(RESPONSAVEIS_ALVO)} responsaveis!"
+        )
 
     except KeyboardInterrupt:
         logging.warning("\n[V2] Interrompido pelo usuario (Ctrl+C).")
-
     except Exception as e:
         logging.error(f"[V2] Erro fatal: {e}")
         try:

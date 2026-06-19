@@ -155,6 +155,30 @@ def selecionar_responsavel(driver, nome: str = RESPONSAVEL_ALVO):
     )
     time.sleep(2)
 
+    # ── Limpar seleções anteriores (multi-select acumula) ──────────────
+    seletores_selecionados = [
+        "//label[contains(@class,'lookup-option-label')]/input[@type='checkbox' and @checked]/..",
+        "//label[contains(@class,'lookup-option-label') and contains(@class,'selected')]",
+        "//li[contains(@class,'active')]//label[contains(@class,'lookup-option-label')]",
+        "//label[contains(@class,'lookup-option-label') and @aria-checked='true']",
+    ]
+    for xpath_sel in seletores_selecionados:
+        try:
+            selecionados = driver.find_elements(By.XPATH, xpath_sel)
+            if selecionados:
+                for opt in selecionados:
+                    try:
+                        driver.execute_script("arguments[0].click();", opt)
+                        time.sleep(0.3)
+                    except Exception:
+                        pass
+                logging.info(
+                    f"[FILTRO] {len(selecionados)} selecao(oes) anterior(es) removida(s)."
+                )
+                break
+        except Exception:
+            continue
+
     option_xpath = f"//label[contains(@class,'lookup-option-label') and normalize-space(text())='{nome}']"
     try:
         option = wait.until(EC.element_to_be_clickable((By.XPATH, option_xpath)))

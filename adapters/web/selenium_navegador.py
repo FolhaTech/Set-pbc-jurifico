@@ -37,7 +37,7 @@ class SeleniumNavegador(NavegadorWeb):
     """Implementacao de NavegadorWeb usando Selenium + modulos existentes."""
 
     def __init__(
-            self, usar_undetected: bool = True, cliente_ia: ClienteIA | None = None
+        self, usar_undetected: bool = True, cliente_ia: ClienteIA | None = None
     ):
         self._driver = None
         self._usar_undetected = usar_undetected
@@ -61,13 +61,14 @@ class SeleniumNavegador(NavegadorWeb):
         time.sleep(3)
         diagnosticar_pagina(self.driver, "pos_publicacoes")
 
-    def aplicar_filtros(self) -> None:
+    def aplicar_filtros(self, responsavel: str | None) -> None:
         self._indice_atual = 0
         selecionar_periodo_60_dias(self.driver)
         time.sleep(2)
         abrir_mais_filtros(self.driver)
         time.sleep(3)
-        selecionar_responsavel(self.driver, RESPONSAVEL_ALVO)
+        nome = responsavel or RESPONSAVEL_ALVO
+        selecionar_responsavel(self.driver, nome)
         time.sleep(1)
         aplicar_filtros(self.driver)
         time.sleep(3)
@@ -122,7 +123,7 @@ class SeleniumNavegador(NavegadorWeb):
         return marcar_sem_providencia(self.driver)
 
     def abrir_e_criar_compromisso(
-            self, publicacao: Publicacao, analise: Analise
+        self, publicacao: Publicacao, analise: Analise
     ) -> bool:
         dados_dict = self._publicacao_para_dict(publicacao)
         if analise is not None:
