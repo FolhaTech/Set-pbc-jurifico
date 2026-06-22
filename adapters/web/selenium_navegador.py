@@ -119,6 +119,21 @@ class SeleniumNavegador(NavegadorWeb):
         except Exception as e:
             logger.warning(f"[NAV] Erro ao fechar painel: {e}")
 
+    def reiniciar_indice(self) -> None:
+        """
+        Reseta o indice de navegacao e fecha qualquer painel aberto.
+        Util apos marcar publicacoes como Tratado/Sem providencia,
+        pois o DOM pode ter sido atualizado e o indice anterior
+        pode apontar para uma publicacao diferente.
+        """
+        self._indice_atual = 0
+        try:
+            self.fechar_painel_detalhes()
+        except Exception as e:
+            logger.warning(f"[NAV] Erro ao fechar painel em reiniciar_indice: {e}")
+        time.sleep(1)
+        logger.info("[NAV] Indice de publicacoes reiniciado.")
+
     def marcar_sem_providencia(self) -> bool:
         return marcar_sem_providencia(self.driver)
 

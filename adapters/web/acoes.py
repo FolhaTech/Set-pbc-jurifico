@@ -99,18 +99,16 @@ def _clicar_opcao_menu(driver, texto_alvo: str, nome_acao: str) -> bool:
             continue
 
     try:
-        result = driver.execute_script(f"""
-            var alvo = '{texto_alvo}'.toLowerCase();
-            var todos = document.querySelectorAll('a, li, button, span, div');
-            for (var i = 0; i < todo.length; i++) {{
-                var txt = (todos[i].innerText || '').toLowerCase().trim();
-                if ((txt === alvo || txt.includes(alvo)) && todos[i].offsetParent !== null) {{
-                    todos[i].click();
-                    return txt;
-                }}
-            }}
-            return null;
-        """)
+        scrip_path = (
+            pathlib.Path(__file__).parent.parent.parent / "scripts" / "all-options.js"
+        )
+        js_code = scrip_path.read_text(encoding="utf-8")
+        driver.execute_script(js_code)
+
+        alvo_lower = texto_alvo.lower()
+
+        result = driver.execute_script(f"return window.__selectOption({alvo_lower!r});")
+
         if result:
             logging.info(f"[ACAO] '{nome_acao}' clicado via JavaScript: '{result}'")
             time.sleep(2)
@@ -133,10 +131,9 @@ def marcar_tratado(driver) -> bool:
             )
             return False
 
-        for texto in ["Tratado", "tratado", "TRATADO"]:
-            if _clicar_opcao_menu(driver, texto, "Tratado"):
-                logging.info("[ACAO] Marcado como 'Tratado'.")
-                return True
+        if _clicar_opcao_menu(driver, "Tratada", "Tratada"):
+            logging.info("[ACAO] Marcado como tratado")
+            return True
 
         return False
     except Exception as e:
@@ -285,9 +282,9 @@ def publicacao_sigilosa(dados: dict | None) -> bool:
     conteudo = (dados.get("conteudo") or "").lower()
 
     return (
-            "processo sigiloso" in conteudo
-            or "consulte os autos digitais" in conteudo
-            or "polo p: sigilo" in conteudo
+        "processo sigiloso" in conteudo
+        or "consulte os autos digitais" in conteudo
+        or "polo p: sigilo" in conteudo
     )
 
 
@@ -366,17 +363,17 @@ def obter_classificacao_ia(dados: dict, opcoes: list, adapta_info: dict | None) 
         return "N/A"
 
     prompt = (
-            f"Com base na publicacao juridica abaixo, identifique qual das seguintes opcoes de descricao de compromisso "
-            f"do escritorio e a mais adequada.\n\n"
-            f"**PUBLICACAO:**\n{dados.get('conteudo', '')}\n\n"
-            f"**OPCOES DISPONIVEIS:**\n" + "\n".join(f"- {op}" for op in opcoes) + "\n\n"
-                                                                                   f"REGRAS IMPORTANTES:\n"
-                                                                                   f"- Escolha obrigatoriamente uma das opcoes disponiveis sempre que houver opcoes na lista.\n"
-                                                                                   f"- Se a publicacao for sigilosa, generica ou nao trouxer determinacao especifica, escolha a opcao mais generica.\n"
-                                                                                   f"- Se existir uma opcao parecida com 'Cumprir prazo', priorize essa opcao para publicacoes sigilosas/genericas.\n"
-                                                                                   f"- Responda N/A somente se a lista de opcoes estiver vazia ou totalmente inutilizavel.\n\n"
-                                                                                   f"Responda APENAS com o texto exato da opcao selecionada (copie exatamente como esta na lista acima). "
-                                                                                   f"Nao adicione introducao, pontuacao, explicacao ou qualquer texto extra."
+        f"Com base na publicacao juridica abaixo, identifique qual das seguintes opcoes de descricao de compromisso "
+        f"do escritorio e a mais adequada.\n\n"
+        f"**PUBLICACAO:**\n{dados.get('conteudo', '')}\n\n"
+        f"**OPCOES DISPONIVEIS:**\n" + "\n".join(f"- {op}" for op in opcoes) + "\n\n"
+        f"REGRAS IMPORTANTES:\n"
+        f"- Escolha obrigatoriamente uma das opcoes disponiveis sempre que houver opcoes na lista.\n"
+        f"- Se a publicacao for sigilosa, generica ou nao trouxer determinacao especifica, escolha a opcao mais generica.\n"
+        f"- Se existir uma opcao parecida com 'Cumprir prazo', priorize essa opcao para publicacoes sigilosas/genericas.\n"
+        f"- Responda N/A somente se a lista de opcoes estiver vazia ou totalmente inutilizavel.\n\n"
+        f"Responda APENAS com o texto exato da opcao selecionada (copie exatamente como esta na lista acima). "
+        f"Nao adicione introducao, pontuacao, explicacao ou qualquer texto extra."
     )
 
     try:
@@ -412,7 +409,7 @@ def obter_classificacao_ia(dados: dict, opcoes: list, adapta_info: dict | None) 
 
 
 def obter_classificacao_tipo_ia(
-        dados: dict, opcoes: list, adapta_info: dict | None, descricao_escolhida: str
+    dados: dict, opcoes: list, adapta_info: dict | None, descricao_escolhida: str
 ) -> str:
     if not adapta_info:
         logging.warning(
@@ -421,17 +418,17 @@ def obter_classificacao_tipo_ia(
         return "N/A"
 
     prompt = (
-            f"Com base na publicacao juridica abaixo e na descricao de compromisso ja selecionada, "
-            f"identifique qual dos seguintes TIPOS de compromisso e o mais adequado.\n\n"
-            f"**DESCRICAO SELECIONADA:** {descricao_escolhida}\n\n"
-            f"**PUBLICACAO:**\n{dados.get('conteudo', '')[:1000]}\n\n"
-            f"**OPCOES DE TIPO DISPONIVEIS:**\n"
-            + "\n".join(f"- {op}" for op in opcoes)
-            + "\n\n"
-              f"Responda APENAS com o texto exato da opcao selecionada "
-              f"(copie exatamente como esta na lista acima). "
-              f"Nao adicione introducao, pontuacao, explicacao ou qualquer texto extra. "
-              f"Se nenhuma opcao se aplicar, responda exatamente: N/A"
+        f"Com base na publicacao juridica abaixo e na descricao de compromisso ja selecionada, "
+        f"identifique qual dos seguintes TIPOS de compromisso e o mais adequado.\n\n"
+        f"**DESCRICAO SELECIONADA:** {descricao_escolhida}\n\n"
+        f"**PUBLICACAO:**\n{dados.get('conteudo', '')[:1000]}\n\n"
+        f"**OPCOES DE TIPO DISPONIVEIS:**\n"
+        + "\n".join(f"- {op}" for op in opcoes)
+        + "\n\n"
+        f"Responda APENAS com o texto exato da opcao selecionada "
+        f"(copie exatamente como esta na lista acima). "
+        f"Nao adicione introducao, pontuacao, explicacao ou qualquer texto extra. "
+        f"Se nenhuma opcao se aplicar, responda exatamente: N/A"
     )
 
     try:
@@ -585,9 +582,9 @@ def clicar_link_processo(driver, dados: dict = None, adapta_info: dict = None) -
 
             if not link_clicado_comp:
                 scrip_path = (
-                        pathlib.Path(__file__).parent.parent.parent
-                        / "scripts"
-                        / "new-task.js"
+                    pathlib.Path(__file__).parent.parent.parent
+                    / "scripts"
+                    / "new-task.js"
                 )
                 js_code = scrip_path.read_text(encoding="utf-8")
                 resultado_js = driver.execute_script(js_code)
@@ -732,8 +729,8 @@ def clicar_link_processo(driver, dados: dict = None, adapta_info: dict = None) -
             if not val_id:
                 for texto, vid in opcoes_map.items():
                     if (
-                            escolha.lower() in texto.lower()
-                            or texto.lower() in escolha.lower()
+                        escolha.lower() in texto.lower()
+                        or texto.lower() in escolha.lower()
                     ):
                         val_id = vid
                         escolha = texto  # usa o texto exato da lista
@@ -808,8 +805,8 @@ def clicar_link_processo(driver, dados: dict = None, adapta_info: dict = None) -
                                 )
                                 texto = td.text.strip()
                                 if (
-                                        escolha.lower() in texto.lower()
-                                        or texto.lower() in escolha.lower()
+                                    escolha.lower() in texto.lower()
+                                    or texto.lower() in escolha.lower()
                                 ):
                                     driver.execute_script(
                                         "arguments[0].scrollIntoView({block:'center'});",
@@ -946,8 +943,8 @@ def clicar_link_processo(driver, dados: dict = None, adapta_info: dict = None) -
                 if not tipo_id:
                     for texto, tid in opcoes_tipo_map.items():
                         if (
-                                escolha_tipo.lower() in texto.lower()
-                                or texto.lower() in escolha_tipo.lower()
+                            escolha_tipo.lower() in texto.lower()
+                            or texto.lower() in escolha_tipo.lower()
                         ):
                             tipo_id = tid
                             escolha_tipo = texto
@@ -1114,5 +1111,18 @@ def clicar_link_processo(driver, dados: dict = None, adapta_info: dict = None) -
         except Exception:
             pass
         time.sleep(1)
+
+        try:
+            logging.info("[ACAO] Marcando publicação como tratada...")
+            if marcar_tratado(driver):
+                logging.info(
+                    "[ACAO] Publicacao agendada e marcada como 'Tratado' com sucesso."
+                )
+            else:
+                logging.warning(
+                    "[ACAO] Publicacao foi agendada, mas NAO foi possivel marcar como 'Tratado'."
+                )
+        except Exception as e:
+            logging.warning(f"[ACAO] Erro ao marcar como tratado: {e}")
 
     return True

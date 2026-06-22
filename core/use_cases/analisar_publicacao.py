@@ -12,12 +12,12 @@ from ports.repositorio import Repositorio
 
 class AnalisarPublicacao:
     def __init__(
-            self,
-            repositorio: Repositorio,
-            navegador: NavegadorWeb,
-            calculador_prazo: CalcularPrazo,
-            classificador: ClassificadorPolo,
-            cliente_ia: Optional[ClienteIA] = None,
+        self,
+        repositorio: Repositorio,
+        navegador: NavegadorWeb,
+        calculador_prazo: CalcularPrazo,
+        classificador: ClassificadorPolo,
+        cliente_ia: Optional[ClienteIA] = None,
     ):
         self._repo = repositorio
         self._nav = navegador
@@ -72,4 +72,4 @@ class AnalisarPublicacao:
             )
         else:
             self._nav.abrir_e_criar_compromisso(pub, pub.analise)
-            pub.analise.status_acao = StatusAcao.PENDENTE
+            pub.analise.status_acao = StatusAcao.TRATADO

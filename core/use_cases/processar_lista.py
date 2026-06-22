@@ -14,12 +14,12 @@ logger = logging.getLogger(__name__)
 
 class ProcessarLista:
     def __init__(
-            self,
-            navegador: NavegadorWeb,
-            repositorio: Repositorio,
-            cliente_ia: Optional[ClienteIA] = None,
-            max_publicacoes: int = 50,
-            verificacao_planilha: Optional[Callable] = None,
+        self,
+        navegador: NavegadorWeb,
+        repositorio: Repositorio,
+        cliente_ia: Optional[ClienteIA] = None,
+        max_publicacoes: int = 50,
+        verificacao_planilha: Optional[Callable] = None,
     ):
         calculador = CalcularPrazo()
         classificador = ClassificadorPolo()
@@ -63,8 +63,8 @@ class ProcessarLista:
             return True
 
         if existente.analise.status_acao in (
-                StatusAcao.SEM_PROVIDENCIA,
-                StatusAcao.TRATADO,
+            StatusAcao.SEM_PROVIDENCIA,
+            StatusAcao.TRATADO,
         ):
             logging.info(
                 f"[PULAR] Processo {pub.processo_numero} já finalizado como "
@@ -75,6 +75,7 @@ class ProcessarLista:
 
     def executar_primeira(self) -> int:
         while True:
+            self._nav.reiniciar_indice()
             pub = self._nav.raspar_proxima_publicacao()
             if not pub:
                 return 0
@@ -90,6 +91,7 @@ class ProcessarLista:
     def executar_todas(self) -> int:
         processadas = 0
         while processadas < self._max:
+            self._nav.reiniciar_indice()
             pub = self._nav.raspar_proxima_publicacao()
             if not pub:
                 break
