@@ -79,7 +79,7 @@ concretas. O **Core** não conhece os adapters — ele depende apenas das ports.
 ## Pré-requisitos
 
 | Requisito          | Versão mínima    | Observação                                                                               |
-|--------------------|------------------|------------------------------------------------------------------------------------------|
+| ------------------ | ---------------- | ---------------------------------------------------------------------------------------- |
 | Python             | 3.12+            | `requires-python = ">=3.12"` no `pyproject.toml`                                         |
 | Node.js            | 18+              | Necessário para `extract_token.js` (extração de token JWT)                               |
 | Google Chrome      | Qualquer estável | O `undetected-chromedriver` gerencia o chromedriver automaticamente                      |
@@ -104,7 +104,7 @@ pip install -r Set-pbc-jurifico\requirements.txt
 **Dependências principais:**
 
 | Pacote                    | Finalidade                                                                        |
-|---------------------------|-----------------------------------------------------------------------------------|
+| ------------------------- | --------------------------------------------------------------------------------- |
 | `selenium`                | Automação do navegador Chrome                                                     |
 | `undetected-chromedriver` | Chrome driver que evita detecção de bots                                          |
 | `groq`                    | Cliente API para IA (disponível mas não utilizado diretamente no fluxo principal) |
@@ -127,7 +127,7 @@ Copy-Item .env.example .env
 Preencha as variáveis:
 
 | Variável           | Obrigatória | Descrição                                                                                   |
-|--------------------|-------------|---------------------------------------------------------------------------------------------|
+| ------------------ | ----------- | ------------------------------------------------------------------------------------------- |
 | `THOMSON_USERNAME` | Sim         | Usuário de login do Legal One (Thomson Reuters)                                             |
 | `THOMSON_PASSWORD` | Sim         | Senha do login do Legal One                                                                 |
 | `RESPONSAVEL_ALVO` | Não         | Nome do responsável alvo nos filtros                                                        |
@@ -239,7 +239,7 @@ python run_v2.py --primeira --sem-adapta
 ### Resumo dos Flags
 
 | Flag           | Efeito                                           | Padrão                  |
-|----------------|--------------------------------------------------|-------------------------|
+| -------------- | ------------------------------------------------ | ----------------------- |
 | `--primeira`   | Processa apenas a primeira publicação (sem skip) | `False`                 |
 | `--sem-adapta` | Desativa envio ao Adapta ONE (modo offline)      | `False` (IA ativa)      |
 | `--max N`      | Limite máximo de publicações a processar         | `50` (de `settings.py`) |
@@ -528,21 +528,21 @@ O Container monta todas as dependências sob demanda (lazy loading):
 - **`marcar_sem_providencia(driver)`**: Abre dropdown de status → seleciona "Sem providências" (múltiplos XPaths de
   fallback)
 - **`clicar_link_processo(driver, dados, adapta_info)`**: Fluxo complexo que:
-    1. Clica no link do processo (abre nova aba)
-    2. Navega para aba "Compromissos e tarefas"
-    3. Clica em "Adicionar" → "Novo compromisso"
-    4. Abre lookup de descrição
-    5. Coleta todas as opções disponíveis (até 5 páginas)
-    6. Envia opções para IA classificar a melhor descrição
-    7. Seleciona a opção classificada no lookup (dropdown mantido aberto durante IA)
-    8. **Campo Tipo**:
-        - Limpa `TipoText` e `TipoId`
-        - Clica no botão `.lookup-button` do lookuptree
-        - Aguarda popup e extrai texto bruto das opções
-        - IA classifica o tipo com base na Descrição + Publicação
-        - Seta valor via JavaScript nos campos (com eventos `input`/`change`)
-        - Se IA não classificar, restaura "Diversos"
-    9. Retorna para a aba original
+  1. Clica no link do processo (abre nova aba)
+  2. Navega para aba "Compromissos e tarefas"
+  3. Clica em "Adicionar" → "Novo compromisso"
+  4. Abre lookup de descrição
+  5. Coleta todas as opções disponíveis (até 5 páginas)
+  6. Envia opções para IA classificar a melhor descrição
+  7. Seleciona a opção classificada no lookup (dropdown mantido aberto durante IA)
+  8. **Campo Tipo**:
+     - Limpa `TipoText` e `TipoId`
+     - Clica no botão `.lookup-button` do lookuptree
+     - Aguarda popup e extrai texto bruto das opções
+     - IA classifica o tipo com base na Descrição + Publicação
+     - Seta valor via JavaScript nos campos (com eventos `input`/`change`)
+     - Se IA não classificar, restaura "Diversos"
+  9. Retorna para a aba original
 
 ### `adapters/ia/adapta_one_cliente.py` — Cliente Adapta ONE
 
@@ -574,10 +574,10 @@ dias
 - Salva/atualiza publicações em `dados/publicacoes.json` (upsert por `processo_numero`)
 - Se `processo_numero` é "N/A", gera um ID temporário via MD5 do conteúdo
 - **`gerar_relatorio()`**: Gera `dados/relatorio_analise.json` com:
-    - `nosso_tratado`: publicações do escritório já marcadas como "Tratado"
-    - `pendentes_acao`: publicações do escritório ainda pendentes
-    - `operadora_sem_providencia`: publicações da operadora marcadas
-    - `urgencias_nossas`: processos com status URGENTE ou ATRASADO
+  - `nosso_tratado`: publicações do escritório já marcadas como "Tratado"
+  - `pendentes_acao`: publicações do escritório ainda pendentes
+  - `operadora_sem_providencia`: publicações da operadora marcadas
+  - `urgencias_nossas`: processos com status URGENTE ou ATRASADO
 
 ---
 

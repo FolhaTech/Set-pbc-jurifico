@@ -4,6 +4,7 @@ from datetime import datetime
 from typing import Optional
 
 from selenium.webdriver.common.by import By
+from selenium.webdriver.remote.webdriver import WebDriver
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.support.ui import WebDriverWait
 
@@ -39,15 +40,13 @@ class SeleniumNavegador(NavegadorWeb):
     def __init__(
         self, usar_undetected: bool = True, cliente_ia: ClienteIA | None = None
     ):
-        self._driver = None
         self._usar_undetected = usar_undetected
         self._cliente_ia = cliente_ia
         self._indice_atual = 0
+        self._driver: WebDriver = configurar_driver(usar_undetected=usar_undetected)
 
     @property
-    def driver(self):
-        if self._driver is None:
-            self._driver = configurar_driver(usar_undetected=self._usar_undetected)
+    def driver(self) -> WebDriver:
         return self._driver
 
     def login(self) -> None:
@@ -133,6 +132,14 @@ class SeleniumNavegador(NavegadorWeb):
             logger.warning(f"[NAV] Erro ao fechar painel em reiniciar_indice: {e}")
         time.sleep(1)
         logger.info("[NAV] Indice de publicacoes reiniciado.")
+
+    def decrementar_indice(self) -> None:
+        if self._indice_atual > 0:
+            self._indice_atual -= 1
+            logger.info(
+                f"[NAV] Indice decrementado para {self._indice_atual} "
+                f"(item anterior foi removido da lista)."
+            )
 
     def marcar_sem_providencia(self) -> bool:
         return marcar_sem_providencia(self.driver)

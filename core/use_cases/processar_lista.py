@@ -1,5 +1,8 @@
 import logging
+import time
 from typing import Optional, Callable
+
+from selenium.webdriver.common.by import By
 
 from core.enums import StatusAcao
 from core.services.calcular_prazo import CalcularPrazo
@@ -74,13 +77,13 @@ class ProcessarLista:
         return False
 
     def executar_primeira(self) -> int:
+        self._garantir_aba_pendentes()
         while True:
-            self._nav.reiniciar_indice()
             pub = self._nav.raspar_proxima_publicacao()
             if not pub:
                 return 0
             if self._ja_foi_processado(pub):
-                self._nav.fechar_painel_detalhes()
+                self._pular_e_avancar()
                 continue
             e_nosso = self._verificar_e_nosso(pub)
             self._analisar.executar(pub, e_nosso=e_nosso)
@@ -88,20 +91,24 @@ class ProcessarLista:
             self._imprimir_resumo(pub)
             return 1
 
+    def _pular_e_avancar(self) -> None:
+        self._nav.fechar_painel_detalhes()
+
     def executar_todas(self) -> int:
         processadas = 0
         while processadas < self._max:
-            self._nav.reiniciar_indice()
+            self._garantir_aba_pendentes()
             pub = self._nav.raspar_proxima_publicacao()
             if not pub:
                 break
             if self._ja_foi_processado(pub):
-                self._nav.fechar_painel_detalhes()
+                self._pular_e_avancar()
                 continue
             e_nosso = self._verificar_e_nosso(pub)
             self._analisar.executar(pub, e_nosso=e_nosso)
             self._repo.salvar(pub)
             self._imprimir_resumo(pub)
+            self._nav.decrementar_indice()
             processadas += 1
         return processadas
 
@@ -116,3 +123,35 @@ class ProcessarLista:
         print(f"  Processo: {pub.processo_numero}")
         print(f"  Decisao: {decisao}  |  Agendamento: {data_str or 'N/A'}")
         print(f"{'*' * 50}\n")
+
+    def _garantir_aba_pendentes(self) -> None:
+        try:
+            driver = self._nav.driver
+            if driver is None:
+                logging.warning(
+                    "[NAV] Driver nao inicializado — pulando garantia de aba."
+                )
+                return
+            xpath_pendentes = [
+                "//a[normalize-space(.)='Pendentes']",
+                "//button[normalize-space(.)='Pendentes']",
+                "//li[contains(@class,'active')]//a[contains(.,'Pendente')]",
+                "//a[contains(@href, 'status=Pendente') or contains(@href, 'status=Pendentes')]",
+                "//span[normalize-space(.)='Pendentes']/parent::a",
+                "//span[normalize-space(.)='Pendentes']/parent::button",
+            ]
+            for xp in xpath_pendentes:
+                try:
+                    el = driver.find_element(By.XPATH, xp)
+                    if el.is_displayed():
+                        driver.execute_script("arguments[0].click();", el)
+                        time.sleep(2)
+                        logging.info(
+                            "[NAV] Aba 'Pendentes' reativada para proxima publicacao."
+                        )
+                        return
+                except Exception:
+                    continue
+            logging.warning("[NAV] Nao foi possivel reativar a aba 'Pendentes'.")
+        except Exception as e:
+            logging.error(f"[NAV] Falha ao tentar reativar aba 'Pendentes': {e}")

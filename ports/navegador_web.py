@@ -1,9 +1,15 @@
 from abc import ABC, abstractmethod
 
+from selenium.webdriver.remote.webdriver import WebDriver
+
 from core.entities import Publicacao, Analise
 
 
 class NavegadorWeb(ABC):
+    @property
+    @abstractmethod
+    def driver(self) -> WebDriver: ...
+
     @abstractmethod
     def login(self) -> None: ...
 
@@ -29,3 +35,6 @@ class NavegadorWeb(ABC):
 
     @abstractmethod
     def reiniciar_indice(self) -> None: ...
+
+    @abstractmethod
+    def decrementar_indice(self) -> None: ...

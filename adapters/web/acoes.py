@@ -363,15 +363,21 @@ def obter_classificacao_ia(dados: dict, opcoes: list, adapta_info: dict | None) 
         return "N/A"
 
     prompt = (
-        f"Com base na publicacao juridica abaixo, identifique qual das seguintes opcoes de descricao de compromisso "
-        f"do escritorio e a mais adequada.\n\n"
+        f"Voce e um assistente juridico especializado em analise de publicacoes processuais.\n"
+        f"Com base na publicacao abaixo, identifique qual das opcoes de descricao de compromisso "
+        f"e a mais adequada para a equipe executar.\n\n"
         f"**PUBLICACAO:**\n{dados.get('conteudo', '')}\n\n"
         f"**OPCOES DISPONIVEIS:**\n" + "\n".join(f"- {op}" for op in opcoes) + "\n\n"
-        f"REGRAS IMPORTANTES:\n"
-        f"- Escolha obrigatoriamente uma das opcoes disponiveis sempre que houver opcoes na lista.\n"
-        f"- Se a publicacao for sigilosa, generica ou nao trouxer determinacao especifica, escolha a opcao mais generica.\n"
-        f"- Se existir uma opcao parecida com 'Cumprir prazo', priorize essa opcao para publicacoes sigilosas/genericas.\n"
-        f"- Responda N/A somente se a lista de opcoes estiver vazia ou totalmente inutilizavel.\n\n"
+        f"**REGRAS DE DECISAO (em ordem de importancia):**\n"
+        f"1. Identifique o ato processual principal da publicacao (ex: despacho, sentenca, "
+        f"intimacao para manifestar, audiencia, julgamento, etc).\n"
+        f"2. Escolha a opcao que melhor representa esse ato principal.\n"
+        f"3. NAO escolha 'Cumprir prazo' a menos que a publicacao determine literalmente um prazo "
+        f"a ser cumprido pela parte (ex: 'intime-se para cumprir o prazo de 5 dias').\n"
+        f"4. Se a publicacao for sigilosa, generica ou nao trouxer ato especifico, escolha a opcao "
+        f"mais generica (ex: 'Manifestacao', 'Outros', etc), mas NUNCA 'Cumprir prazo' como padrao.\n"
+        f"5. Responda N/A somente se a lista de opcoes estiver vazia ou totalmente inutilizavel.\n\n"
+        f"**FORMATO DA RESPOSTA:**\n"
         f"Responda APENAS com o texto exato da opcao selecionada (copie exatamente como esta na lista acima). "
         f"Nao adicione introducao, pontuacao, explicacao ou qualquer texto extra."
     )
@@ -388,10 +394,16 @@ def obter_classificacao_ia(dados: dict, opcoes: list, adapta_info: dict | None) 
 
         linhas = [l.strip() for l in escolha_raw.splitlines() if l.strip()]
 
+        def _norm(t):
+            return re.sub(r"[^a-z0-9\s]", "", t.lower()).strip()
+
+        opcoes_norm = {_norm(op): op for op in opcoes}
         for linha in reversed(linhas):
-            if linha in opcoes:
+            n = _norm(linha)
+            if n in opcoes_norm:
+                op = opcoes_norm[n]
                 logging.info(f"[ACAO] Correspondencia exata (ultima linha): '{linha}'")
-                return linha
+                return op
 
         for linha in reversed(linhas):
             for op in opcoes:
@@ -1106,23 +1118,30 @@ def clicar_link_processo(driver, dados: dict = None, adapta_info: dict = None) -
 
     finally:
         try:
+            try:
+                if len(driver.window_handles) > 1:
+                    abas = [h for h in driver.window_handles if h != original_handle]
+                    if abas:
+                        driver.switch_to.window(abas[0])
+                    driver.close()
+            except Exception as e:
+                logging.error(f"[ACAO] Falha ao fechar aba do processo: {e}")
+                pass
+
             driver.switch_to.window(original_handle)
-            logging.info("[ACAO] Retornou para a aba principal da automacao.")
-        except Exception:
+            logging.info("[ACAO] Aba do processo fechada com sucesso.")
+        except Exception as e:
+            logging.error(f"[ACAO] Falha ao fechar aba do processo: {e}")
             pass
         time.sleep(1)
 
         try:
-            logging.info("[ACAO] Marcando publicação como tratada...")
+            logging.info("[ACAO] Marcar publicacoes como tratadas ...")
             if marcar_tratado(driver):
-                logging.info(
-                    "[ACAO] Publicacao agendada e marcada como 'Tratado' com sucesso."
-                )
+                logging.info("[ACAO] Publicacoes marcadas como tratadas com sucesso.")
             else:
-                logging.warning(
-                    "[ACAO] Publicacao foi agendada, mas NAO foi possivel marcar como 'Tratado'."
-                )
+                logging.warning("[ACAO] Falha ao marcar publicacoes como tratadas.")
         except Exception as e:
-            logging.warning(f"[ACAO] Erro ao marcar como tratado: {e}")
-
+            logging.error(f"[ACAO] Falha ao marcar publicacoes como tratadas: {e}")
+            pass
     return True
