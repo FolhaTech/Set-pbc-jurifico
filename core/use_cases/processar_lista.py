@@ -1,4 +1,5 @@
 import logging
+import pathlib
 import time
 from typing import Optional, Callable
 
@@ -13,6 +14,12 @@ from ports.navegador_web import NavegadorWeb
 from ports.repositorio import Repositorio
 
 logger = logging.getLogger(__name__)
+
+_SCRIPTS_DIR = pathlib.Path(__file__).parent.parent.parent / "scripts"
+
+
+def _js(nome_arquivo: str) -> str:
+    return (_SCRIPTS_DIR / nome_arquivo).read_text(encoding="utf-8")
 
 
 class ProcessarLista:
@@ -89,6 +96,7 @@ class ProcessarLista:
             self._analisar.executar(pub, e_nosso=e_nosso)
             self._repo.salvar(pub)
             self._imprimir_resumo(pub)
+            self._nav.reiniciar_indice()
             return 1
 
     def _pular_e_avancar(self) -> None:
@@ -108,7 +116,7 @@ class ProcessarLista:
             self._analisar.executar(pub, e_nosso=e_nosso)
             self._repo.salvar(pub)
             self._imprimir_resumo(pub)
-            self._nav.decrementar_indice()
+            self._nav.reiniciar_indice()
             processadas += 1
         return processadas
 
@@ -132,6 +140,21 @@ class ProcessarLista:
                     "[NAV] Driver nao inicializado — pulando garantia de aba."
                 )
                 return
+
+            # ── 1) Detectar se ja esta em 'Pendentes' ──
+            try:
+                driver.execute_script(_js("check-pendings.js"))
+                ja_ativa = driver.execute_script(
+                    "return window.__abaPendentesJaAtiva();"
+                )
+
+                if ja_ativa:
+                    logging.debug("[NAV] Aba 'Pendentes' ja esta ativa.")
+                    return
+            except Exception:
+                pass
+
+            # ── 2) Tentar clicar em 'Pendentes' ──
             xpath_pendentes = [
                 "//a[normalize-space(.)='Pendentes']",
                 "//button[normalize-space(.)='Pendentes']",
@@ -140,6 +163,7 @@ class ProcessarLista:
                 "//span[normalize-space(.)='Pendentes']/parent::a",
                 "//span[normalize-space(.)='Pendentes']/parent::button",
             ]
+            clicou = False
             for xp in xpath_pendentes:
                 try:
                     el = driver.find_element(By.XPATH, xp)
@@ -149,9 +173,37 @@ class ProcessarLista:
                         logging.info(
                             "[NAV] Aba 'Pendentes' reativada para proxima publicacao."
                         )
-                        return
+                        clicou = True
+                        break
                 except Exception:
                     continue
-            logging.warning("[NAV] Nao foi possivel reativar a aba 'Pendentes'.")
+
+            if not clicou:
+                logging.warning("[NAV] Nao foi possivel reativar a aba 'Pendentes'.")
+                return
+
+            # ── 3) Resetar indice apos trocar de aba ──
+            try:
+                self._nav.reiniciar_indice()
+            except Exception as e:
+                logging.warning(f"[NAV] Falha ao reiniciar indice: {e}")
+
+            # ── 4) BLINDAGEM: verificar se filtros foram preservados ──
+            try:
+                from config.settings import RESPONSAVEL_ALVO
+
+                driver.execute_script(_js("filter-check.js"))
+                resp_ok = driver.execute_script(
+                    "return window.__filtroResponsavelPreservado();"
+                )
+
+                if not resp_ok:
+                    logging.warning(
+                        "[NAV] Filtros resetaram ao trocar aba. Reaplicando..."
+                    )
+                    self._nav.aplicar_filtros(responsavel=RESPONSAVEL_ALVO)
+            except Exception as e:
+                logging.warning(f"[NAV] Falha ao verificar filtros: {e}")
+
         except Exception as e:
             logging.error(f"[NAV] Falha ao tentar reativar aba 'Pendentes': {e}")

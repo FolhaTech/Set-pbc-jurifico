@@ -131,11 +131,34 @@ def marcar_tratado(driver) -> bool:
             )
             return False
 
-        if _clicar_opcao_menu(driver, "Tratada", "Tratada"):
-            logging.info("[ACAO] Marcado como tratado")
-            return True
+        if not _clicar_opcao_menu(driver, "Tratada", "Tratada"):
+            return False
 
-        return False
+        time.sleep(2)
+
+        xpath_pendentes = [
+            "//a[normalize-space(.)='Pendentes']",
+            "//button[normalize-space(.)='Pendentes']",
+            "//li[contains(@class,'active')]//a[contains(.,'Pendente')]",
+            "//a[contains(@href, 'status=Pendente') or contains(@href, 'status=Pendentes')]",
+            "//span[normalize-space(.)='Pendentes']/parent::a",
+            "//span[normalize-space(.)='Pendentes']/parent::button",
+        ]
+        for xp in xpath_pendentes:
+            try:
+                el = driver.find_element(By.XPATH, xp)
+                if el.is_displayed():
+                    driver.execute_script("arguments[0].click();", el)
+                    time.sleep(2)
+                    logging.info(
+                        "[ACAO] Marcado como tratado. Aba 'Pendentes' mantida."
+                    )
+                    return True
+            except Exception:
+                continue
+
+        logging.info("[ACAO] Marcado como tratado (aba atual nao confirmada).")
+        return True
     except Exception as e:
         logging.warning(f"[ACAO] Falha em marcar_tratado: {e}")
         return False
