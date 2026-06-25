@@ -107,6 +107,8 @@ def _clicar_opcao_menu(driver, texto_alvo: str, nome_acao: str) -> bool:
 
         alvo_lower = texto_alvo.lower()
 
+        print(f"[DEBUG] alvo_lower: {alvo_lower!r}")
+
         result = driver.execute_script(f"return window.__selectOption({alvo_lower!r});")
 
         if result:
